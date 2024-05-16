@@ -17,6 +17,8 @@ with orhelper.OpenRocketInstance() as instance:
     # Added code here
 
     from net.sf.openrocket.util import Coordinate # Once the instance starts, Java classes can be imported using JPype
+    from net.sf.openrocket.masscalc import BasicMassCalculator
+    from net.sf.openrocket.masscalc import MassCalculator
 
     opts = sim.getOptions()
     rocket = opts.getRocket()
@@ -48,6 +50,10 @@ with orhelper.OpenRocketInstance() as instance:
     #printed_points = fins.getFinPoints()
     #for p in printed_points: print(p)
 
+    conf = rocket.getDefaultConfiguration() # Is this the actual simulation config though?
+    bmc = BasicMassCalculator()
+    mct = MassCalculator.MassCalcType.LAUNCH_MASS
+
     aft_radii = [0.0125, 0.01, 0.0075, 0.02, 0.03, 0.04]
     nose_lengths = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6]
     nose_types = [nose.Shape.OGIVE,nose.Shape.CONICAL,nose.Shape.ELLIPSOID,nose.Shape.POWER,nose.Shape.PARABOLIC,nose.Shape.HAACK]
@@ -60,18 +66,21 @@ with orhelper.OpenRocketInstance() as instance:
                   [Coordinate(0.0,0.0,0.0), Coordinate(0.0223,0.0106,0.000), Coordinate(0.0173,0.0318,0.000), Coordinate(0.0427, 0.0172, 0.0), Coordinate(0.0628, 0.0278, 0.0), Coordinate(0.0572, 0.0127, 0.0), Coordinate(0.0747, 0.00714, 0.0), Coordinate(0.05, 0.0, 0.0)]]
     data = list()
     events = list()
+    cgs = list()
 
     for i in range(len(fin_points)):
         #nose.setLength(nose_lengths[i])
         #nose.setAftRadius(aft_radii[i])
         #nose.setType(nose_types[i])
         #nose.setShapeParameter(nose_shape[i])
-        #nose.setThickness(thicknesses[i])
+        nose.setThickness(thicknesses[i])
 
-        #body.setLength(body_lengths[i])
+        body.setLength(body_lengths[i])
 
-        #fins.setFinCount(fin_counts[i])
+        fins.setFinCount(fin_counts[i])
         fins.setPoints(fin_points[i])
+
+        cgs.append(bmc.getCG(conf, mct).x) # For BC
 
         orh.run_simulation(sim)
         data.append( orh.get_timeseries(sim, [FlightDataType.TYPE_TIME, FlightDataType.TYPE_ALTITUDE, FlightDataType.TYPE_VELOCITY_Z]) )
@@ -96,17 +105,23 @@ with orhelper.OpenRocketInstance() as instance:
     ax1.set_xlabel('Time (s)')
     ax1.set_ylabel('Altitude (m)')
 
+    apogees = list()
+
     for i in range(len(data)): 
         index_at = lambda t: (np.abs(data[i][FlightDataType.TYPE_TIME] - t)).argmin()
         for event, times in events[i].items():
             if event not in events_to_annotate:
                 continue
             for time in times:
+                apogees.append(data[i][FlightDataType.TYPE_ALTITUDE][index_at(time)])
                 ax1.annotate(events_to_annotate[event], xy=(time, data[i][FlightDataType.TYPE_ALTITUDE][index_at(time)]),
                              xycoords='data', xytext=(20, 0), textcoords='offset points',
                              arrowprops=dict(arrowstyle="->", connectionstyle="arc3"))
 
     ax1.grid(True)
+
+    print(apogees)
+    print(cgs)
 
 # Leave OpenRocketInstance context before showing plot in order to shutdown JVM first
 plt.show()
