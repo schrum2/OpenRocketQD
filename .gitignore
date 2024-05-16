@@ -115,3 +115,4 @@ OpenRocket*.jar
 
 venv/
 .idea/
+/.ipynb_checkpoints
