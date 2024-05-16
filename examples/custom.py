@@ -19,6 +19,9 @@ with orhelper.OpenRocketInstance() as instance:
     from net.sf.openrocket.util import Coordinate # Once the instance starts, Java classes can be imported using JPype
     from net.sf.openrocket.masscalc import BasicMassCalculator
     from net.sf.openrocket.masscalc import MassCalculator
+    from net.sf.openrocket.aerodynamics import WarningSet
+    from net.sf.openrocket.aerodynamics import BarrowmanCalculator
+    from net.sf.openrocket.aerodynamics import FlightConditions
 
     opts = sim.getOptions()
     rocket = opts.getRocket()
@@ -54,8 +57,19 @@ with orhelper.OpenRocketInstance() as instance:
     print("wind speed deviation: ", opts.getWindSpeedDeviation()) # in m/s
 
     conf = rocket.getDefaultConfiguration() # Is this the actual simulation config though?
+    #conf = sim.getConfiguration() # Or is this the right configuration?
     bmc = BasicMassCalculator()
     mct = MassCalculator.MassCalcType.LAUNCH_MASS
+
+    # Look at updateExtras under https://github.com/openrocket/openrocket/blob/7a9bb436c1ed91335a396693eccfc400ffe236d2/swing/src/main/java/info/openrocket/swing/gui/scalefigure/RocketPanel.java
+    adc = BarrowmanCalculator()
+    conds = FlightConditions(conf)
+    #conds.setMach(cpMach) # how do I get cpMach?
+    #conds.setAOA(cpAOA) # how do I get cpAOA?
+    #conds.setRollRate(cpRoll) # how do I get cpRoll?
+    #conds.setTheta(cpTheta) # how do I get cpTheta?
+    warnings = WarningSet()
+    warnings.clear()
 
     aft_radii = [0.0125, 0.01, 0.0075, 0.02, 0.03, 0.04]
     nose_lengths = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6]
@@ -74,6 +88,7 @@ with orhelper.OpenRocketInstance() as instance:
     data = list()
     events = list()
     cgs = list()
+    cps = list() # Depends on something called cpTheta, but I'm not sure where that comes from, so ignoring it
 
     for i in range(len(wind_speeds)):
         #nose.setLength(nose_lengths[i])
@@ -90,7 +105,9 @@ with orhelper.OpenRocketInstance() as instance:
         #opts.setWindSpeedAverage(wind_speeds[i])
         opts.setWindSpeedDeviation(wind_devs[i])
 
-        cgs.append(bmc.getCG(conf, mct).x) # For BC
+        # For BC
+        cgs.append(bmc.getCG(conf, mct).x) 
+        cps.append(adc.getCP(conf, conds, warnings).x)
 
         orh.run_simulation(sim)
         data.append( orh.get_timeseries(sim, [FlightDataType.TYPE_TIME, FlightDataType.TYPE_ALTITUDE, FlightDataType.TYPE_VELOCITY_Z]) )
@@ -130,8 +147,11 @@ with orhelper.OpenRocketInstance() as instance:
 
     ax1.grid(True)
 
-    print(apogees)
-    print(cgs)
+    print("Apogees: ", apogees)
+    print("CGs: ", cgs)
+    print("CPs: ", cps)
+    # Stability defined as CP - CG
+    print("Stability: ", [cp - cg for cp,cg in zip(cps,cgs)])
 
 # Leave OpenRocketInstance context before showing plot in order to shutdown JVM first
 plt.show()
