@@ -50,6 +50,9 @@ with orhelper.OpenRocketInstance() as instance:
     #printed_points = fins.getFinPoints()
     #for p in printed_points: print(p)
 
+    print("average wind speed: ", opts.getWindSpeedAverage()) # in m/s
+    print("wind speed deviation: ", opts.getWindSpeedDeviation()) # in m/s
+
     conf = rocket.getDefaultConfiguration() # Is this the actual simulation config though?
     bmc = BasicMassCalculator()
     mct = MassCalculator.MassCalcType.LAUNCH_MASS
@@ -64,21 +67,28 @@ with orhelper.OpenRocketInstance() as instance:
     fin_points = [[Coordinate(0.0,0.0,0.0), Coordinate(0.025,0.030,0.000), Coordinate(0.075,0.030,0.000), Coordinate(0.05, 0.0, 0.0)], 
                   [Coordinate(0.0,0.0,0.0), Coordinate(0.1,0.08,0.0), Coordinate(0.05, 0.0, 0.0)],
                   [Coordinate(0.0,0.0,0.0), Coordinate(0.0223,0.0106,0.000), Coordinate(0.0173,0.0318,0.000), Coordinate(0.0427, 0.0172, 0.0), Coordinate(0.0628, 0.0278, 0.0), Coordinate(0.0572, 0.0127, 0.0), Coordinate(0.0747, 0.00714, 0.0), Coordinate(0.05, 0.0, 0.0)]]
+
+    wind_speeds = [2.0, 3.0, 4.0, 5.0, 6.0, 7.0]
+    wind_devs = [0.2, 0.5, 1.0, 1.5, 2.0, 3.0]
+
     data = list()
     events = list()
     cgs = list()
 
-    for i in range(len(fin_points)):
+    for i in range(len(wind_speeds)):
         #nose.setLength(nose_lengths[i])
         #nose.setAftRadius(aft_radii[i])
         #nose.setType(nose_types[i])
         #nose.setShapeParameter(nose_shape[i])
-        nose.setThickness(thicknesses[i])
+        #nose.setThickness(thicknesses[i])
 
-        body.setLength(body_lengths[i])
+        #body.setLength(body_lengths[i])
 
-        fins.setFinCount(fin_counts[i])
-        fins.setPoints(fin_points[i])
+        #fins.setFinCount(fin_counts[i])
+        #fins.setPoints(fin_points[i])
+
+        #opts.setWindSpeedAverage(wind_speeds[i])
+        opts.setWindSpeedDeviation(wind_devs[i])
 
         cgs.append(bmc.getCG(conf, mct).x) # For BC
 
