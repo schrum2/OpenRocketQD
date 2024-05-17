@@ -2,3 +2,6 @@ jpype1
 orhelper
 numpy
 matplotlib
+tqdm
+ribs[all]
+fire
