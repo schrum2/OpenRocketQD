@@ -6,6 +6,36 @@ from matplotlib import pyplot as plt
 import orhelper
 from orhelper import FlightDataType, FlightEvent
 
+import random
+
+def random_genome(scales):
+    genome = list()
+    for lo,hi in scales:
+        genome.append(lo + random.random() * (hi - lo))
+
+    return genome
+
+def apply_genome_to_rocket(rocket, genonme):
+    nose = orh.get_component_named(rocket, 'Nose cone')
+    body = orh.get_component_named(rocket, 'Body tube')
+    fins = orh.get_component_named(body, 'Freeform fin set')
+
+    #nose.setLength(nose_lengths[i])
+    #nose.setAftRadius(aft_radii[i])
+    #nose.setType(nose_types[i])
+    #nose.setShapeParameter(nose_shape[i])
+    #nose.setThickness(thicknesses[i])
+
+    #body.setLength(body_lengths[i])
+
+    #fins.setFinCount(fin_counts[i])
+    #fins.setPoints(fin_points[i])
+
+    #### TODO WORK ABOVE HERE! ##########
+    
+# If I want to set a seed
+# random.seed(0)
+
 with orhelper.OpenRocketInstance() as instance:
     orh = orhelper.Helper(instance)
 
@@ -90,7 +120,27 @@ with orhelper.OpenRocketInstance() as instance:
     cgs = list()
     cps = list() # Depends on something called cpTheta, but I'm not sure where that comes from, so ignoring it
 
+    # The number range appropriate for each element of genome
+    scales = [(0.01, 0.04), # Aft radius
+              (0.1, 1.0),   # Nose length
+              (0,5),        # Nose type: [0 = nose.Shape.OGIVE,1 = nose.Shape.CONICAL,2 = nose.Shape.ELLIPSOID,3 = nose.Shape.POWER,4 = nose.Shape.PARABOLIC,5 = nose.Shape.HAACK]
+              (0.0,1.0),    # Nose shape (only affects some types)
+              (0.001,0.009),# Nose thickness
+              (0.2,1.0),    # Body length
+              (2,5),        # Fin count (integer)
+              (0.0,0.3),    # Fin point 1 x-coordinate
+              (0.0,0.3),    # Fin point 1 y-coordinate
+              (0.0,0.3),    # Fin point 2 x-coordinate
+              (0.0,0.3),    # Fin point 2 y-coordinate
+              (0.0,0.3),    # Fin point 3 x-coordinate
+              (0.0,0.3)    # Fin point 3 y-coordinate
+             ]
+    # Note: might want to generalize to more fin points later
+
     for i in range(len(wind_speeds)):
+
+        genome = random_genome(scales)
+
         #nose.setLength(nose_lengths[i])
         #nose.setAftRadius(aft_radii[i])
         #nose.setType(nose_types[i])
