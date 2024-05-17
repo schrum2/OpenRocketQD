@@ -92,6 +92,9 @@ def apply_genome_to_rocket(rocket, genonme):
     fin_points.append( decode_genome_element_coordinate(scales, genome, GENOME_INDEX_FIN_POINT2_X, GENOME_INDEX_FIN_POINT2_Y) )
     fin_points.append( decode_genome_element_coordinate(scales, genome, GENOME_INDEX_FIN_POINT3_X, GENOME_INDEX_FIN_POINT3_Y) )
 
+    # Troubleshoot by hard coding these fin points
+    fin_points = [Coordinate(0.0,0.0,0.0), Coordinate(0.025,0.030,0.000), Coordinate(0.075,0.030,0.000), Coordinate(0.05, 0.0, 0.0)]
+
     fins.setPoints(fin_points)
     
 # If I want to set a seed
@@ -169,9 +172,9 @@ with orhelper.OpenRocketInstance() as instance:
     #thicknesses = [0.002, 0.001, 0.003, 0.004, 0.005, 0.006]
     #body_lengths = [0.3, 0.4, 0.5, 0.2, 0.6, 0.7]
     #fin_counts = [2,3,4,5,6,7]
-    fin_points = [[Coordinate(0.0,0.0,0.0), Coordinate(0.025,0.030,0.000), Coordinate(0.075,0.030,0.000), Coordinate(0.05, 0.0, 0.0)], 
-                  [Coordinate(0.0,0.0,0.0), Coordinate(0.1,0.08,0.0), Coordinate(0.05, 0.0, 0.0)],
-                  [Coordinate(0.0,0.0,0.0), Coordinate(0.0223,0.0106,0.000), Coordinate(0.0173,0.0318,0.000), Coordinate(0.0427, 0.0172, 0.0), Coordinate(0.0628, 0.0278, 0.0), Coordinate(0.0572, 0.0127, 0.0), Coordinate(0.0747, 0.00714, 0.0), Coordinate(0.05, 0.0, 0.0)]]
+    #fin_points = [[Coordinate(0.0,0.0,0.0), Coordinate(0.025,0.030,0.000), Coordinate(0.075,0.030,0.000), Coordinate(0.05, 0.0, 0.0)], 
+    #              [Coordinate(0.0,0.0,0.0), Coordinate(0.1,0.08,0.0), Coordinate(0.05, 0.0, 0.0)],
+    #              [Coordinate(0.0,0.0,0.0), Coordinate(0.0223,0.0106,0.000), Coordinate(0.0173,0.0318,0.000), Coordinate(0.0427, 0.0172, 0.0), Coordinate(0.0628, 0.0278, 0.0), Coordinate(0.0572, 0.0127, 0.0), Coordinate(0.0747, 0.00714, 0.0), Coordinate(0.05, 0.0, 0.0)]]
 
     wind_speeds = [2.0, 3.0, 4.0, 5.0, 6.0, 7.0]
     wind_devs = [0.2, 0.5, 1.0, 1.5, 2.0, 3.0]
@@ -181,14 +184,14 @@ with orhelper.OpenRocketInstance() as instance:
     cgs = list()
     cps = list() # Depends on something called cpTheta, but I'm not sure where that comes from, so ignoring it
 
-    num_rockets = 3 #5
+    num_rockets = 5
 
     for i in range(num_rockets):
 
-        fins.setPoints(fin_points[i])
+        #fins.setPoints(fin_points[i])
 
-        #genome = random_genome(len(scales))
-        #apply_genome_to_rocket(rocket, genome)
+        genome = random_genome(len(scales))
+        apply_genome_to_rocket(rocket, genome)
 
         #opts.setWindSpeedAverage(wind_speeds[i])
         #opts.setWindSpeedDeviation(wind_devs[i])
