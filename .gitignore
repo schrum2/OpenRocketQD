@@ -117,3 +117,4 @@ venv/
 .idea/
 /.ipynb_checkpoints
 /sphere_output
+*.swp

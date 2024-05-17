@@ -7,31 +7,92 @@ import orhelper
 from orhelper import FlightDataType, FlightEvent
 
 import random
+import math
 
-def random_genome(scales):
+GENOME_INDEX_NOSE_AFT_RADIUS = 0
+GENOME_INDEX_NOSE_LENGTH = 1
+GENOME_INDEX_NOSE_TYPE = 2
+GENOME_INDEX_NOSE_SHAPE = 3
+GENOME_INDEX_NOSE_THICKNESS = 4
+GENOME_INDEX_BODY_LENGTH = 5
+GENOME_INDEX_FIN_COUNT = 6
+GENOME_INDEX_FIN_POINT1_X = 7
+GENOME_INDEX_FIN_POINT1_Y = 8
+GENOME_INDEX_FIN_POINT2_X = 9
+GENOME_INDEX_FIN_POINT2_Y = 10
+GENOME_INDEX_FIN_POINT3_X = 11
+GENOME_INDEX_FIN_POINT3_Y = 12
+
+# The number range appropriate for each element of genome
+scales = [(0.01, 0.04), # Aft radius
+          (0.1, 1.0),   # Nose length
+          (0,5),        # Nose type: [yy0 = nose.Shape.OGIVE,1 = nose.Shape.CONICAL,2 = nose.Shape.ELLIPSOID,3 = nose.Shape.POWER,4 = nose.Shape.PARABOLIC,5 = nose.Shape.HAACK]
+          (0.0,1.0),    # Nose shape (only affects some types)
+          (0.001,0.009),# Nose thickness
+          (0.2,1.0),    # Body length
+          (2,5),        # Fin count (integer)
+          (0.0,0.3),    # Fin point 1 x-coordinate
+          (0.0,0.3),    # Fin point 1 y-coordinate
+          (0.0,0.3),    # Fin point 2 x-coordinate
+          (0.0,0.3),    # Fin point 2 y-coordinate
+          (0.0,0.3),    # Fin point 3 x-coordinate
+          (0.0,0.3)    # Fin point 3 y-coordinate
+         ]
+# Note: might want to generalize to more fin points later
+
+def random_genome(count):
+    """
+        Random genome of values from 0.0 to 1.0.
+    """
+
     genome = list()
-    for lo,hi in scales:
-        genome.append(lo + random.random() * (hi - lo))
+    for _ in range(count):
+        genome.append(random.random())
 
     return genome
+
+def decode_genome_element_scale(scales, genome, index):
+    bounds = scales[index]
+    lo = bounds[0]
+    hi = bounds[1]
+    value = genome[index]
+    return lo + value * (hi - lo)
+
+def decode_genome_element_discrete(scales, genome, index):
+    scaled = decode_genome_element_scale(scales, genome, index)
+    return int(math.floor(scaled))
+
+def decode_genome_element_nose_type(scales, genome, index):
+    type_index = decode_genome_element_discrete(scales, genome, index)
+    return NOSE_TYPES[type_index] 
+
+def decode_genome_element_coordinate(scales, genome, x_index, y_index):
+    x = decode_genome_element_scale(scales, genome, x_index)
+    y = decode_genome_element_scale(scales, genome, y_index)
+    return Coordinate(x, y, 0.0) # Coordinates are 3D even when only (x,y) are used
 
 def apply_genome_to_rocket(rocket, genonme):
     nose = orh.get_component_named(rocket, 'Nose cone')
     body = orh.get_component_named(rocket, 'Body tube')
     fins = orh.get_component_named(body, 'Freeform fin set')
 
-    #nose.setLength(nose_lengths[i])
-    #nose.setAftRadius(aft_radii[i])
-    #nose.setType(nose_types[i])
-    #nose.setShapeParameter(nose_shape[i])
-    #nose.setThickness(thicknesses[i])
+    nose.setAftRadius(decode_genome_element_scale(scales, genome, GENOME_INDEX_NOSE_AFT_RADIUS))
+    nose.setLength(decode_genome_element_scale(scales, genome, GENOME_INDEX_NOSE_LENGTH))
+    nose.setType(decode_genome_element_nose_type(scales, genome, GENOME_INDEX_NOSE_TYPE))
+    nose.setShapeParameter(decode_genome_element_scale(scales, genome, GENOME_INDEX_NOSE_SHAPE))
+    nose.setThickness(decode_genome_element_scale(scales, genome, GENOME_INDEX_NOSE_THICKNESS))
 
-    #body.setLength(body_lengths[i])
+    body.setLength(decode_genome_element_scale(scales, genome, GENOME_INDEX_BODY_LENGTH))
 
-    #fins.setFinCount(fin_counts[i])
-    #fins.setPoints(fin_points[i])
+    fins.setFinCount(decode_genome_element_discrete(scales, genome, GENOME_INDEX_FIN_COUNT))
 
-    #### TODO WORK ABOVE HERE! ##########
+    fin_points = list()
+    fin_points.append( Coordinate(0.0,0.0,0.0) ) # Always start at (0,0,0)
+    fin_points.append( decode_genome_element_coordinate(scales, genome, GENOME_INDEX_FIN_POINT1_X, GENOME_INDEX_FIN_POINT1_Y) )
+    fin_points.append( decode_genome_element_coordinate(scales, genome, GENOME_INDEX_FIN_POINT2_X, GENOME_INDEX_FIN_POINT2_Y) )
+    fin_points.append( decode_genome_element_coordinate(scales, genome, GENOME_INDEX_FIN_POINT3_X, GENOME_INDEX_FIN_POINT3_Y) )
+
+    fins.setPoints(fin_points)
     
 # If I want to set a seed
 # random.seed(0)
@@ -101,13 +162,13 @@ with orhelper.OpenRocketInstance() as instance:
     warnings = WarningSet()
     warnings.clear()
 
-    aft_radii = [0.0125, 0.01, 0.0075, 0.02, 0.03, 0.04]
-    nose_lengths = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6]
-    nose_types = [nose.Shape.OGIVE,nose.Shape.CONICAL,nose.Shape.ELLIPSOID,nose.Shape.POWER,nose.Shape.PARABOLIC,nose.Shape.HAACK]
-    nose_shape = [1.0, 0.9, 0.95, 0.8, 0.85, 0.75]
-    thicknesses = [0.002, 0.001, 0.003, 0.004, 0.005, 0.006]
-    body_lengths = [0.3, 0.4, 0.5, 0.2, 0.6, 0.7]
-    fin_counts = [2,3,4,5,6,7]
+    #aft_radii = [0.0125, 0.01, 0.0075, 0.02, 0.03, 0.04]
+    #nose_lengths = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6]
+    NOSE_TYPES = [nose.Shape.OGIVE,nose.Shape.CONICAL,nose.Shape.ELLIPSOID,nose.Shape.POWER,nose.Shape.PARABOLIC,nose.Shape.HAACK]
+    #nose_shape = [1.0, 0.9, 0.95, 0.8, 0.85, 0.75]
+    #thicknesses = [0.002, 0.001, 0.003, 0.004, 0.005, 0.006]
+    #body_lengths = [0.3, 0.4, 0.5, 0.2, 0.6, 0.7]
+    #fin_counts = [2,3,4,5,6,7]
     fin_points = [[Coordinate(0.0,0.0,0.0), Coordinate(0.025,0.030,0.000), Coordinate(0.075,0.030,0.000), Coordinate(0.05, 0.0, 0.0)], 
                   [Coordinate(0.0,0.0,0.0), Coordinate(0.1,0.08,0.0), Coordinate(0.05, 0.0, 0.0)],
                   [Coordinate(0.0,0.0,0.0), Coordinate(0.0223,0.0106,0.000), Coordinate(0.0173,0.0318,0.000), Coordinate(0.0427, 0.0172, 0.0), Coordinate(0.0628, 0.0278, 0.0), Coordinate(0.0572, 0.0127, 0.0), Coordinate(0.0747, 0.00714, 0.0), Coordinate(0.05, 0.0, 0.0)]]
@@ -120,40 +181,17 @@ with orhelper.OpenRocketInstance() as instance:
     cgs = list()
     cps = list() # Depends on something called cpTheta, but I'm not sure where that comes from, so ignoring it
 
-    # The number range appropriate for each element of genome
-    scales = [(0.01, 0.04), # Aft radius
-              (0.1, 1.0),   # Nose length
-              (0,5),        # Nose type: [0 = nose.Shape.OGIVE,1 = nose.Shape.CONICAL,2 = nose.Shape.ELLIPSOID,3 = nose.Shape.POWER,4 = nose.Shape.PARABOLIC,5 = nose.Shape.HAACK]
-              (0.0,1.0),    # Nose shape (only affects some types)
-              (0.001,0.009),# Nose thickness
-              (0.2,1.0),    # Body length
-              (2,5),        # Fin count (integer)
-              (0.0,0.3),    # Fin point 1 x-coordinate
-              (0.0,0.3),    # Fin point 1 y-coordinate
-              (0.0,0.3),    # Fin point 2 x-coordinate
-              (0.0,0.3),    # Fin point 2 y-coordinate
-              (0.0,0.3),    # Fin point 3 x-coordinate
-              (0.0,0.3)    # Fin point 3 y-coordinate
-             ]
-    # Note: might want to generalize to more fin points later
+    num_rockets = 3 #5
 
-    for i in range(len(wind_speeds)):
+    for i in range(num_rockets):
 
-        genome = random_genome(scales)
+        fins.setPoints(fin_points[i])
 
-        #nose.setLength(nose_lengths[i])
-        #nose.setAftRadius(aft_radii[i])
-        #nose.setType(nose_types[i])
-        #nose.setShapeParameter(nose_shape[i])
-        #nose.setThickness(thicknesses[i])
-
-        #body.setLength(body_lengths[i])
-
-        #fins.setFinCount(fin_counts[i])
-        #fins.setPoints(fin_points[i])
+        #genome = random_genome(len(scales))
+        #apply_genome_to_rocket(rocket, genome)
 
         #opts.setWindSpeedAverage(wind_speeds[i])
-        opts.setWindSpeedDeviation(wind_devs[i])
+        #opts.setWindSpeedDeviation(wind_devs[i])
 
         # For BC
         cgs.append(bmc.getCG(conf, mct).x) 
