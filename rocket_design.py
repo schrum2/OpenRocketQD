@@ -92,6 +92,12 @@ def decode_genome_element_nose_type(scales, genome, index):
     """
     global NOSE_TYPES
     type_index = decode_genome_element_discrete(scales, genome, index)
+    if type_index < 0 or type_index >= len(NOSE_TYPES):
+        print("Genome:", genome)
+        print("Scales:", scales)
+        print("index:", index)
+        print("type_index:", type_index)
+        print("NOSE_TYPES:", NOSE_TYPES)
     return NOSE_TYPES[type_index] 
 
 def decode_genome_element_coordinate(Coordinate, scales, genome, x_index, y_index):
