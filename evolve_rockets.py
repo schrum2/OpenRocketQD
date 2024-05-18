@@ -68,7 +68,6 @@ import time
 from pathlib import Path
 
 import fire
-import matplotlib.pyplot as plt
 import numpy as np
 import tqdm
 
@@ -716,7 +715,7 @@ def create_scheduler(config, algorithm, seed=None):
     return scheduler
 
 
-def save_heatmap(archive, heatmap_path):
+def save_heatmap(plt, archive, heatmap_path):
     """Saves a heatmap of the archive to the given path.
 
     Args:
@@ -758,6 +757,12 @@ def evolve_rockets_main(algorithm,
             and saving heatmap.
         seed (int): Seed for the algorithm. By default, there is no seed.
     """
+
+    # Adding matplotlib imports here to avoid problems when combined with JPype
+    import matplotlib
+    matplotlib.use('Agg')
+    import matplotlib.pyplot as plt
+
     config = copy.deepcopy(CONFIG[algorithm])
 
     # Use default itrs for each algorithm.
@@ -801,7 +806,7 @@ def evolve_rockets_main(algorithm,
     }
 
     non_logging_time = 0.0
-    save_heatmap(result_archive, str(outdir / f"{name}_heatmap_{0:05d}.png"))
+    save_heatmap(plt, result_archive, str(outdir / f"{name}_heatmap_{0:05d}.png"))
 
     for itr in tqdm.trange(1, itrs + 1):
         itr_start = time.time()
@@ -838,7 +843,7 @@ def evolve_rockets_main(algorithm,
                 f"{metrics['Archive Coverage']['y'][-1] * 100:.3f}% "
                 f"QD Score: {metrics['QD Score']['y'][-1]:.3f}")
 
-            save_heatmap(result_archive,
+            save_heatmap(plt, result_archive,
                          str(outdir / f"{name}_heatmap_{itr:05d}.png"))
 
     # Plot metrics.
