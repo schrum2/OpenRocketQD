@@ -41,6 +41,10 @@ scales = [(0.01, 0.04), # Aft radius
 def random_genome(count):
     """
         Random genome of values from 0.0 to 1.0.
+
+        count -- number of elements in genome
+
+        Return: list of random elements representing the genome
     """
 
     genome = list()
@@ -50,6 +54,15 @@ def random_genome(count):
     return genome
 
 def decode_genome_element_scale(scales, genome, index):
+    """
+        Convert specific genome element to its properly scaled value.
+
+        scales -- 2-tuples with (min,max) pairs
+        genome -- evolved genome of values in [0,1]
+        index  -- an index that associates a scale with a genome value
+
+        Return: value from genome index scaled according to same index in scales
+    """
     bounds = scales[index]
     lo = bounds[0]
     hi = bounds[1]
@@ -57,19 +70,55 @@ def decode_genome_element_scale(scales, genome, index):
     return lo + value * (hi - lo)
 
 def decode_genome_element_discrete(scales, genome, index):
+    """
+        Convert specific genome element to scaled discrete integer value
+
+        scales -- 2-tuples with (min,max) pairs
+        genome -- evolved genome of values in [0,1]
+        index  -- an index that associates a scale with a genome value
+
+        Return: value from genome index scaled and rounded down to an int according to same index in scales
+    """
     scaled = decode_genome_element_scale(scales, genome, index)
     return int(math.floor(scaled))
 
 def decode_genome_element_nose_type(scales, genome, index):
+    """
+        Convert specific genome element to a particular nose code type
+
+        scales -- 2-tuples with (min,max) pairs
+        genome -- evolved genome of values in [0,1]
+        index  -- an index that associates a scale with a genome value
+
+        Return: value from genome index converted to nose cone type according to same index in scales
+    """
     type_index = decode_genome_element_discrete(scales, genome, index)
     return NOSE_TYPES[type_index] 
 
 def decode_genome_element_coordinate(scales, genome, x_index, y_index):
+    """
+        Convert two specific genome elements to a Coordinate point.
+
+        scales -- 2-tuples with (min,max) pairs
+        genome -- evolved genome of values in [0,1]
+        x_index-- an index that associates a scale with a genome value for an x-coordinate
+        y_index-- an index that associates a scale with a genome value for a y-coordinate
+
+        Return: Coordinate resulting from scaling the two genome values to x and y coordinates
+    """
     x = decode_genome_element_scale(scales, genome, x_index)
     y = decode_genome_element_scale(scales, genome, y_index)
     return Coordinate(x, y, 0.0) # Coordinates are 3D even when only (x,y) are used
 
 def apply_genome_to_rocket(rocket, genonme):
+    """
+        Interpret every element of the evolved genome as a parameter for
+        the rocket, and apply each parameter setting. There is no return value,
+        as the rocket object is modified via side effects.
+
+        rocket -- rocket from Open Rocket that is modified according to the genome
+        genome -- evolved genome of values in [0,1] which are interpreted as parameters for rocket design
+    """
     nose = orh.get_component_named(rocket, 'Nose cone')
     body = orh.get_component_named(rocket, 'Body tube')
     fins = orh.get_component_named(body, 'Freeform fin set')
