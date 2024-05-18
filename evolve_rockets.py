@@ -78,6 +78,9 @@ from ribs.emitters import (EvolutionStrategyEmitter, GaussianEmitter,
 from ribs.schedulers import BanditScheduler, Scheduler
 from ribs.visualize import cvt_archive_heatmap, grid_archive_heatmap
 
+# Might use to distribute evaluations later. See Pyribs Lunar Lander tutorial
+#from dask.distributed import Client
+
 import rocket_design as rd
 from rocket_design import GENOME_LENGTH
 
@@ -590,41 +593,21 @@ def evolve_rockets(solution_batch):
     """
     dim = solution_batch.shape[1]
 
-    # Shift the Sphere function so that the optimal value is at x_i = 2.048.
-    evolve_rockets_shift = 5.12 * 0.4
+    # These are made up objectives and BCs. Replace with real later
+    import random
+    results = map(lambda x : (random.random(), random.random()*4 - 2, 20*random.random()), solution_batch)
 
-    # Normalize the objective to the range [0, 100] where 100 is optimal.
-    best_obj = 0.0
-    worst_obj = (-5.12 - evolve_rockets_shift)**2 * dim
-    raw_obj = np.sum(np.square(solution_batch - evolve_rockets_shift), axis=1)
-    objective_batch = (raw_obj - worst_obj) / (best_obj - worst_obj) * 100
+    # Collect the objectives and measures in a manner similar to the Lunar Lander example
+    objective_batch = [] 
+    measures_batch = []
 
-    # Compute gradient of the objective.
-    objective_grad_batch = -2 * (solution_batch - evolve_rockets_shift)
+    for obj, stability, altitude in results:
+        objective_batch.append(obj)
+        measures_batch.append([stability, altitude])
 
-    # Calculate measures.
-    clipped = solution_batch.copy()
-    clip_mask = (clipped < -5.12) | (clipped > 5.12)
-    clipped[clip_mask] = 5.12 / clipped[clip_mask]
-    measures_batch = np.concatenate(
-        (
-            np.sum(clipped[:, :dim // 2], axis=1, keepdims=True),
-            np.sum(clipped[:, dim // 2:], axis=1, keepdims=True),
-        ),
-        axis=1,
-    )
-
-    # Compute gradient of the measures.
-    derivatives = np.ones(solution_batch.shape)
-    derivatives[clip_mask] = -5.12 / np.square(solution_batch[clip_mask])
-
-    mask_0 = np.concatenate((np.ones(dim // 2), np.zeros(dim - dim // 2)))
-    mask_1 = np.concatenate((np.zeros(dim // 2), np.ones(dim - dim // 2)))
-
-    d_measure0 = derivatives * mask_0
-    d_measure1 = derivatives * mask_1
-
-    measures_grad_batch = np.stack((d_measure0, d_measure1), axis=1)
+    # I have no idea how to compute gradients for a problem like this, if it is even possible
+    objective_grad_batch = None 
+    measures_grad_batch = None 
 
     return (
         objective_batch,
@@ -861,8 +844,13 @@ def evolve_rockets_main(algorithm,
 
 if __name__ == '__main__':
     with orhelper.OpenRocketInstance() as instance:
-        global orh # So this will be usable above
         orh = orhelper.Helper(instance)
+        doc = orh.load_doc(os.path.join('examples', 'modified.ork')) # File was modified to replace Trapezoidal fin set with Freeform fin set
+        sim = doc.getSimulation(0)
+        global opts
+        global rocket
+        opts = sim.getOptions()
+        rocket = opts.getRocket()
 
         # These are Java classes. They have to be loaded after JPype is being used
         from net.sf.openrocket.util import Coordinate # Once the instance starts, Java classes can be imported using JPype
