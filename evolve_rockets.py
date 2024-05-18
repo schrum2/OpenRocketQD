@@ -51,10 +51,10 @@ reproduce the experiments presented in the paper in which each algorithm is
 introduced.
 
 Outputs are saved in the `sphere_output/` directory by default. The archive is
-saved as a CSV named `{algorithm}_{dim}_archive.csv`, while snapshots of the
-heatmap are saved as `{algorithm}_{dim}_heatmap_{iteration}.png`. Metrics about
-the run are also saved in `{algorithm}_{dim}_metrics.json`, and plots of the
-metrics are saved in PNG's with the name `{algorithm}_{dim}_metric_name.png`.
+saved as a CSV named `{algorithm}_archive.csv`, while snapshots of the
+heatmap are saved as `{algorithm}_heatmap_{iteration}.png`. Metrics about
+the run are also saved in `{algorithm}_metrics.json`, and plots of the
+metrics are saved in PNG's with the name `{algorithm}_metric_name.png`.
 
 To generate a video of the heatmap from the heatmap images, use a tool like
 ffmpeg. For example, the following will generate a 6FPS video showing the
@@ -100,7 +100,6 @@ from orhelper import FlightDataType, FlightEvent
 
 CONFIG = {
     "map_elites": {
-        "dim": GENOME_LENGTH,
         "iters": 4500,
         "archive_dims": (500, 500),
         "use_result_archive": False,
@@ -125,7 +124,6 @@ CONFIG = {
         }
     },
     "line_map_elites": {
-        "dim": GENOME_LENGTH,
         "iters": 4500,
         "archive_dims": (500, 500),
         "use_result_archive": False,
@@ -151,7 +149,6 @@ CONFIG = {
         }
     },
     "cvt_map_elites": {
-        "dim": GENOME_LENGTH,
         "iters": 4500,
         "archive_dims": (500, 500),
         "use_result_archive": False,
@@ -178,7 +175,6 @@ CONFIG = {
         }
     },
     "line_cvt_map_elites": {
-        "dim": GENOME_LENGTH,
         "iters": 4500,
         "archive_dims": (500, 500),
         "use_result_archive": False,
@@ -206,7 +202,6 @@ CONFIG = {
         }
     },
     "me_map_elites": {
-        "dim": GENOME_LENGTH,
         "iters": 20_000,
         "archive_dims": (100, 100),
         "use_result_archive": False,
@@ -256,7 +251,6 @@ CONFIG = {
         }
     },
     "cma_me_mixed": {
-        "dim": GENOME_LENGTH,
         "iters": 4500,
         "archive_dims": (500, 500),
         "use_result_archive": False,
@@ -289,7 +283,6 @@ CONFIG = {
         }
     },
     "cma_me_imp": {
-        "dim": GENOME_LENGTH,
         "iters": 4500,
         "archive_dims": (500, 500),
         "use_result_archive": False,
@@ -317,7 +310,6 @@ CONFIG = {
         }
     },
     "cma_me_imp_mu": {
-        "dim": GENOME_LENGTH,
         "iters": 4500,
         "archive_dims": (500, 500),
         "use_result_archive": False,
@@ -345,7 +337,6 @@ CONFIG = {
         }
     },
     "cma_me_rd": {
-        "dim": GENOME_LENGTH,
         "iters": 4500,
         "archive_dims": (500, 500),
         "use_result_archive": False,
@@ -373,7 +364,6 @@ CONFIG = {
         }
     },
     "cma_me_rd_mu": {
-        "dim": GENOME_LENGTH,
         "iters": 4500,
         "archive_dims": (500, 500),
         "use_result_archive": False,
@@ -401,7 +391,6 @@ CONFIG = {
         }
     },
     "cma_me_opt": {
-        "dim": GENOME_LENGTH,
         "iters": 4500,
         "archive_dims": (500, 500),
         "use_result_archive": False,
@@ -429,7 +418,6 @@ CONFIG = {
         }
     },
     "og_map_elites": {
-        "dim": GENOME_LENGTH,
         "iters": 10_000,
         "archive_dims": (100, 100),
         "use_result_archive": False,
@@ -459,7 +447,6 @@ CONFIG = {
         }
     },
     "omg_mega": {
-        "dim": GENOME_LENGTH,
         "iters": 10_000,
         "archive_dims": (100, 100),
         "use_result_archive": False,
@@ -489,7 +476,6 @@ CONFIG = {
         }
     },
     "cma_mega": {
-        "dim": GENOME_LENGTH,
         "iters": 10_000,
         "archive_dims": (100, 100),
         "use_result_archive": False,
@@ -517,7 +503,6 @@ CONFIG = {
         }
     },
     "cma_mega_adam": {
-        "dim": GENOME_LENGTH,
         "iters": 10_000,
         "archive_dims": (100, 100),
         "use_result_archive": False,
@@ -545,7 +530,6 @@ CONFIG = {
         }
     },
     "cma_mae": {
-        "dim": GENOME_LENGTH,
         "iters": 10_000,
         "archive_dims": (100, 100),
         "use_result_archive": True,
@@ -574,7 +558,6 @@ CONFIG = {
         }
     },
     "cma_maega": {
-        "dim": GENOME_LENGTH,
         "iters": 10_000,
         "archive_dims": (100, 100),
         "use_result_archive": True,
@@ -676,7 +659,7 @@ def create_scheduler(config, algorithm, seed=None):
     Returns:
         ribs.schedulers.Scheduler: A ribs scheduler for running the algorithm.
     """
-    solution_dim = config["dim"]
+    solution_dim = GENOME_LENGTH
     archive_dims = config["archive_dims"]
     learning_rate = 1.0 if "learning_rate" not in config["archive"][
         "kwargs"] else config["archive"]["kwargs"]["learning_rate"]
@@ -762,19 +745,17 @@ def save_heatmap(archive, heatmap_path):
 
 
 def sphere_main(algorithm,
-                dim=None,
                 itrs=None,
                 archive_dims=None,
                 learning_rate=None,
                 es=None,
-                outdir="sphere_output",
+                outdir="evolve_rockets_output",
                 log_freq=250,
                 seed=None):
     """Demo on the Sphere function.
 
     Args:
         algorithm (str): Name of the algorithm.
-        dim (int): Dimensionality of the sphere function.
         itrs (int): Iterations to run.
         archive_dims (tuple): Dimensionality of the archive.
         learning_rate (float): The archive learning rate.
@@ -786,10 +767,6 @@ def sphere_main(algorithm,
         seed (int): Seed for the algorithm. By default, there is no seed.
     """
     config = copy.deepcopy(CONFIG[algorithm])
-
-    # Use default dim for each algorithm.
-    if dim is not None:
-        config["dim"] = dim
 
     # Use default itrs for each algorithm.
     if itrs is not None:
@@ -809,7 +786,7 @@ def sphere_main(algorithm,
             if e["class"] == EvolutionStrategyEmitter:
                 e["kwargs"]["es"] = es
 
-    name = f"{algorithm}_{config['dim']}"
+    name = f"{algorithm}"
     if es is not None:
         name += f"_{es}"
     outdir = Path(outdir)
