@@ -104,7 +104,7 @@ def decode_genome_element_coordinate(scales, genome, x_index, y_index):
     y = decode_genome_element_scale(scales, genome, y_index)
     return Coordinate(x, y, 0.0) # Coordinates are 3D even when only (x,y) are used
 
-def apply_genome_to_rocket(rocket, genonme):
+def apply_genome_to_rocket(orh, rocket, genonme):
     """
         Interpret every element of the evolved genome as a parameter for
         the rocket, and apply each parameter setting. There is no return value,

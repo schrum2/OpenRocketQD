@@ -561,6 +561,19 @@ CONFIG = {
     }
 }
 
+def evaluate_rocket_genome(genome):
+    """
+        Evaluate a rocket, then return fitness and BC/measure information
+
+        genome -- numbers that are mapped to rocket design parameters
+
+        Return: (fitness, stability, max altitude)
+    """
+    global sim
+    global opts
+    rocket = opts.getRocket()
+    rd.apply_genome_to_rocket(orh, rocket, genome)
+    return re.simulate_rocket(sim, opts)
 
 def evolve_rockets(solution_batch):
     """Sphere function evaluation and measures for a batch of solutions.
@@ -578,8 +591,7 @@ def evolve_rockets(solution_batch):
     dim = solution_batch.shape[1]
 
     # These are made up objectives and BCs. Replace with real later
-    import random
-    results = map(lambda x : (random.random(), random.random()*4 - 2, 20*random.random()), solution_batch)
+    results = map(evaluate_rocket_genome, solution_batch)
 
     # Collect the objectives and measures in a manner similar to the Lunar Lander example
     objective_batch = [] 
@@ -822,11 +834,13 @@ def evolve_rockets_main(algorithm,
 
 if __name__ == '__main__':
     with orhelper.OpenRocketInstance() as instance:
+        global orh
+        global sim
+        global opts
+        global rocket
         orh = orhelper.Helper(instance)
         doc = orh.load_doc(os.path.join('examples', 'modified.ork')) # File was modified to replace Trapezoidal fin set with Freeform fin set
         sim = doc.getSimulation(0)
-        global opts
-        global rocket
         opts = sim.getOptions()
         rocket = opts.getRocket()
 

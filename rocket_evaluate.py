@@ -63,5 +63,5 @@ def simulate_rocket(sim, opts):
             apogee = data[FlightDataType.TYPE_ALTITUDE][index_at(time)]
 
     stability = cp - cg
-
-    return (stability, apogee)
+    # For now, use 1 as place holder for fitness
+    return (1, stability, apogee)
