@@ -96,6 +96,7 @@ def apply_genome_to_rocket(rocket, genonme):
     try:
         fins.setPoints(fin_points)
     except:
+        fin.setPoints( [Coordinate(0.0,0.0,0.0), Coordinate(0.025,0.030,0.000), Coordinate(0.075,0.030,0.000), Coordinate(0.05, 0.0, 0.0)] )
         print("Fin point failure: default trapezoid fins")
     
 # If I want to set a seed
