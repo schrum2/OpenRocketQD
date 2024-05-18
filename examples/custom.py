@@ -186,7 +186,7 @@ with orhelper.OpenRocketInstance() as instance:
     cgs = list()
     cps = list() # Depends on something called cpTheta, but I'm not sure where that comes from, so ignoring it
 
-    num_rockets = 10
+    num_rockets = 30
 
     for i in range(num_rockets):
 
@@ -220,7 +220,7 @@ with orhelper.OpenRocketInstance() as instance:
     colors = ['b','r','g','c','m','y','tab:orange', 'tab:purple', 'tab:brown', 'tab:pink']
 
     for i in range(len(data)):
-        ax1.plot(data[i][FlightDataType.TYPE_TIME], data[i][FlightDataType.TYPE_ALTITUDE], colors[i])
+        ax1.plot(data[i][FlightDataType.TYPE_TIME], data[i][FlightDataType.TYPE_ALTITUDE], colors[i % len(colors)])
     
     ax1.set_xlabel('Time (s)')
     ax1.set_ylabel('Altitude (m)')
