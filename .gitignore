@@ -118,3 +118,4 @@ venv/
 /.ipynb_checkpoints
 /sphere_output
 *.swp
+/evolve_rockets_output
