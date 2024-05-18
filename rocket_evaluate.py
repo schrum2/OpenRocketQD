@@ -1,3 +1,7 @@
+
+from orhelper import FlightDataType, FlightEvent
+import numpy as np
+
 def prepare_for_rocket_simulation(sim):
     # Once the instance starts, Java classes can be imported using JPype
     from net.sf.openrocket.masscalc import BasicMassCalculator
@@ -28,10 +32,11 @@ def prepare_for_rocket_simulation(sim):
     warnings = WarningSet()
     warnings.clear()
 
-def simulate_rocket(sim, opts):
+def simulate_rocket(orh, sim, opts):
     """
         Simulate the rocket and return performance information.
 
+        orh     -- Open Rocket helper object
         sim     -- Rocket simulation object
         opts    -- Simulation options
     """
@@ -63,5 +68,5 @@ def simulate_rocket(sim, opts):
             apogee = data[FlightDataType.TYPE_ALTITUDE][index_at(time)]
 
     stability = cp - cg
-    # For now, use 1 as place holder for fitness
-    return (1, stability, apogee)
+    # For now, use 90 as place holder for fitness
+    return (90, stability, apogee)

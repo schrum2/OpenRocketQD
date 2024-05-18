@@ -32,6 +32,10 @@ SCALES = [(0.01, 0.04), # Aft radius
 
 GENOME_LENGTH = len(SCALES)
 
+def define_nose_types(nose):
+    global NOSE_TYPES
+    NOSE_TYPES = [nose.Shape.OGIVE,nose.Shape.CONICAL,nose.Shape.ELLIPSOID,nose.Shape.POWER,nose.Shape.PARABOLIC,nose.Shape.HAACK]
+
 def random_genome(count):
     """
         Random genome of values from 0.0 to 1.0.
@@ -86,10 +90,11 @@ def decode_genome_element_nose_type(scales, genome, index):
 
         Return: value from genome index converted to nose cone type according to same index in scales
     """
+    global NOSE_TYPES
     type_index = decode_genome_element_discrete(scales, genome, index)
     return NOSE_TYPES[type_index] 
 
-def decode_genome_element_coordinate(scales, genome, x_index, y_index):
+def decode_genome_element_coordinate(Coordinate, scales, genome, x_index, y_index):
     """
         Convert two specific genome elements to a Coordinate point.
 
@@ -104,7 +109,7 @@ def decode_genome_element_coordinate(scales, genome, x_index, y_index):
     y = decode_genome_element_scale(scales, genome, y_index)
     return Coordinate(x, y, 0.0) # Coordinates are 3D even when only (x,y) are used
 
-def apply_genome_to_rocket(orh, rocket, genonme):
+def apply_genome_to_rocket(orh, rocket, genome):
     """
         Interpret every element of the evolved genome as a parameter for
         the rocket, and apply each parameter setting. There is no return value,
@@ -113,25 +118,28 @@ def apply_genome_to_rocket(orh, rocket, genonme):
         rocket -- rocket from Open Rocket that is modified according to the genome
         genome -- evolved genome of values in [0,1] which are interpreted as parameters for rocket design
     """
+        
+    from net.sf.openrocket.util import Coordinate # Once the instance starts, Java classes can be imported using JPype
+
     nose = orh.get_component_named(rocket, 'Nose cone')
     body = orh.get_component_named(rocket, 'Body tube')
     fins = orh.get_component_named(body, 'Freeform fin set')
 
-    nose.setAftRadius(decode_genome_element_scale(scales, genome, GENOME_INDEX_NOSE_AFT_RADIUS))
-    nose.setLength(decode_genome_element_scale(scales, genome, GENOME_INDEX_NOSE_LENGTH))
-    nose.setType(decode_genome_element_nose_type(scales, genome, GENOME_INDEX_NOSE_TYPE))
-    nose.setShapeParameter(decode_genome_element_scale(scales, genome, GENOME_INDEX_NOSE_SHAPE))
-    nose.setThickness(decode_genome_element_scale(scales, genome, GENOME_INDEX_NOSE_THICKNESS))
+    nose.setAftRadius(decode_genome_element_scale(SCALES, genome, GENOME_INDEX_NOSE_AFT_RADIUS))
+    nose.setLength(decode_genome_element_scale(SCALES, genome, GENOME_INDEX_NOSE_LENGTH))
+    nose.setType(decode_genome_element_nose_type(SCALES, genome, GENOME_INDEX_NOSE_TYPE))
+    nose.setShapeParameter(decode_genome_element_scale(SCALES, genome, GENOME_INDEX_NOSE_SHAPE))
+    nose.setThickness(decode_genome_element_scale(SCALES, genome, GENOME_INDEX_NOSE_THICKNESS))
 
-    body.setLength(decode_genome_element_scale(scales, genome, GENOME_INDEX_BODY_LENGTH))
+    body.setLength(decode_genome_element_scale(SCALES, genome, GENOME_INDEX_BODY_LENGTH))
 
-    fins.setFinCount(decode_genome_element_discrete(scales, genome, GENOME_INDEX_FIN_COUNT))
+    fins.setFinCount(decode_genome_element_discrete(SCALES, genome, GENOME_INDEX_FIN_COUNT))
 
     fin_points = list()
     fin_points.append( Coordinate(0.0,0.0,0.0) ) # Always start at (0,0,0)
-    fin_points.append( decode_genome_element_coordinate(scales, genome, GENOME_INDEX_FIN_POINT1_X, GENOME_INDEX_FIN_POINT1_Y) )
-    fin_points.append( decode_genome_element_coordinate(scales, genome, GENOME_INDEX_FIN_POINT2_X, GENOME_INDEX_FIN_POINT2_Y) )
-    fin_points.append( Coordinate( decode_genome_element_scale(scales, genome, GENOME_INDEX_FIN_POINT3_X), 0.0, 0.0) ) # Last y-coordinate must be 0
+    fin_points.append( decode_genome_element_coordinate(Coordinate, SCALES, genome, GENOME_INDEX_FIN_POINT1_X, GENOME_INDEX_FIN_POINT1_Y) )
+    fin_points.append( decode_genome_element_coordinate(Coordinate, SCALES, genome, GENOME_INDEX_FIN_POINT2_X, GENOME_INDEX_FIN_POINT2_Y) )
+    fin_points.append( Coordinate( decode_genome_element_scale(SCALES, genome, GENOME_INDEX_FIN_POINT3_X), 0.0, 0.0) ) # Last y-coordinate must be 0
 
     #print("---------------")
     #for p in fin_points: print(p)

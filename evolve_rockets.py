@@ -571,9 +571,10 @@ def evaluate_rocket_genome(genome):
     """
     global sim
     global opts
+    global orh
     rocket = opts.getRocket()
     rd.apply_genome_to_rocket(orh, rocket, genome)
-    return re.simulate_rocket(sim, opts)
+    return re.simulate_rocket(orh, sim, opts)
 
 def evolve_rockets(solution_batch):
     """Sphere function evaluation and measures for a batch of solutions.
@@ -844,8 +845,8 @@ if __name__ == '__main__':
         opts = sim.getOptions()
         rocket = opts.getRocket()
 
-        from net.sf.openrocket.util import Coordinate # Once the instance starts, Java classes can be imported using JPype
-
         re.prepare_for_rocket_simulation(sim) # Sets some global variables for rocket evaluation
+        nose = orh.get_component_named(rocket, 'Nose cone')
+        rd.define_nose_types(nose)
 
         fire.Fire(evolve_rockets_main)
