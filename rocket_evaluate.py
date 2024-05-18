@@ -1,17 +1,17 @@
-
-def simulate_rocket(sim, pts, rocket):
-    """
-        Simulate the rocket and return performance information.
-
-        sim     -- Rocket simulation object
-        opts    -- Simulation options
-    """
+def prepare_for_rocket_simulation():
     #from net.sf.openrocket.util import Coordinate # Once the instance starts, Java classes can be imported using JPype
     #from net.sf.openrocket.masscalc import BasicMassCalculator
     #from net.sf.openrocket.masscalc import MassCalculator
     #from net.sf.openrocket.aerodynamics import WarningSet
     #from net.sf.openrocket.aerodynamics import BarrowmanCalculator
     #from net.sf.openrocket.aerodynamics import FlightConditions
+
+    global conf
+    global bmc
+    global mct
+    global conds
+    global warnings
+    global adc
 
     #conf = rocket.getDefaultConfiguration() # Is this the actual simulation config though?
     conf = sim.getConfiguration() # Or is this the right configuration?
@@ -28,25 +28,35 @@ def simulate_rocket(sim, pts, rocket):
     warnings = WarningSet()
     warnings.clear()
 
+def simulate_rocket(sim, opts):
+    """
+        Simulate the rocket and return performance information.
+
+        sim     -- Rocket simulation object
+        opts    -- Simulation options
+    """
+    global conf
+    global bmc
+    global mct
+    global conds
+    global warnings
+    global adc
+
     # For BC/measures
     cg = bmc.getCG(conf, mct).x
     cp = adc.getCP(conf, conds, warnings).x
 
     orh.run_simulation(sim)
-    data = orh.get_timeseries(sim, [FlightDataType.TYPE_TIME, FlightDataType.TYPE_ALTITUDE, FlightDataType.TYPE_VELOCITY_Z]) )
+    data = orh.get_timeseries(sim, [FlightDataType.TYPE_TIME, FlightDataType.TYPE_ALTITUDE, FlightDataType.TYPE_VELOCITY_Z])
     events = orh.get_events(sim) 
 
-    # Make a custom plot of the simulation
-
     events_to_annotate = {
-        #FlightEvent.BURNOUT: 'Motor burnout',
-        FlightEvent.APOGEE: 'Apogee' #,
-        #FlightEvent.LAUNCHROD: 'Launch rod clearance'
+        FlightEvent.APOGEE: 'Apogee' 
     }
 
     apogee = 0.0 # Default
     index_at = lambda t: (np.abs(data[FlightDataType.TYPE_TIME] - t)).argmin()
-    for event, times in events[i].items():
+    for event, times in events.items():
         if event not in events_to_annotate:
             continue
         for time in times:
