@@ -648,11 +648,16 @@ def create_scheduler(config, algorithm, seed=None):
     """
     solution_dim = GENOME_LENGTH
     archive_dims = config["archive_dims"]
-    learning_rate = 1.0 if "learning_rate" not in config["archive"][
-        "kwargs"] else config["archive"]["kwargs"]["learning_rate"]
+    learning_rate = 1.0 if "learning_rate" not in config["archive"]["kwargs"] else config["archive"]["kwargs"]["learning_rate"]
     use_result_archive = config["use_result_archive"]
-    max_bound = solution_dim / 2 * 5.12
-    bounds = [(-max_bound, max_bound), (-max_bound, max_bound)]
+    
+    # These are guesses that go beyond what I expect is reasonable
+    MIN_STABILITY = -2.0
+    MAX_STABILITY = 2.0
+    MIN_ALTITUDE = 0.0
+    MAX_ALTITUDE = 20.0 # Should this allow higher?
+    
+    bounds = [(MIN_STABILITY, MAX_STABILITY), (MIN_ALTITUDE, MAX_ALTITUDE)]
     initial_sol = np.zeros(solution_dim)
     mode = "batch"
 
