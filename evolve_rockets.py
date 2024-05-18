@@ -81,6 +81,7 @@ from ribs.visualize import cvt_archive_heatmap, grid_archive_heatmap
 # Might use to distribute evaluations later. See Pyribs Lunar Lander tutorial
 #from dask.distributed import Client
 
+import rocket_evaluate as re
 import rocket_design as rd
 from rocket_design import GENOME_LENGTH
 
@@ -829,12 +830,8 @@ if __name__ == '__main__':
         opts = sim.getOptions()
         rocket = opts.getRocket()
 
-        # These are Java classes. They have to be loaded after JPype is being used
         from net.sf.openrocket.util import Coordinate # Once the instance starts, Java classes can be imported using JPype
-        from net.sf.openrocket.masscalc import BasicMassCalculator
-        from net.sf.openrocket.masscalc import MassCalculator
-        from net.sf.openrocket.aerodynamics import WarningSet
-        from net.sf.openrocket.aerodynamics import BarrowmanCalculator
-        from net.sf.openrocket.aerodynamics import FlightConditions
+
+        re.prepare_for_rocket_simulation(sim) # Sets some global variables for rocket evaluation
 
         fire.Fire(evolve_rockets_main)

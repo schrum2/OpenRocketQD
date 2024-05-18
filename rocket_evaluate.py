@@ -1,10 +1,10 @@
-def prepare_for_rocket_simulation():
-    #from net.sf.openrocket.util import Coordinate # Once the instance starts, Java classes can be imported using JPype
-    #from net.sf.openrocket.masscalc import BasicMassCalculator
-    #from net.sf.openrocket.masscalc import MassCalculator
-    #from net.sf.openrocket.aerodynamics import WarningSet
-    #from net.sf.openrocket.aerodynamics import BarrowmanCalculator
-    #from net.sf.openrocket.aerodynamics import FlightConditions
+def prepare_for_rocket_simulation(sim):
+    # Once the instance starts, Java classes can be imported using JPype
+    from net.sf.openrocket.masscalc import BasicMassCalculator
+    from net.sf.openrocket.masscalc import MassCalculator
+    from net.sf.openrocket.aerodynamics import WarningSet
+    from net.sf.openrocket.aerodynamics import BarrowmanCalculator
+    from net.sf.openrocket.aerodynamics import FlightConditions
 
     global conf
     global bmc
