@@ -96,7 +96,7 @@ def apply_genome_to_rocket(rocket, genonme):
     try:
         fins.setPoints(fin_points)
     except:
-        fin.setPoints( [Coordinate(0.0,0.0,0.0), Coordinate(0.025,0.030,0.000), Coordinate(0.075,0.030,0.000), Coordinate(0.05, 0.0, 0.0)] )
+        fins.setPoints( [Coordinate(0.0,0.0,0.0), Coordinate(0.025,0.030,0.000), Coordinate(0.075,0.030,0.000), Coordinate(0.05, 0.0, 0.0)] )
         print("Fin point failure: default trapezoid fins")
     
 # If I want to set a seed
@@ -238,6 +238,10 @@ with orhelper.OpenRocketInstance() as instance:
                              xycoords='data', xytext=(20, 0), textcoords='offset points',
                              arrowprops=dict(arrowstyle="->", connectionstyle="arc3"))
 
+        if len(apogees) == i: # If a new apogee was not added, the rocket failed and earns an apogee of 0
+            apogees.append(0.0)
+            print("Failed apogee")
+
     ax1.grid(True)
 
     print("Apogees: ", apogees)
@@ -247,12 +251,15 @@ with orhelper.OpenRocketInstance() as instance:
     stabilities = [cp - cg for cp,cg in zip(cps,cgs)]
     print("Stability: ", stabilities)
 
+    for pair in zip(stabilities, apogees):
+        print(pair)
+
 # Leave OpenRocketInstance context before showing plot in order to shutdown JVM first
 plt.show()
 
 fig = plt.figure()
 ax1 = fig.add_subplot(111)
-ax1.plot(stabilities, apogees, 'r')
+ax1.scatter(stabilities, apogees)
     
 ax1.set_xlabel('Stability')
 ax1.set_ylabel('Altitude (m)')
