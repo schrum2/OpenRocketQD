@@ -785,61 +785,73 @@ def evolve_rockets_main(algorithm,
     if not outdir.is_dir():
         outdir.mkdir()
 
-    scheduler = create_scheduler(config, algorithm, seed=seed)
-    result_archive = scheduler.result_archive
-    is_dqd = config["is_dqd"]
-    itrs = config["iters"]
-    metrics = {
-        "QD Score": {
-            "x": [0],
-            "y": [0.0],
-        },
-        "Archive Coverage": {
-            "x": [0],
-            "y": [0.0],
-        },
-    }
+    with orhelper.OpenRocketInstance() as instance:
+        global orh # So this will be usable above
+        orh = orhelper.Helper(instance)
 
-    non_logging_time = 0.0
-    save_heatmap(result_archive, str(outdir / f"{name}_heatmap_{0:05d}.png"))
+        # These are Java classes. They have to be loaded after JPype is being used
+        from net.sf.openrocket.util import Coordinate # Once the instance starts, Java classes can be imported using JPype
+        from net.sf.openrocket.masscalc import BasicMassCalculator
+        from net.sf.openrocket.masscalc import MassCalculator
+        from net.sf.openrocket.aerodynamics import WarningSet
+        from net.sf.openrocket.aerodynamics import BarrowmanCalculator
+        from net.sf.openrocket.aerodynamics import FlightConditions
 
-    for itr in tqdm.trange(1, itrs + 1):
-        itr_start = time.time()
+        scheduler = create_scheduler(config, algorithm, seed=seed)
+        result_archive = scheduler.result_archive
+        is_dqd = config["is_dqd"]
+        itrs = config["iters"]
+        metrics = {
+            "QD Score": {
+                "x": [0],
+                "y": [0.0],
+            },
+            "Archive Coverage": {
+                "x": [0],
+                "y": [0.0],
+            },
+        }
 
-        if is_dqd:
-            solution_batch = scheduler.ask_dqd()
-            (objective_batch, objective_grad_batch, measures_batch,
-             measures_grad_batch) = evolve_rockets(solution_batch)
-            objective_grad_batch = np.expand_dims(objective_grad_batch, axis=1)
-            jacobian_batch = np.concatenate(
-                (objective_grad_batch, measures_grad_batch), axis=1)
-            scheduler.tell_dqd(objective_batch, measures_batch, jacobian_batch)
+        non_logging_time = 0.0
+        save_heatmap(result_archive, str(outdir / f"{name}_heatmap_{0:05d}.png"))
 
-        solution_batch = scheduler.ask()
-        objective_batch, _, measure_batch, _ = evolve_rockets(solution_batch)
-        scheduler.tell(objective_batch, measure_batch)
-        non_logging_time += time.time() - itr_start
+        for itr in tqdm.trange(1, itrs + 1):
+            itr_start = time.time()
 
-        # Logging and output.
-        final_itr = itr == itrs
-        if itr % log_freq == 0 or final_itr:
-            if final_itr:
-                result_archive.data(return_type="pandas").to_csv(
-                    outdir / f"{name}_archive.csv")
+            if is_dqd:
+                solution_batch = scheduler.ask_dqd()
+                (objective_batch, objective_grad_batch, measures_batch,
+                 measures_grad_batch) = evolve_rockets(solution_batch)
+                objective_grad_batch = np.expand_dims(objective_grad_batch, axis=1)
+                jacobian_batch = np.concatenate(
+                    (objective_grad_batch, measures_grad_batch), axis=1)
+                scheduler.tell_dqd(objective_batch, measures_batch, jacobian_batch)
 
-            # Record and display metrics.
-            metrics["QD Score"]["x"].append(itr)
-            metrics["QD Score"]["y"].append(result_archive.stats.qd_score)
-            metrics["Archive Coverage"]["x"].append(itr)
-            metrics["Archive Coverage"]["y"].append(
-                result_archive.stats.coverage)
-            tqdm.tqdm.write(
-                f"Iteration {itr} | Archive Coverage: "
-                f"{metrics['Archive Coverage']['y'][-1] * 100:.3f}% "
-                f"QD Score: {metrics['QD Score']['y'][-1]:.3f}")
+            solution_batch = scheduler.ask()
+            objective_batch, _, measure_batch, _ = evolve_rockets(solution_batch)
+            scheduler.tell(objective_batch, measure_batch)
+            non_logging_time += time.time() - itr_start
 
-            save_heatmap(result_archive,
-                         str(outdir / f"{name}_heatmap_{itr:05d}.png"))
+            # Logging and output.
+            final_itr = itr == itrs
+            if itr % log_freq == 0 or final_itr:
+                if final_itr:
+                    result_archive.data(return_type="pandas").to_csv(
+                        outdir / f"{name}_archive.csv")
+
+                # Record and display metrics.
+                metrics["QD Score"]["x"].append(itr)
+                metrics["QD Score"]["y"].append(result_archive.stats.qd_score)
+                metrics["Archive Coverage"]["x"].append(itr)
+                metrics["Archive Coverage"]["y"].append(
+                    result_archive.stats.coverage)
+                tqdm.tqdm.write(
+                    f"Iteration {itr} | Archive Coverage: "
+                    f"{metrics['Archive Coverage']['y'][-1] * 100:.3f}% "
+                    f"QD Score: {metrics['QD Score']['y'][-1]:.3f}")
+
+                save_heatmap(result_archive,
+                             str(outdir / f"{name}_heatmap_{itr:05d}.png"))
 
     # Plot metrics.
     print(f"Algorithm Time (Excludes Logging and Setup): {non_logging_time}s")
