@@ -21,7 +21,6 @@ GENOME_INDEX_FIN_POINT1_Y = 8
 GENOME_INDEX_FIN_POINT2_X = 9
 GENOME_INDEX_FIN_POINT2_Y = 10
 GENOME_INDEX_FIN_POINT3_X = 11
-GENOME_INDEX_FIN_POINT3_Y = 12
 
 # The number range appropriate for each element of genome
 scales = [(0.01, 0.04), # Aft radius
@@ -35,8 +34,7 @@ scales = [(0.01, 0.04), # Aft radius
           (0.0,0.3),    # Fin point 1 y-coordinate
           (0.0,0.3),    # Fin point 2 x-coordinate
           (0.0,0.3),    # Fin point 2 y-coordinate
-          (0.0,0.3),    # Fin point 3 x-coordinate
-          (0.0,0.3)    # Fin point 3 y-coordinate
+          (0.0,0.3)     # Fin point 3 x-coordinate (final y-coordinate must be 0.0)
          ]
 # Note: might want to generalize to more fin points later
 
@@ -90,12 +88,15 @@ def apply_genome_to_rocket(rocket, genonme):
     fin_points.append( Coordinate(0.0,0.0,0.0) ) # Always start at (0,0,0)
     fin_points.append( decode_genome_element_coordinate(scales, genome, GENOME_INDEX_FIN_POINT1_X, GENOME_INDEX_FIN_POINT1_Y) )
     fin_points.append( decode_genome_element_coordinate(scales, genome, GENOME_INDEX_FIN_POINT2_X, GENOME_INDEX_FIN_POINT2_Y) )
-    fin_points.append( decode_genome_element_coordinate(scales, genome, GENOME_INDEX_FIN_POINT3_X, GENOME_INDEX_FIN_POINT3_Y) )
+    fin_points.append( Coordinate( decode_genome_element_scale(scales, genome, GENOME_INDEX_FIN_POINT3_X), 0.0, 0.0) ) # Last y-coordinate must be 0
 
-    # Troubleshoot by hard coding these fin points
-    fin_points = [Coordinate(0.0,0.0,0.0), Coordinate(0.025,0.030,0.000), Coordinate(0.075,0.030,0.000), Coordinate(0.05, 0.0, 0.0)]
+    #print("---------------")
+    #for p in fin_points: print(p)
 
-    fins.setPoints(fin_points)
+    try:
+        fins.setPoints(fin_points)
+    except:
+        print("Fin point failure: default trapezoid fins")
     
 # If I want to set a seed
 # random.seed(0)
@@ -184,7 +185,7 @@ with orhelper.OpenRocketInstance() as instance:
     cgs = list()
     cps = list() # Depends on something called cpTheta, but I'm not sure where that comes from, so ignoring it
 
-    num_rockets = 5
+    num_rockets = 10
 
     for i in range(num_rockets):
 
@@ -215,7 +216,7 @@ with orhelper.OpenRocketInstance() as instance:
     fig = plt.figure()
     ax1 = fig.add_subplot(111)
 
-    colors = ['b','r','g','c','m','y']
+    colors = ['b','r','g','c','m','y','tab:orange', 'tab:purple', 'tab:brown', 'tab:pink']
 
     for i in range(len(data)):
         ax1.plot(data[i][FlightDataType.TYPE_TIME], data[i][FlightDataType.TYPE_ALTITUDE], colors[i])
@@ -242,7 +243,16 @@ with orhelper.OpenRocketInstance() as instance:
     print("CGs: ", cgs)
     print("CPs: ", cps)
     # Stability defined as CP - CG
-    print("Stability: ", [cp - cg for cp,cg in zip(cps,cgs)])
+    stabilities = [cp - cg for cp,cg in zip(cps,cgs)]
+    print("Stability: ", stabilities)
 
 # Leave OpenRocketInstance context before showing plot in order to shutdown JVM first
+plt.show()
+
+fig = plt.figure()
+ax1 = fig.add_subplot(111)
+ax1.plot(stabilities, apogees, 'r')
+    
+ax1.set_xlabel('Stability')
+ax1.set_ylabel('Altitude (m)')
 plt.show()
