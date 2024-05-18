@@ -90,7 +90,6 @@ from orhelper import FlightDataType, FlightEvent
 CONFIG = {
     "map_elites": {
         "iters": 4500,
-        "archive_dims": (500, 500),
         "use_result_archive": False,
         "is_dqd": False,
         "batch_size": 37,
@@ -114,7 +113,6 @@ CONFIG = {
     },
     "line_map_elites": {
         "iters": 4500,
-        "archive_dims": (500, 500),
         "use_result_archive": False,
         "is_dqd": False,
         "batch_size": 37,
@@ -139,7 +137,6 @@ CONFIG = {
     },
     "cvt_map_elites": {
         "iters": 4500,
-        "archive_dims": (500, 500),
         "use_result_archive": False,
         "is_dqd": False,
         "batch_size": 37,
@@ -165,7 +162,6 @@ CONFIG = {
     },
     "line_cvt_map_elites": {
         "iters": 4500,
-        "archive_dims": (500, 500),
         "use_result_archive": False,
         "is_dqd": False,
         "batch_size": 37,
@@ -192,7 +188,6 @@ CONFIG = {
     },
     "me_map_elites": {
         "iters": 20_000,
-        "archive_dims": (100, 100),
         "use_result_archive": False,
         "is_dqd": False,
         "batch_size": 50,
@@ -241,7 +236,6 @@ CONFIG = {
     },
     "cma_me_mixed": {
         "iters": 4500,
-        "archive_dims": (500, 500),
         "use_result_archive": False,
         "is_dqd": False,
         "batch_size": 37,
@@ -273,7 +267,6 @@ CONFIG = {
     },
     "cma_me_imp": {
         "iters": 4500,
-        "archive_dims": (500, 500),
         "use_result_archive": False,
         "is_dqd": False,
         "batch_size": 37,
@@ -300,7 +293,6 @@ CONFIG = {
     },
     "cma_me_imp_mu": {
         "iters": 4500,
-        "archive_dims": (500, 500),
         "use_result_archive": False,
         "is_dqd": False,
         "batch_size": 37,
@@ -327,7 +319,6 @@ CONFIG = {
     },
     "cma_me_rd": {
         "iters": 4500,
-        "archive_dims": (500, 500),
         "use_result_archive": False,
         "is_dqd": False,
         "batch_size": 37,
@@ -354,7 +345,6 @@ CONFIG = {
     },
     "cma_me_rd_mu": {
         "iters": 4500,
-        "archive_dims": (500, 500),
         "use_result_archive": False,
         "is_dqd": False,
         "batch_size": 37,
@@ -381,7 +371,6 @@ CONFIG = {
     },
     "cma_me_opt": {
         "iters": 4500,
-        "archive_dims": (500, 500),
         "use_result_archive": False,
         "is_dqd": False,
         "batch_size": 37,
@@ -408,7 +397,6 @@ CONFIG = {
     },
     "og_map_elites": {
         "iters": 10_000,
-        "archive_dims": (100, 100),
         "use_result_archive": False,
         "is_dqd": True,
         # Divide by 2 since half of the 36 solutions are used in ask_dqd(), and
@@ -437,7 +425,6 @@ CONFIG = {
     },
     "omg_mega": {
         "iters": 10_000,
-        "archive_dims": (100, 100),
         "use_result_archive": False,
         "is_dqd": True,
         # Divide by 2 since half of the 36 solutions are used in ask_dqd(), and
@@ -466,7 +453,6 @@ CONFIG = {
     },
     "cma_mega": {
         "iters": 10_000,
-        "archive_dims": (100, 100),
         "use_result_archive": False,
         "is_dqd": True,
         "batch_size": 35,
@@ -493,7 +479,6 @@ CONFIG = {
     },
     "cma_mega_adam": {
         "iters": 10_000,
-        "archive_dims": (100, 100),
         "use_result_archive": False,
         "is_dqd": True,
         "batch_size": 35,
@@ -520,7 +505,6 @@ CONFIG = {
     },
     "cma_mae": {
         "iters": 10_000,
-        "archive_dims": (100, 100),
         "use_result_archive": True,
         "is_dqd": False,
         "batch_size": 36,
@@ -548,7 +532,6 @@ CONFIG = {
     },
     "cma_maega": {
         "iters": 10_000,
-        "archive_dims": (100, 100),
         "use_result_archive": True,
         "is_dqd": True,
         "batch_size": 35,
@@ -629,7 +612,7 @@ def create_scheduler(config, algorithm, seed=None):
         ribs.schedulers.Scheduler: A ribs scheduler for running the algorithm.
     """
     solution_dim = GENOME_LENGTH
-    archive_dims = config["archive_dims"]
+    archive_dims = (100,100) # Hard-coding archive size 
     learning_rate = 1.0 if "learning_rate" not in config["archive"]["kwargs"] else config["archive"]["kwargs"]["learning_rate"]
     use_result_archive = config["use_result_archive"]
     
@@ -720,7 +703,6 @@ def save_heatmap(plt, archive, heatmap_path):
 
 def evolve_rockets_main(algorithm,
                 itrs=None,
-                archive_dims=None,
                 learning_rate=None,
                 es=None,
                 outdir="evolve_rockets_output",
@@ -731,7 +713,6 @@ def evolve_rockets_main(algorithm,
     Args:
         algorithm (str): Name of the algorithm.
         itrs (int): Iterations to run.
-        archive_dims (tuple): Dimensionality of the archive.
         learning_rate (float): The archive learning rate.
         es (str): If passed, this will set the ES for all
             EvolutionStrategyEmitter instances.
@@ -751,10 +732,6 @@ def evolve_rockets_main(algorithm,
     # Use default itrs for each algorithm.
     if itrs is not None:
         config["iters"] = itrs
-
-    # Use default archive_dim for each algorithm.
-    if archive_dims is not None:
-        config["archive_dims"] = archive_dims
 
     # Use default learning_rate for each algorithm.
     if learning_rate is not None:
