@@ -1,20 +1,9 @@
-"""Runs various QD algorithms on the Sphere function.
+"""Runs various QD algorithms to evolve model rockets
 
-Install the following dependencies before running this example:
-    pip install ribs[visualize] tqdm fire
+First run: pip install -r requirements.txt
 
-The sphere function in this example is adapted from Section 4 of Fontaine 2020
-(https://arxiv.org/abs/1912.02400). Namely, each solution value is clipped to
-the range [-5.12, 5.12], and the optimum is moved from [0,..] to [0.4 * 5.12 =
-2.048,..]. Furthermore, the objectives are normalized to the range [0,
-100] where 100 is the maximum and corresponds to 0 on the original sphere
-function.
-
-There are two measures in this example. The first is the sum of the first n/2
-clipped values of the solution, and the second is the sum of the last n/2
-clipped values of the solution. Having each measure depend equally on several
-values in the solution space makes the problem more difficult (refer to
-Fontaine 2020 for more info).
+There are two measures in this example. 
+The rocket Stability and the Maximum Altitude.
 
 The supported algorithms are:
 - `map_elites`: GridArchive with GaussianEmitter.
@@ -46,11 +35,9 @@ The supported algorithms are:
 - `cma_maega`: GridArchive (learning_rate = 0.01) with
   GradientArborescenceEmitter using ImprovementRanker.
 
-The parameters for each algorithm are stored in CONFIG. The parameters
-reproduce the experiments presented in the paper in which each algorithm is
-introduced.
+The parameters for each algorithm are stored in CONFIG. 
 
-Outputs are saved in the `sphere_output/` directory by default. The archive is
+Outputs are saved in the `evolve_rockets_output/` directory by default. The archive is
 saved as a CSV named `{algorithm}_archive.csv`, while snapshots of the
 heatmap are saved as `{algorithm}_heatmap_{iteration}.png`. Metrics about
 the run are also saved in `{algorithm}_metrics.json`, and plots of the
@@ -60,19 +47,19 @@ To generate a video of the heatmap from the heatmap images, use a tool like
 ffmpeg. For example, the following will generate a 6FPS video showing the
 heatmap for cma_me_imp with 20 dims.
 
-    ffmpeg -r 6 -i "sphere_output/cma_me_imp_20_heatmap_%*.png" \
-        sphere_output/cma_me_imp_20_heatmap_video.mp4
+    ffmpeg -r 6 -i "evolve_rockets_output/cma_me_imp_heatmap_%*.png" \
+        evolve_rockets_output/cma_me_imp_heatmap_video.mp4
 
-Usage (see sphere_main function for all args or run `python sphere.py --help`):
-    python sphere.py ALGORITHM
+Usage (see evolve_main function for all args or run `python evolve_rockets.py --help`):
+    python evolve_rockets.py ALGORITHM
 Example:
-    python sphere.py map_elites
+    python evolve_rockets.py map_elites
 
     # To make numpy and sklearn run single-threaded, set env variables for BLAS
     # and OpenMP:
-    OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 python sphere.py map_elites 20
+    OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 python evolve_rockets.py map_elites 20
 Help:
-    python sphere.py --help
+    python evolve_rockets.py --help
 """
 import os
 import copy
@@ -589,7 +576,7 @@ CONFIG = {
 }
 
 
-def sphere(solution_batch):
+def evolve_rockets(solution_batch):
     """Sphere function evaluation and measures for a batch of solutions.
 
     Args:
@@ -605,16 +592,16 @@ def sphere(solution_batch):
     dim = solution_batch.shape[1]
 
     # Shift the Sphere function so that the optimal value is at x_i = 2.048.
-    sphere_shift = 5.12 * 0.4
+    evolve_rockets_shift = 5.12 * 0.4
 
     # Normalize the objective to the range [0, 100] where 100 is optimal.
     best_obj = 0.0
-    worst_obj = (-5.12 - sphere_shift)**2 * dim
-    raw_obj = np.sum(np.square(solution_batch - sphere_shift), axis=1)
+    worst_obj = (-5.12 - evolve_rockets_shift)**2 * dim
+    raw_obj = np.sum(np.square(solution_batch - evolve_rockets_shift), axis=1)
     objective_batch = (raw_obj - worst_obj) / (best_obj - worst_obj) * 100
 
     # Compute gradient of the objective.
-    objective_grad_batch = -2 * (solution_batch - sphere_shift)
+    objective_grad_batch = -2 * (solution_batch - evolve_rockets_shift)
 
     # Calculate measures.
     clipped = solution_batch.copy()
@@ -744,7 +731,7 @@ def save_heatmap(archive, heatmap_path):
     plt.close(plt.gcf())
 
 
-def sphere_main(algorithm,
+def evolve_rockets_main(algorithm,
                 itrs=None,
                 archive_dims=None,
                 learning_rate=None,
@@ -752,7 +739,7 @@ def sphere_main(algorithm,
                 outdir="evolve_rockets_output",
                 log_freq=250,
                 seed=None):
-    """Demo on the Sphere function.
+    """Evolve model rockets with Open Rocket.
 
     Args:
         algorithm (str): Name of the algorithm.
@@ -817,14 +804,14 @@ def sphere_main(algorithm,
         if is_dqd:
             solution_batch = scheduler.ask_dqd()
             (objective_batch, objective_grad_batch, measures_batch,
-             measures_grad_batch) = sphere(solution_batch)
+             measures_grad_batch) = evolve_rockets(solution_batch)
             objective_grad_batch = np.expand_dims(objective_grad_batch, axis=1)
             jacobian_batch = np.concatenate(
                 (objective_grad_batch, measures_grad_batch), axis=1)
             scheduler.tell_dqd(objective_batch, measures_batch, jacobian_batch)
 
         solution_batch = scheduler.ask()
-        objective_batch, _, measure_batch, _ = sphere(solution_batch)
+        objective_batch, _, measure_batch, _ = evolve_rockets(solution_batch)
         scheduler.tell(objective_batch, measure_batch)
         non_logging_time += time.time() - itr_start
 
@@ -863,4 +850,4 @@ def sphere_main(algorithm,
 
 
 if __name__ == '__main__':
-    fire.Fire(sphere_main)
+    fire.Fire(evolve_rockets_main)
