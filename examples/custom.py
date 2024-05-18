@@ -305,6 +305,7 @@ with orhelper.OpenRocketInstance() as instance:
     #cgs = list()
     #cps = list() # Depends on something called cpTheta, but I'm not sure where that comes from, so ignoring it
     stabilities = list()
+    apogees = list()
 
     num_rockets = 30
 
@@ -325,6 +326,7 @@ with orhelper.OpenRocketInstance() as instance:
         result = simulate_rocket(sim, opts)
         print(result)
         stabilities.append(result[0])
+        apogees.append(result[1])
 
         orh.run_simulation(sim)
         data.append( orh.get_timeseries(sim, [FlightDataType.TYPE_TIME, FlightDataType.TYPE_ALTITUDE, FlightDataType.TYPE_VELOCITY_Z]) )
@@ -349,7 +351,7 @@ with orhelper.OpenRocketInstance() as instance:
     ax1.set_xlabel('Time (s)')
     ax1.set_ylabel('Altitude (m)')
 
-    apogees = list()
+    #apogees = list()
 
     for i in range(len(data)): 
         index_at = lambda t: (np.abs(data[i][FlightDataType.TYPE_TIME] - t)).argmin()
@@ -357,14 +359,14 @@ with orhelper.OpenRocketInstance() as instance:
             if event not in events_to_annotate:
                 continue
             for time in times:
-                apogees.append(data[i][FlightDataType.TYPE_ALTITUDE][index_at(time)])
+                #apogees.append(data[i][FlightDataType.TYPE_ALTITUDE][index_at(time)])
                 ax1.annotate(events_to_annotate[event], xy=(time, data[i][FlightDataType.TYPE_ALTITUDE][index_at(time)]),
                              xycoords='data', xytext=(20, 0), textcoords='offset points',
                              arrowprops=dict(arrowstyle="->", connectionstyle="arc3"))
 
-        if len(apogees) == i: # If a new apogee was not added, the rocket failed and earns an apogee of 0
-            apogees.append(0.0)
-            print("Failed apogee")
+        #if len(apogees) == i: # If a new apogee was not added, the rocket failed and earns an apogee of 0
+        #    apogees.append(0.0)
+        #    print("Failed apogee")
 
     ax1.grid(True)
 
