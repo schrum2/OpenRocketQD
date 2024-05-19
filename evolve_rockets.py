@@ -850,4 +850,16 @@ if __name__ == '__main__':
         nose = orh.get_component_named(rocket, 'Nose cone')
         rd.define_nose_types(nose)
 
+        #import random
+        #genome = list()
+        #for _ in range(GENOME_LENGTH):
+        #    genome.append(random.random())
+        #print(evaluate_rocket_genome(genome))
+        #input("done 1")
+        #genome = list()
+        #for _ in range(GENOME_LENGTH):
+        #    genome.append(random.random())
+        #print(evaluate_rocket_genome(genome))
+        #input("done 2")
+
         fire.Fire(evolve_rockets_main)
