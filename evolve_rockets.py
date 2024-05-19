@@ -90,7 +90,6 @@ from orhelper import FlightDataType, FlightEvent
 
 CONFIG = {
     "map_elites": {
-        "iters": 4500,
         "use_result_archive": False,
         "is_dqd": False,
         "batch_size": 37,
@@ -114,7 +113,6 @@ CONFIG = {
         }
     },
     "line_map_elites": {
-        "iters": 4500,
         "use_result_archive": False,
         "is_dqd": False,
         "batch_size": 37,
@@ -139,7 +137,6 @@ CONFIG = {
         }
     },
     "cvt_map_elites": {
-        "iters": 4500,
         "use_result_archive": False,
         "is_dqd": False,
         "batch_size": 37,
@@ -165,7 +162,6 @@ CONFIG = {
         }
     },
     "line_cvt_map_elites": {
-        "iters": 4500,
         "use_result_archive": False,
         "is_dqd": False,
         "batch_size": 37,
@@ -192,7 +188,6 @@ CONFIG = {
         }
     },
     "me_map_elites": {
-        "iters": 20_000,
         "use_result_archive": False,
         "is_dqd": False,
         "batch_size": 50,
@@ -244,7 +239,6 @@ CONFIG = {
         }
     },
     "cma_me_mixed": {
-        "iters": 4500,
         "use_result_archive": False,
         "is_dqd": False,
         "batch_size": 37,
@@ -277,7 +271,6 @@ CONFIG = {
         }
     },
     "cma_me_imp": {
-        "iters": 4500,
         "use_result_archive": False,
         "is_dqd": False,
         "batch_size": 37,
@@ -304,7 +297,6 @@ CONFIG = {
         }
     },
     "cma_me_imp_mu": {
-        "iters": 4500,
         "use_result_archive": False,
         "is_dqd": False,
         "batch_size": 37,
@@ -331,7 +323,6 @@ CONFIG = {
         }
     },
     "cma_me_rd": {
-        "iters": 4500,
         "use_result_archive": False,
         "is_dqd": False,
         "batch_size": 37,
@@ -358,7 +349,6 @@ CONFIG = {
         }
     },
     "cma_me_rd_mu": {
-        "iters": 4500,
         "use_result_archive": False,
         "is_dqd": False,
         "batch_size": 37,
@@ -385,7 +375,6 @@ CONFIG = {
         }
     },
     "cma_me_opt": {
-        "iters": 4500,
         "use_result_archive": False,
         "is_dqd": False,
         "batch_size": 37,
@@ -412,7 +401,6 @@ CONFIG = {
         }
     },
     "og_map_elites": {
-        "iters": 10_000,
         "use_result_archive": False,
         "is_dqd": True,
         # Divide by 2 since half of the 36 solutions are used in ask_dqd(), and
@@ -441,7 +429,6 @@ CONFIG = {
         }
     },
     "omg_mega": {
-        "iters": 10_000,
         "use_result_archive": False,
         "is_dqd": True,
         # Divide by 2 since half of the 36 solutions are used in ask_dqd(), and
@@ -470,7 +457,6 @@ CONFIG = {
         }
     },
     "cma_mega": {
-        "iters": 10_000,
         "use_result_archive": False,
         "is_dqd": True,
         "batch_size": 35,
@@ -497,7 +483,6 @@ CONFIG = {
         }
     },
     "cma_mega_adam": {
-        "iters": 10_000,
         "use_result_archive": False,
         "is_dqd": True,
         "batch_size": 35,
@@ -524,7 +509,6 @@ CONFIG = {
         }
     },
     "cma_mae": {
-        "iters": 10_000,
         "use_result_archive": True,
         "is_dqd": False,
         "batch_size": 36,
@@ -552,7 +536,6 @@ CONFIG = {
         }
     },
     "cma_maega": {
-        "iters": 10_000,
         "use_result_archive": True,
         "is_dqd": True,
         "batch_size": 35,
@@ -664,7 +647,7 @@ def create_scheduler(config, algorithm, seed=None):
     MIN_STABILITY = -2.0
     MAX_STABILITY = 2.0
     MIN_ALTITUDE = 0.0
-    MAX_ALTITUDE = 40.0 # Should this allow higher?
+    MAX_ALTITUDE = 50.0 # Should this allow higher?
     
     bounds = [(MIN_STABILITY, MAX_STABILITY), (MIN_ALTITUDE, MAX_ALTITUDE)]
     initial_sol = np.zeros(solution_dim)
@@ -745,11 +728,11 @@ def save_heatmap(plt, archive, heatmap_path):
 
 
 def evolve_rockets_main(algorithm,
-                itrs=None,
+                itrs=1000,
                 learning_rate=None,
                 es=None,
                 outdir="evolve_rockets_output",
-                log_freq=250,
+                log_freq=100,
                 seed=None):
     """Evolve model rockets with Open Rocket.
 
