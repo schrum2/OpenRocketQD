@@ -51,7 +51,18 @@ def simulate_rocket(orh, sim, opts):
     cg = bmc.getCG(conf, mct).x
     cp = adc.getCP(conf, conds, warnings).x
 
-    orh.run_simulation(sim)
+    try:
+        orh.run_simulation(sim)
+    except Exception as e:
+        print("EXCEPTION")
+        print(e)
+        e.printStackTrace()
+        raise e
+    except RuntimeError as rte:
+        print("RuntimeError")
+        print(rte)
+        raise rte
+
     data = orh.get_timeseries(sim, [FlightDataType.TYPE_TIME, FlightDataType.TYPE_ALTITUDE, FlightDataType.TYPE_VELOCITY_Z])
     events = orh.get_events(sim) 
 
