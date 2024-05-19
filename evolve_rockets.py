@@ -664,7 +664,7 @@ def create_scheduler(config, algorithm, seed=None):
     MIN_STABILITY = -2.0
     MAX_STABILITY = 2.0
     MIN_ALTITUDE = 0.0
-    MAX_ALTITUDE = 20.0 # Should this allow higher?
+    MAX_ALTITUDE = 40.0 # Should this allow higher?
     
     bounds = [(MIN_STABILITY, MAX_STABILITY), (MIN_ALTITUDE, MAX_ALTITUDE)]
     initial_sol = np.zeros(solution_dim)
