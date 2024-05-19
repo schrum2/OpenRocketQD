@@ -103,7 +103,8 @@ CONFIG = {
         "emitters": [{
             "class": GaussianEmitter,
             "kwargs": {
-                "sigma": 0.5
+                "sigma": 0.5,
+                "bounds" : [(0.0,1.0)] * GENOME_LENGTH 
             },
             "num_emitters": 15
         }],
