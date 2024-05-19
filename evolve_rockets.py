@@ -780,6 +780,13 @@ def evolve_rockets_main(algorithm,
         },
     }
 
+    #print("TEST")
+    #test_batch = scheduler.ask()
+    #print(evaluate_rocket_genome(test_batch[0]))
+    #input("done numpy 1")
+    #print(evaluate_rocket_genome(test_batch[1]))
+    #input("done numpy 2")
+
     non_logging_time = 0.0
     save_heatmap(plt, result_archive, str(outdir / f"{name}_heatmap_{0:05d}.png"))
 
