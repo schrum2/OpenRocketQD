@@ -154,7 +154,7 @@ def apply_genome_to_rocket(orh, rocket, genome):
     if DEBUG: print("Body Length:",bodyLength)
     body.setLength(bodyLength)
 
-    finsCount = decode_genome_element_discrete(SCALES, genome, GENOME_INDEX_FIN_COUNT)
+    finCount = decode_genome_element_discrete(SCALES, genome, GENOME_INDEX_FIN_COUNT)
     if DEBUG: print("Fin Count:",finCount)
     fins.setFinCount(finCount)
 
