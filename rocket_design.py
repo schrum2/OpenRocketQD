@@ -199,6 +199,7 @@ def apply_genome_to_rocket(orh, rocket, genome):
         if DEBUG: print("Use provided fin points")
     except (ValueError,Exception) as e:
         fins.setPoints( [Coordinate(0.0,0.0,0.0), Coordinate(0.025,0.030,0.000), Coordinate(0.075,0.030,0.000), Coordinate(0.05, 0.0, 0.0)] )
-        print(e)
-        print("Fin point failure: default trapezoid fins")
+        if DEBUG:
+            print(e)
+            print("Fin point failure: default trapezoid fins")
     
