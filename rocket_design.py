@@ -171,29 +171,29 @@ def apply_genome_to_rocket(orh, rocket, genome):
     # At least one of the y-coordinates and one of the x-coordinates must not be 0.0
     non_zero_y = False
     non_zero_x = False
-    #num_all_zero = 0
+    num_all_zero = 0
     for p in fin_points:
         if p.y > 0.0: 
             non_zero_y = True
         if p.x > 0.0:
             non_zero_x = True
-        #if p.x == 0.0 and p.y == 0.0:
-        #    num_all_zero += 1
-        #elif DEBUG:
-        #    print("Not (0,0):", p.x, ",", p.y)
+        if p.x == 0.0 and p.y == 0.0:
+            num_all_zero += 1
+        elif DEBUG:
+            print("Not (0,0):", p.x, ",", p.y)
 
     duplicate_coordinates = len(fin_points) != len(set(fin_points)) 
 
     if DEBUG:
         print("non zero x:",non_zero_x)
         print("non zero y:",non_zero_y)
-        #print("num all zero:",num_all_zero)
+        print("num all zero:",num_all_zero)
         print("duplicates:",duplicate_coordinates)
 
     try:
         if not non_zero_y: raise ValueError("y-coordinates are all zero. Use default fins.")
         if not non_zero_x: raise ValueError("x-coordinates are all zero. Use default fins.")
-        #if num_all_zero > 1: raise ValueError("There should only be one (0,0) point. Use default fins.")
+        if num_all_zero > 1: raise ValueError("There should only be one (0,0) point. Use default fins.") # Seemingly redundant with 0.0 check, but maybe not
         if duplicate_coordinates: raise ValueError("There should be no duplicates. Use default fins.")
         fins.setPoints(fin_points)
         if DEBUG: print("Use provided fin points")
