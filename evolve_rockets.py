@@ -128,7 +128,8 @@ CONFIG = {
             "class": IsoLineEmitter,
             "kwargs": {
                 "iso_sigma": 0.1,
-                "line_sigma": 0.2
+                "line_sigma": 0.2,
+                "bounds" : [(0.0,1.0)] * GENOME_LENGTH 
             },
             "num_emitters": 15
         }],
@@ -153,7 +154,8 @@ CONFIG = {
         "emitters": [{
             "class": GaussianEmitter,
             "kwargs": {
-                "sigma": 0.5
+                "sigma": 0.5,
+                "bounds" : [(0.0,1.0)] * GENOME_LENGTH 
             },
             "num_emitters": 15
         }],
@@ -179,7 +181,8 @@ CONFIG = {
             "class": IsoLineEmitter,
             "kwargs": {
                 "iso_sigma": 0.1,
-                "line_sigma": 0.2
+                "line_sigma": 0.2,
+                "bounds" : [(0.0,1.0)] * GENOME_LENGTH 
             },
             "num_emitters": 15
         }],
@@ -203,28 +206,32 @@ CONFIG = {
             "class": EvolutionStrategyEmitter,
             "kwargs": {
                 "sigma0": 0.5,
-                "ranker": "obj"
+                "ranker": "obj",
+                "bounds" : [(0.0,1.0)] * GENOME_LENGTH 
             },
             "num_emitters": 12
         }, {
             "class": EvolutionStrategyEmitter,
             "kwargs": {
                 "sigma0": 0.5,
-                "ranker": "2rd"
+                "ranker": "2rd",
+                "bounds" : [(0.0,1.0)] * GENOME_LENGTH 
             },
             "num_emitters": 12
         }, {
             "class": EvolutionStrategyEmitter,
             "kwargs": {
                 "sigma0": 0.5,
-                "ranker": "2imp"
+                "ranker": "2imp",
+                "bounds" : [(0.0,1.0)] * GENOME_LENGTH 
             },
             "num_emitters": 12
         }, {
             "class": IsoLineEmitter,
             "kwargs": {
                 "iso_sigma": 0.01,
-                "line_sigma": 0.1
+                "line_sigma": 0.1,
+                "bounds" : [(0.0,1.0)] * GENOME_LENGTH 
             },
             "num_emitters": 12
         }],
@@ -251,14 +258,16 @@ CONFIG = {
             "class": EvolutionStrategyEmitter,
             "kwargs": {
                 "sigma0": 0.5,
-                "ranker": "2rd"
+                "ranker": "2rd",
+                "bounds" : [(0.0,1.0)] * GENOME_LENGTH 
             },
             "num_emitters": 7
         }, {
             "class": EvolutionStrategyEmitter,
             "kwargs": {
                 "sigma0": 0.5,
-                "ranker": "2imp"
+                "ranker": "2imp",
+                "bounds" : [(0.0,1.0)] * GENOME_LENGTH 
             },
             "num_emitters": 8
         }],
@@ -284,7 +293,8 @@ CONFIG = {
                 "sigma0": 0.5,
                 "ranker": "2imp",
                 "selection_rule": "filter",
-                "restart_rule": "no_improvement"
+                "restart_rule": "no_improvement",
+                "bounds" : [(0.0,1.0)] * GENOME_LENGTH 
             },
             "num_emitters": 15
         }],
@@ -310,7 +320,8 @@ CONFIG = {
                 "sigma0": 0.5,
                 "ranker": "2imp",
                 "selection_rule": "mu",
-                "restart_rule": "no_improvement"
+                "restart_rule": "no_improvement",
+                "bounds" : [(0.0,1.0)] * GENOME_LENGTH 
             },
             "num_emitters": 15
         }],
@@ -336,7 +347,8 @@ CONFIG = {
                 "sigma0": 0.5,
                 "ranker": "2rd",
                 "selection_rule": "filter",
-                "restart_rule": "no_improvement"
+                "restart_rule": "no_improvement",
+                "bounds" : [(0.0,1.0)] * GENOME_LENGTH 
             },
             "num_emitters": 15
         }],
@@ -362,7 +374,8 @@ CONFIG = {
                 "sigma0": 0.5,
                 "ranker": "2rd",
                 "selection_rule": "mu",
-                "restart_rule": "no_improvement"
+                "restart_rule": "no_improvement",
+                "bounds" : [(0.0,1.0)] * GENOME_LENGTH 
             },
             "num_emitters": 15
         }],
@@ -388,7 +401,8 @@ CONFIG = {
                 "sigma0": 0.5,
                 "ranker": "obj",
                 "selection_rule": "mu",
-                "restart_rule": "basic"
+                "restart_rule": "basic",
+                "bounds" : [(0.0,1.0)] * GENOME_LENGTH 
             },
             "num_emitters": 15
         }],
@@ -417,6 +431,7 @@ CONFIG = {
                 "sigma_g": 0.5,
                 "measure_gradients": False,
                 "normalize_grad": False,
+                "bounds" : [(0.0,1.0)] * GENOME_LENGTH 
             },
             "num_emitters": 1
         }],
@@ -445,6 +460,7 @@ CONFIG = {
                 "sigma_g": 10.0,
                 "measure_gradients": True,
                 "normalize_grad": True,
+                "bounds" : [(0.0,1.0)] * GENOME_LENGTH 
             },
             "num_emitters": 1
         }],
@@ -470,7 +486,8 @@ CONFIG = {
                 "sigma0": 10.0,
                 "lr": 1.0,
                 "grad_opt": "gradient_ascent",
-                "selection_rule": "mu"
+                "selection_rule": "mu",
+                "bounds" : [(0.0,1.0)] * GENOME_LENGTH 
             },
             "num_emitters": 1
         }],
@@ -496,7 +513,8 @@ CONFIG = {
                 "sigma0": 10.0,
                 "lr": 0.002,
                 "grad_opt": "adam",
-                "selection_rule": "mu"
+                "selection_rule": "mu",
+                "bounds" : [(0.0,1.0)] * GENOME_LENGTH 
             },
             "num_emitters": 1
         }],
@@ -523,7 +541,8 @@ CONFIG = {
                 "sigma0": 0.5,
                 "ranker": "imp",
                 "selection_rule": "mu",
-                "restart_rule": "basic"
+                "restart_rule": "basic",
+                "bounds" : [(0.0,1.0)] * GENOME_LENGTH 
             },
             "num_emitters": 15
         }],
@@ -551,7 +570,8 @@ CONFIG = {
                 "lr": 1.0,
                 "ranker": "imp",
                 "grad_opt": "gradient_ascent",
-                "restart_rule": "basic"
+                "restart_rule": "basic",
+                "bounds" : [(0.0,1.0)] * GENOME_LENGTH 
             },
             "num_emitters": 15
         }],
