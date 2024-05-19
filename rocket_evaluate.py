@@ -54,14 +54,11 @@ def simulate_rocket(orh, sim, opts):
     try:
         orh.run_simulation(sim)
     except Exception as e:
+        # This will hopefully never happen in the final version of the code,
+        # but I want to see exception details any time that it does.
         print("EXCEPTION")
-        print(e)
         e.printStackTrace()
-        raise e
-    except RuntimeError as rte:
-        print("RuntimeError")
-        print(rte)
-        raise rte
+        raise e # Still crash
 
     data = orh.get_timeseries(sim, [FlightDataType.TYPE_TIME, FlightDataType.TYPE_ALTITUDE, FlightDataType.TYPE_VELOCITY_Z])
     events = orh.get_events(sim) 
