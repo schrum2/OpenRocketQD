@@ -593,7 +593,14 @@ def evolve_rockets(solution_batch):
     dim = solution_batch.shape[1]
 
     # These are made up objectives and BCs. Replace with real later
-    results = map(evaluate_rocket_genome, solution_batch)
+    #results = map(evaluate_rocket_genome, solution_batch)
+    results = list()
+    for genome in solution_batch:
+        print("Genome")
+        print(genome)
+        results.append(evaluate_rocket_genome(genome))
+        print(results)
+        input("iteration")
 
     # Collect the objectives and measures in a manner similar to the Lunar Lander example
     objective_batch = [] 

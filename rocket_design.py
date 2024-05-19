@@ -1,6 +1,8 @@
 import random
 import math
 
+DEBUG = True
+
 GENOME_INDEX_NOSE_AFT_RADIUS = 0
 GENOME_INDEX_NOSE_LENGTH = 1
 GENOME_INDEX_NOSE_TYPE = 2
@@ -92,6 +94,7 @@ def decode_genome_element_nose_type(scales, genome, index):
     """
     global NOSE_TYPES
     type_index = decode_genome_element_discrete(scales, genome, index)
+    # This will never happen now that I've discovered how to constrain genom values in [0,1]
     if type_index < 0 or type_index >= len(NOSE_TYPES):
         print("Genome:", genome)
         print("Scales:", scales)
@@ -131,15 +134,29 @@ def apply_genome_to_rocket(orh, rocket, genome):
     body = orh.get_component_named(rocket, 'Body tube')
     fins = orh.get_component_named(body, 'Freeform fin set')
 
-    nose.setAftRadius(decode_genome_element_scale(SCALES, genome, GENOME_INDEX_NOSE_AFT_RADIUS))
-    nose.setLength(decode_genome_element_scale(SCALES, genome, GENOME_INDEX_NOSE_LENGTH))
-    nose.setType(decode_genome_element_nose_type(SCALES, genome, GENOME_INDEX_NOSE_TYPE))
-    nose.setShapeParameter(decode_genome_element_scale(SCALES, genome, GENOME_INDEX_NOSE_SHAPE))
-    nose.setThickness(decode_genome_element_scale(SCALES, genome, GENOME_INDEX_NOSE_THICKNESS))
+    aftRadius = decode_genome_element_scale(SCALES, genome, GENOME_INDEX_NOSE_AFT_RADIUS)
+    if DEBUG: print("Aft Radius:",aftRadius)
+    nose.setAftRadius(aftRadius)
+    noseLength = decode_genome_element_scale(SCALES, genome, GENOME_INDEX_NOSE_LENGTH)
+    if DEBUG: print("Nose Length:",noseLength)
+    nose.setLength(noseLength)
+    noseType = decode_genome_element_nose_type(SCALES, genome, GENOME_INDEX_NOSE_TYPE)
+    if DEBUG: print("Nose Type:",noseType)
+    nose.setType(noseType)
+    noseShape = decode_genome_element_scale(SCALES, genome, GENOME_INDEX_NOSE_SHAPE)
+    if DEBUG: print("Nose Shape:",noseShape)
+    nose.setShapeParameter(noseShape)
+    noseThickness = decode_genome_element_scale(SCALES, genome, GENOME_INDEX_NOSE_THICKNESS)
+    if DEBUG: print("Nose Thickness:",noseThickness)
+    nose.setThickness(noseThickness)
 
-    body.setLength(decode_genome_element_scale(SCALES, genome, GENOME_INDEX_BODY_LENGTH))
+    bodyLength = decode_genome_element_scale(SCALES, genome, GENOME_INDEX_BODY_LENGTH)
+    if DEBUG: print("Body Length:",bodyLength)
+    body.setLength(bodyLength)
 
-    fins.setFinCount(decode_genome_element_discrete(SCALES, genome, GENOME_INDEX_FIN_COUNT))
+    finsCount = decode_genome_element_discrete(SCALES, genome, GENOME_INDEX_FIN_COUNT)
+    if DEBUG: print("Fin Count:",finCount)
+    fins.setFinCount(finCount)
 
     fin_points = list()
     fin_points.append( Coordinate(0.0,0.0,0.0) ) # Always start at (0,0,0)
@@ -147,8 +164,9 @@ def apply_genome_to_rocket(orh, rocket, genome):
     fin_points.append( decode_genome_element_coordinate(Coordinate, SCALES, genome, GENOME_INDEX_FIN_POINT2_X, GENOME_INDEX_FIN_POINT2_Y) )
     fin_points.append( Coordinate( decode_genome_element_scale(SCALES, genome, GENOME_INDEX_FIN_POINT3_X), 0.0, 0.0) ) # Last y-coordinate must be 0
 
-    #print("---------------")
-    #for p in fin_points: print(p)
+    if DEBUG:
+        print("Fin points")
+        for p in fin_points: print(p)
 
     try:
         fins.setPoints(fin_points)
