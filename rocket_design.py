@@ -168,9 +168,21 @@ def apply_genome_to_rocket(orh, rocket, genome):
         print("Fin points")
         for p in fin_points: print(p)
 
+    # At least one of the y-coordinates and one of the x-coordinates must not be 0.0
+    non_zero_y = False
+    non_zero_x = False
+    for p in fin_points:
+        if p.y > 0.0: 
+            non_zero_y = True
+        if p.x > 0.0:
+            non_zero_x = True
+
     try:
+        if not non_zero_y: raise ValueError("y-coordinates are all zero. Use default fins.")
+        if not non_zero_x: raise ValueError("x-coordinates are all zero. Use default fins.")
         fins.setPoints(fin_points)
-    except:
+    except (ValueError,Exception) as e:
         fins.setPoints( [Coordinate(0.0,0.0,0.0), Coordinate(0.025,0.030,0.000), Coordinate(0.075,0.030,0.000), Coordinate(0.05, 0.0, 0.0)] )
+        print(e)
         print("Fin point failure: default trapezoid fins")
     
