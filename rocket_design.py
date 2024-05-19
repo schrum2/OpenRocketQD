@@ -1,7 +1,7 @@
 import random
 import math
 
-DEBUG = True
+DEBUG = False
 
 GENOME_INDEX_NOSE_AFT_RADIUS = 0
 GENOME_INDEX_NOSE_LENGTH = 1
@@ -114,8 +114,8 @@ def decode_genome_element_coordinate(Coordinate, scales, genome, x_index, y_inde
 
         Return: Coordinate resulting from scaling the two genome values to x and y coordinates
     """
-    x = decode_genome_element_scale(scales, genome, x_index)
-    y = decode_genome_element_scale(scales, genome, y_index)
+    x = round(decode_genome_element_scale(scales, genome, x_index), 3)
+    y = round(decode_genome_element_scale(scales, genome, y_index), 3)
     return Coordinate(x, y, 0.0) # Coordinates are 3D even when only (x,y) are used
 
 def apply_genome_to_rocket(orh, rocket, genome):
@@ -162,7 +162,7 @@ def apply_genome_to_rocket(orh, rocket, genome):
     fin_points.append( Coordinate(0.0,0.0,0.0) ) # Always start at (0,0,0)
     fin_points.append( decode_genome_element_coordinate(Coordinate, SCALES, genome, GENOME_INDEX_FIN_POINT1_X, GENOME_INDEX_FIN_POINT1_Y) )
     fin_points.append( decode_genome_element_coordinate(Coordinate, SCALES, genome, GENOME_INDEX_FIN_POINT2_X, GENOME_INDEX_FIN_POINT2_Y) )
-    fin_points.append( Coordinate( decode_genome_element_scale(SCALES, genome, GENOME_INDEX_FIN_POINT3_X), 0.0, 0.0) ) # Last y-coordinate must be 0
+    fin_points.append( Coordinate( round(decode_genome_element_scale(SCALES, genome, GENOME_INDEX_FIN_POINT3_X), 3), 0.0, 0.0) ) # Last y-coordinate must be 0
 
     if DEBUG:
         print("Fin points")
