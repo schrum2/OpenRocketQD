@@ -724,7 +724,6 @@ def create_scheduler(config, algorithm, seed=None):
           f"{len(emitters)} emitters.")
     return scheduler
 
-
 def save_heatmap(plt, archive, heatmap_path):
     """Saves a heatmap of the archive to the given path.
 
