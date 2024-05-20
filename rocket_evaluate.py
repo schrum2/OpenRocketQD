@@ -10,7 +10,7 @@ WIND_SPEED_MAX = 10.0
 WIND_DEVIATION_MIN = 0.2
 WIND_DEVIATION_MAX = 4.0
 
-NUM_ROCKET_EVALS = 5
+NUM_ROCKET_EVALS = 3
 
 def prepare_for_rocket_simulation(sim):
     # Once the instance starts, Java classes can be imported using JPype
