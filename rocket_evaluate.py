@@ -48,13 +48,14 @@ def prepare_for_rocket_simulation(sim):
     warnings = WarningSet()
     warnings.clear()
 
-def simulate_rocket(orh, sim, opts):
+def simulate_rocket(orh, sim, opts, plt = None):
     """
         Simulate the rocket and return performance information.
 
         orh     -- Open Rocket helper object
         sim     -- Rocket simulation object
         opts    -- Simulation options
+        plt     -- matplotlib instance for plotting. Do not do plotting if this is None.
     """
     global conf
     global bmc
@@ -67,6 +68,8 @@ def simulate_rocket(orh, sim, opts):
     cg = bmc.getCG(conf, mct).x
     cp = adc.getCP(conf, conds, warnings).x
     stability = cp - cg
+
+    plot_data = list()
 
     apogees = list()
     wind_speed_increment = (WIND_SPEED_MAX - WIND_SPEED_MIN) / NUM_ROCKET_EVALS
@@ -93,6 +96,7 @@ def simulate_rocket(orh, sim, opts):
             raise e # Still crash
 
         data = orh.get_timeseries(sim, [FlightDataType.TYPE_TIME, FlightDataType.TYPE_ALTITUDE, FlightDataType.TYPE_VELOCITY_Z])
+        if plt != None: plot_data.append(data)
         events = orh.get_events(sim) 
 
         events_to_annotate = {
@@ -108,6 +112,22 @@ def simulate_rocket(orh, sim, opts):
                 apogee = data[FlightDataType.TYPE_ALTITUDE][index_at(time)]
 
         apogees.append(apogee)
+
+    # If this script is being used to evaluate previously evolved rockets, then plot details
+    if plt != None:
+
+        fig = plt.figure()
+        ax1 = fig.add_subplot(111)
+
+        colors = ['b','r','g','c','m','y','tab:orange', 'tab:purple', 'tab:brown', 'tab:pink']
+
+        for i in range(len(plot_data)):
+            ax1.plot(plot_data[i][FlightDataType.TYPE_TIME], plot_data[i][FlightDataType.TYPE_ALTITUDE], colors[i % len(colors)])
+        
+        ax1.set_xlabel('Time (s)')
+        ax1.set_ylabel('Altitude (m)')
+        ax1.grid(True)
+        plt.show()
 
     average_apogee = statistics.mean(apogees)
     apogee_stdev = statistics.pstdev(apogees)
@@ -139,13 +159,13 @@ if __name__ == "__main__":
         genome = row_data
 
         import rocket_design as rd
+        rd.DEBUG = True
         from rocket_design import GENOME_LENGTH
 
         import orhelper
         from orhelper import FlightDataType, FlightEvent
 
         import matplotlib
-        matplotlib.use('Agg')
         import matplotlib.pyplot as plt
 
         with orhelper.OpenRocketInstance() as instance:
@@ -165,5 +185,5 @@ if __name__ == "__main__":
 
             rocket = opts.getRocket()
             rd.apply_genome_to_rocket(orh, rocket, genome)
-            result = simulate_rocket(orh, sim, opts)
+            result = simulate_rocket(orh, sim, opts, plt)
             print(result)
