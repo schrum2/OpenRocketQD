@@ -66,7 +66,7 @@ def simulate_rocket(orh, sim, opts):
     wind_speed_increment = (WIND_SPEED_MAX - WIND_SPEED_MIN) / NUM_ROCKET_EVALS
     wind_deviation_increment = (WIND_DEVIATION_MAX - WIND_DEVIATION_MIN) / NUM_ROCKET_EVALS
     wind_speed = WIND_SPEED_MIN
-    wind_dev = WIND_DEVIATION_MIN
+    wind_deviation = WIND_DEVIATION_MIN
     # Evaluate the rocket with different wind conditions and take the average altitude.
     # The fitness goal is to minimize the variance in max altitude.
     for i in range(NUM_ROCKET_EVALS):
