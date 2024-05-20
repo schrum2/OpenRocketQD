@@ -82,6 +82,7 @@ from ribs.visualize import cvt_archive_heatmap, grid_archive_heatmap
 #from dask.distributed import Client
 
 import rocket_evaluate as re
+from rocket_evaluate import MAX_FITNESS
 import rocket_design as rd
 from rocket_design import GENOME_LENGTH
 
@@ -647,7 +648,7 @@ def create_scheduler(config, algorithm, seed=None):
     MIN_STABILITY = -2.0
     MAX_STABILITY = 2.0
     MIN_ALTITUDE = 0.0
-    MAX_ALTITUDE = 50.0 # Should this allow higher?
+    MAX_ALTITUDE = 70.0 # Should this allow higher?
     
     bounds = [(MIN_STABILITY, MAX_STABILITY), (MIN_ALTITUDE, MAX_ALTITUDE)]
     initial_sol = np.zeros(solution_dim)
@@ -716,12 +717,12 @@ def save_heatmap(plt, archive, heatmap_path):
     """
     if isinstance(archive, GridArchive):
         plt.figure(figsize=(8, 6))
-        grid_archive_heatmap(archive, vmin=0, vmax=100)
+        grid_archive_heatmap(archive, vmin=0, vmax=MAX_FITNESS)
         plt.tight_layout()
         plt.savefig(heatmap_path)
     elif isinstance(archive, CVTArchive):
         plt.figure(figsize=(16, 12))
-        cvt_archive_heatmap(archive, vmin=0, vmax=100)
+        cvt_archive_heatmap(archive, vmin=0, vmax=MAX_FITNESS)
         plt.tight_layout()
         plt.savefig(heatmap_path)
     plt.close(plt.gcf())

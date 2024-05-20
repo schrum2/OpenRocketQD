@@ -12,6 +12,8 @@ WIND_DEVIATION_MAX = 4.0
 
 NUM_ROCKET_EVALS = 3
 
+MAX_FITNESS = 10
+
 def prepare_for_rocket_simulation(sim):
     # Once the instance starts, Java classes can be imported using JPype
     from net.sf.openrocket.masscalc import BasicMassCalculator
@@ -105,5 +107,5 @@ def simulate_rocket(orh, sim, opts):
 
     average_apogee = statistics.mean(apogees)
     apogee_stdev = statistics.pstdev(apogees)
-    # Fitness is 100 minus the standard deviation in the max altitude attained
-    return (100 - apogee_stdev, stability, average_apogee)
+    # Fitness is max minus the standard deviation in the max altitude attained
+    return (MAX_FITNESS - apogee_stdev, stability, average_apogee)
