@@ -1,6 +1,16 @@
 
 from orhelper import FlightDataType, FlightEvent
 import numpy as np
+import statistics
+
+# To test the robustness of the rocket design, it is evaluated at varying wind speeds
+WIND_SPEED_MIN = 2.0
+WIND_SPEED_MAX = 10.0
+
+WIND_DEVIATION_MIN = 0.2
+WIND_DEVIATION_MAX = 4.0
+
+NUM_ROCKET_EVALS = 5
 
 def prepare_for_rocket_simulation(sim):
     # Once the instance starts, Java classes can be imported using JPype
@@ -50,31 +60,50 @@ def simulate_rocket(orh, sim, opts):
     # For BC/measures
     cg = bmc.getCG(conf, mct).x
     cp = adc.getCP(conf, conds, warnings).x
-
-    try:
-        orh.run_simulation(sim)
-    except Exception as e:
-        # This will hopefully never happen in the final version of the code,
-        # but I want to see exception details any time that it does.
-        print("EXCEPTION")
-        e.printStackTrace()
-        raise e # Still crash
-
-    data = orh.get_timeseries(sim, [FlightDataType.TYPE_TIME, FlightDataType.TYPE_ALTITUDE, FlightDataType.TYPE_VELOCITY_Z])
-    events = orh.get_events(sim) 
-
-    events_to_annotate = {
-        FlightEvent.APOGEE: 'Apogee' 
-    }
-
-    apogee = 0.0 # Default
-    index_at = lambda t: (np.abs(data[FlightDataType.TYPE_TIME] - t)).argmin()
-    for event, times in events.items():
-        if event not in events_to_annotate:
-            continue
-        for time in times:
-            apogee = data[FlightDataType.TYPE_ALTITUDE][index_at(time)]
-
     stability = cp - cg
-    # For now, use 90 as place holder for fitness
-    return (90, stability, apogee)
+
+    apogees = list()
+    wind_speed_increment = (WIND_SPEED_MAX - WIND_SPEED_MIN) / NUM_ROCKET_EVALS
+    wind_deviation_increment = (WIND_DEVIATION_MAX - WIND_DEVIATION_MIN) / NUM_ROCKET_EVALS
+    wind_speed = WIND_SPEED_MIN
+    wind_dev = WIND_DEVIATION_MIN
+    # Evaluate the rocket with different wind conditions and take the average altitude.
+    # The fitness goal is to minimize the variance in max altitude.
+    for i in range(NUM_ROCKET_EVALS):
+
+        opts.setWindSpeedAverage(wind_speed)
+        opts.setWindSpeedDeviation(wind_deviation)
+        
+        wind_speed += wind_speed_increment
+        wind_deviation += wind_deviation_increment
+
+        try:
+            orh.run_simulation(sim)
+        except Exception as e:
+            # This will hopefully never happen in the final version of the code,
+            # but I want to see exception details any time that it does.
+            print("EXCEPTION")
+            e.printStackTrace()
+            raise e # Still crash
+
+        data = orh.get_timeseries(sim, [FlightDataType.TYPE_TIME, FlightDataType.TYPE_ALTITUDE, FlightDataType.TYPE_VELOCITY_Z])
+        events = orh.get_events(sim) 
+
+        events_to_annotate = {
+            FlightEvent.APOGEE: 'Apogee' 
+        }
+
+        apogee = 0.0 # Default
+        index_at = lambda t: (np.abs(data[FlightDataType.TYPE_TIME] - t)).argmin()
+        for event, times in events.items():
+            if event not in events_to_annotate:
+                continue
+            for time in times:
+                apogee = data[FlightDataType.TYPE_ALTITUDE][index_at(time)]
+
+        apogees.append(apogee)
+
+    average_apogee = statistics.mean(apogees)
+    apogee_stdev = statistics.pstdev(apogees)
+    # Fitness is 100 minus the standard deviation in the max altitude attained
+    return (100 - apogee_stdev, stability, average_apogee)

@@ -308,16 +308,20 @@ with orhelper.OpenRocketInstance() as instance:
     apogees = list()
 
     num_rockets = 30
+        
+    genome = random_genome(len(scales))
+    apply_genome_to_rocket(rocket, genome)
 
-    for i in range(num_rockets):
+    #for i in range(num_rockets):
+    for i in range(len(wind_speeds)):
 
         #fins.setPoints(fin_points[i])
 
-        genome = random_genome(len(scales))
-        apply_genome_to_rocket(rocket, genome)
+        #genome = random_genome(len(scales))
+        #apply_genome_to_rocket(rocket, genome)
 
-        #opts.setWindSpeedAverage(wind_speeds[i])
-        #opts.setWindSpeedDeviation(wind_devs[i])
+        opts.setWindSpeedAverage(wind_speeds[i])
+        opts.setWindSpeedDeviation(wind_devs[i])
 
         # For BC
         #cgs.append(bmc.getCG(conf, mct).x) 
