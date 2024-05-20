@@ -5,6 +5,7 @@ import statistics
 
 import sys
 import csv
+import os
 
 # To test the robustness of the rocket design, it is evaluated at varying wind speeds
 WIND_SPEED_MIN = 2.0
@@ -131,10 +132,38 @@ if __name__ == "__main__":
         print("Example:")
         print("python rocket_evaluate.py evolve_rockets_output/map_elites_archive.csv 3")
     else:
-        print(sys.argv)
-
         filename = sys.argv[1]
         row_number = int(sys.argv[2])
         row_data = extract_row(filename, row_number)
         print(row_data)
+        genome = row_data
 
+        import rocket_design as rd
+        from rocket_design import GENOME_LENGTH
+
+        import orhelper
+        from orhelper import FlightDataType, FlightEvent
+
+        import matplotlib
+        matplotlib.use('Agg')
+        import matplotlib.pyplot as plt
+
+        with orhelper.OpenRocketInstance() as instance:
+            global orh
+            global sim
+            global opts
+            global rocket
+            orh = orhelper.Helper(instance)
+            doc = orh.load_doc(os.path.join('examples', 'modified.ork')) # File was modified to replace Trapezoidal fin set with Freeform fin set
+            sim = doc.getSimulation(0)
+            opts = sim.getOptions()
+            rocket = opts.getRocket()
+
+            prepare_for_rocket_simulation(sim) # Sets some global variables for rocket evaluation
+            nose = orh.get_component_named(rocket, 'Nose cone')
+            rd.define_nose_types(nose)
+
+            rocket = opts.getRocket()
+            rd.apply_genome_to_rocket(orh, rocket, genome)
+            result = simulate_rocket(orh, sim, opts)
+            print(result)
