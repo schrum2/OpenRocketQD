@@ -3,6 +3,9 @@ from orhelper import FlightDataType, FlightEvent
 import numpy as np
 import statistics
 
+import sys
+import csv
+
 # To test the robustness of the rocket design, it is evaluated at varying wind speeds
 WIND_SPEED_MIN = 2.0
 WIND_SPEED_MAX = 10.0
@@ -109,3 +112,29 @@ def simulate_rocket(orh, sim, opts):
     apogee_stdev = statistics.pstdev(apogees)
     # Fitness is max minus the standard deviation in the max altitude attained
     return (MAX_FITNESS - apogee_stdev, stability, average_apogee)
+
+def extract_row(filename, row_number):
+    with open(filename, mode='r') as file:
+        csv_reader = csv.reader(file)
+        header = next(csv_reader)  # Skip the header row
+        for i, row in enumerate(csv_reader):
+            if i == row_number:
+                # Convert the row contents (excluding the first element) to floats
+                row_data = [float(item) for item in row[1:]]
+                return row_data
+    return None  # Return None if the row number is out of bounds
+
+if __name__ == "__main__":
+    if len(sys.argv) != 3:
+        print("Improper usage. Should be:")
+        print("python rocket_evaluate.py <archive file> <row>")
+        print("Example:")
+        print("python rocket_evaluate.py evolve_rockets_output/map_elites_archive.csv 3")
+    else:
+        print(sys.argv)
+
+        filename = sys.argv[1]
+        row_number = int(sys.argv[2])
+        row_data = extract_row(filename, row_number)
+        print(row_data)
+
