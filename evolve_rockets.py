@@ -106,7 +106,7 @@ CONFIG = {
                 "sigma": 0.5,
                 "bounds" : [(0.0,1.0)] * GENOME_LENGTH 
             },
-            "num_emitters": 15
+            "num_emitters": 10
         }],
         "scheduler": {
             "class": Scheduler,
@@ -130,7 +130,7 @@ CONFIG = {
                 "line_sigma": 0.2,
                 "bounds" : [(0.0,1.0)] * GENOME_LENGTH 
             },
-            "num_emitters": 15
+            "num_emitters": 10
         }],
         "scheduler": {
             "class": Scheduler,
@@ -155,7 +155,7 @@ CONFIG = {
                 "sigma": 0.5,
                 "bounds" : [(0.0,1.0)] * GENOME_LENGTH 
             },
-            "num_emitters": 15
+            "num_emitters": 10
         }],
         "scheduler": {
             "class": Scheduler,
@@ -181,7 +181,7 @@ CONFIG = {
                 "line_sigma": 0.2,
                 "bounds" : [(0.0,1.0)] * GENOME_LENGTH 
             },
-            "num_emitters": 15
+            "num_emitters": 10
         }],
         "scheduler": {
             "class": Scheduler,
@@ -205,7 +205,7 @@ CONFIG = {
                 "ranker": "obj",
                 "bounds" : [(0.0,1.0)] * GENOME_LENGTH 
             },
-            "num_emitters": 12
+            "num_emitters": 7
         }, {
             "class": EvolutionStrategyEmitter,
             "kwargs": {
@@ -213,7 +213,7 @@ CONFIG = {
                 "ranker": "2rd",
                 "bounds" : [(0.0,1.0)] * GENOME_LENGTH 
             },
-            "num_emitters": 12
+            "num_emitters": 7
         }, {
             "class": EvolutionStrategyEmitter,
             "kwargs": {
@@ -221,7 +221,7 @@ CONFIG = {
                 "ranker": "2imp",
                 "bounds" : [(0.0,1.0)] * GENOME_LENGTH 
             },
-            "num_emitters": 12
+            "num_emitters": 7
         }, {
             "class": IsoLineEmitter,
             "kwargs": {
@@ -229,7 +229,7 @@ CONFIG = {
                 "line_sigma": 0.1,
                 "bounds" : [(0.0,1.0)] * GENOME_LENGTH 
             },
-            "num_emitters": 12
+            "num_emitters": 7
         }],
         "scheduler": {
             "class": BanditScheduler,
@@ -256,7 +256,7 @@ CONFIG = {
                 "ranker": "2rd",
                 "bounds" : [(0.0,1.0)] * GENOME_LENGTH 
             },
-            "num_emitters": 7
+            "num_emitters": 5
         }, {
             "class": EvolutionStrategyEmitter,
             "kwargs": {
@@ -264,7 +264,7 @@ CONFIG = {
                 "ranker": "2imp",
                 "bounds" : [(0.0,1.0)] * GENOME_LENGTH 
             },
-            "num_emitters": 8
+            "num_emitters": 5
         }],
         "scheduler": {
             "class": Scheduler,
@@ -290,7 +290,7 @@ CONFIG = {
                 "restart_rule": "no_improvement",
                 "bounds" : [(0.0,1.0)] * GENOME_LENGTH 
             },
-            "num_emitters": 15
+            "num_emitters": 10
         }],
         "scheduler": {
             "class": Scheduler,
@@ -316,7 +316,7 @@ CONFIG = {
                 "restart_rule": "no_improvement",
                 "bounds" : [(0.0,1.0)] * GENOME_LENGTH 
             },
-            "num_emitters": 15
+            "num_emitters": 10
         }],
         "scheduler": {
             "class": Scheduler,
@@ -342,7 +342,7 @@ CONFIG = {
                 "restart_rule": "no_improvement",
                 "bounds" : [(0.0,1.0)] * GENOME_LENGTH 
             },
-            "num_emitters": 15
+            "num_emitters": 10
         }],
         "scheduler": {
             "class": Scheduler,
@@ -368,7 +368,7 @@ CONFIG = {
                 "restart_rule": "no_improvement",
                 "bounds" : [(0.0,1.0)] * GENOME_LENGTH 
             },
-            "num_emitters": 15
+            "num_emitters": 10
         }],
         "scheduler": {
             "class": Scheduler,
@@ -394,7 +394,7 @@ CONFIG = {
                 "restart_rule": "basic",
                 "bounds" : [(0.0,1.0)] * GENOME_LENGTH 
             },
-            "num_emitters": 15
+            "num_emitters": 10
         }],
         "scheduler": {
             "class": Scheduler,
@@ -529,7 +529,7 @@ CONFIG = {
                 "restart_rule": "basic",
                 "bounds" : [(0.0,1.0)] * GENOME_LENGTH 
             },
-            "num_emitters": 15
+            "num_emitters": 10
         }],
         "scheduler": {
             "class": Scheduler,
@@ -557,7 +557,7 @@ CONFIG = {
                 "restart_rule": "basic",
                 "bounds" : [(0.0,1.0)] * GENOME_LENGTH 
             },
-            "num_emitters": 15
+            "num_emitters": 10
         }],
         "scheduler": {
             "class": Scheduler,
@@ -729,11 +729,11 @@ def save_heatmap(plt, archive, heatmap_path):
 
 
 def evolve_rockets_main(algorithm,
-                itrs=1000,
+                itrs=300,
                 learning_rate=None,
                 es=None,
                 outdir="evolve_rockets_output",
-                log_freq=100,
+                log_freq=50,
                 seed=None):
     """Evolve model rockets with Open Rocket.
 
