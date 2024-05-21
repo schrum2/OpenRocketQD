@@ -145,6 +145,9 @@ def extract_row(filename, row_number):
                 return row_data
     return None  # Return None if the row number is out of bounds
 
+def sigmoid(arr):
+    return 1/(1 + np.exp(-arr))
+
 if __name__ == "__main__":
     if len(sys.argv) != 3:
         print("Improper usage. Should be:")
@@ -184,6 +187,7 @@ if __name__ == "__main__":
             rd.define_nose_types(nose)
 
             rocket = opts.getRocket()
-            rd.apply_genome_to_rocket(orh, rocket, genome)
+            squeezed_genome = sigmoid(np.array(genome))
+            rd.apply_genome_to_rocket(orh, rocket, squeezed_genome)
             result = simulate_rocket(orh, sim, opts, plt)
             print(result)
