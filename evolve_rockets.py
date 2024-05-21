@@ -90,7 +90,8 @@ import orhelper
 from orhelper import FlightDataType, FlightEvent
 
 MAX_GENOME_VALUE = 1.0
-BOUNDS = [(0.0,MAX_GENOME_VALUE)] * GENOME_LENGTH 
+# Do not need bounds if sigmoid confines the values
+BOUNDS = None #[(0.0,MAX_GENOME_VALUE)] * GENOME_LENGTH 
 STARTING_SOLUTION = [MAX_GENOME_VALUE / 2.0] * GENOME_LENGTH
 
 CONFIG = {
@@ -570,6 +571,9 @@ CONFIG = {
     }
 }
 
+def sigmoid(arr):
+    return 1/(1 + np.exp(-arr))
+
 def evaluate_rocket_genome(genome):
     """
         Evaluate a rocket, then return fitness and BC/measure information
@@ -582,7 +586,10 @@ def evaluate_rocket_genome(genome):
     global opts
     global orh
     rocket = opts.getRocket()
-    squeezed_genome = list(map(lambda x : x / MAX_GENOME_VALUE, genome))
+    # Confine to [0,1] by scaling
+    #squeezed_genome = list(map(lambda x : x / MAX_GENOME_VALUE, genome))
+    # Confine to (0,1) with sigmoid function
+    squeezed_genome = sigmoid(genome)
     rd.apply_genome_to_rocket(orh, rocket, squeezed_genome)
     return re.simulate_rocket(orh, sim, opts)
 
@@ -738,7 +745,7 @@ def evolve_rockets_main(algorithm,
                 learning_rate=None,
                 es=None,
                 outdir="evolve_rockets_output",
-                log_freq=50,
+                log_freq=25,
                 seed=None):
     """Evolve model rockets with Open Rocket.
 
