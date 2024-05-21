@@ -206,7 +206,6 @@ CONFIG = {
             "class": EvolutionStrategyEmitter,
             "kwargs": {
                 "sigma0": 0.5,
-                "x0" : STARTING_SOLUTION,
                 "ranker": "obj",
                 "bounds" : BOUNDS
             },
@@ -215,7 +214,6 @@ CONFIG = {
             "class": EvolutionStrategyEmitter,
             "kwargs": {
                 "sigma0": 0.5,
-                "x0" : STARTING_SOLUTION,
                 "ranker": "2rd",
                 "bounds" : BOUNDS
             },
@@ -224,7 +222,6 @@ CONFIG = {
             "class": EvolutionStrategyEmitter,
             "kwargs": {
                 "sigma0": 0.5,
-                "x0" : STARTING_SOLUTION,
                 "ranker": "2imp",
                 "bounds" : BOUNDS
             },
@@ -260,7 +257,6 @@ CONFIG = {
             "class": EvolutionStrategyEmitter,
             "kwargs": {
                 "sigma0": 0.5,
-                "x0" : STARTING_SOLUTION,
                 "ranker": "2rd",
                 "bounds" : BOUNDS
             },
@@ -269,7 +265,6 @@ CONFIG = {
             "class": EvolutionStrategyEmitter,
             "kwargs": {
                 "sigma0": 0.5,
-                "x0" : STARTING_SOLUTION,
                 "ranker": "2imp",
                 "bounds" : BOUNDS
             },
@@ -294,7 +289,6 @@ CONFIG = {
             "class": EvolutionStrategyEmitter,
             "kwargs": {
                 "sigma0": 0.5,
-                "x0" : STARTING_SOLUTION,
                 "ranker": "2imp",
                 "selection_rule": "filter",
                 "restart_rule": "no_improvement",
@@ -321,7 +315,6 @@ CONFIG = {
             "class": EvolutionStrategyEmitter,
             "kwargs": {
                 "sigma0": 0.5,
-                "x0" : STARTING_SOLUTION,
                 "ranker": "2imp",
                 "selection_rule": "mu",
                 "restart_rule": "no_improvement",
@@ -348,7 +341,6 @@ CONFIG = {
             "class": EvolutionStrategyEmitter,
             "kwargs": {
                 "sigma0": 0.5,
-                "x0" : STARTING_SOLUTION,
                 "ranker": "2rd",
                 "selection_rule": "filter",
                 "restart_rule": "no_improvement",
@@ -375,7 +367,6 @@ CONFIG = {
             "class": EvolutionStrategyEmitter,
             "kwargs": {
                 "sigma0": 0.5,
-                "x0" : STARTING_SOLUTION,
                 "ranker": "2rd",
                 "selection_rule": "mu",
                 "restart_rule": "no_improvement",
@@ -402,7 +393,6 @@ CONFIG = {
             "class": EvolutionStrategyEmitter,
             "kwargs": {
                 "sigma0": 0.5,
-                "x0" : STARTING_SOLUTION,
                 "ranker": "obj",
                 "selection_rule": "mu",
                 "restart_rule": "basic",
@@ -485,7 +475,6 @@ CONFIG = {
             "class": GradientArborescenceEmitter,
             "kwargs": {
                 "sigma0": 0.5, #10.0,
-                "x0" : STARTING_SOLUTION,
                 "lr": 1.0,
                 "grad_opt": "gradient_ascent",
                 "selection_rule": "mu",
@@ -512,7 +501,6 @@ CONFIG = {
             "class": GradientArborescenceEmitter,
             "kwargs": {
                 "sigma0": 0.5, #10.0,
-                "x0" : STARTING_SOLUTION,
                 "lr": 0.002,
                 "grad_opt": "adam",
                 "selection_rule": "mu",
@@ -540,7 +528,6 @@ CONFIG = {
             "class": EvolutionStrategyEmitter,
             "kwargs": {
                 "sigma0": 0.5,
-                "x0" : STARTING_SOLUTION,
                 "ranker": "imp",
                 "selection_rule": "mu",
                 "restart_rule": "basic",
@@ -568,7 +555,6 @@ CONFIG = {
             "class": GradientArborescenceEmitter,
             "kwargs": {
                 "sigma0": 0.5, #10.0,
-                "x0" : STARTING_SOLUTION,
                 "lr": 1.0,
                 "ranker": "imp",
                 "grad_opt": "gradient_ascent",
@@ -670,7 +656,7 @@ def create_scheduler(config, algorithm, seed=None):
     MAX_ALTITUDE = 100.0 # Should this allow higher?
     
     bounds = [(MIN_STABILITY, MAX_STABILITY), (MIN_ALTITUDE, MAX_ALTITUDE)]
-    initial_sol = np.zeros(solution_dim)
+    initial_sol = np.array(STARTING_SOLUTION)
     mode = "batch"
 
     # Create archive.
