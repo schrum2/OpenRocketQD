@@ -89,11 +89,9 @@ from rocket_design import GENOME_LENGTH
 import orhelper
 from orhelper import FlightDataType, FlightEvent
 
-# CMA-ME and other algorithms do not like tight bounds in [0,1], 
-# so evolve in a larger range instead,
-# then re-scale right before decoding genome.
-MAX_GENOME_VALUE = 100.0
+MAX_GENOME_VALUE = 1.0
 BOUNDS = [(0.0,MAX_GENOME_VALUE)] * GENOME_LENGTH 
+STARTING_SOLUTION = [MAX_GENOME_VALUE / 2.0] * GENOME_LENGTH
 
 CONFIG = {
     "map_elites": {
@@ -208,6 +206,7 @@ CONFIG = {
             "class": EvolutionStrategyEmitter,
             "kwargs": {
                 "sigma0": 0.5,
+                "x0" : STARTING_SOLUTION,
                 "ranker": "obj",
                 "bounds" : BOUNDS
             },
@@ -216,6 +215,7 @@ CONFIG = {
             "class": EvolutionStrategyEmitter,
             "kwargs": {
                 "sigma0": 0.5,
+                "x0" : STARTING_SOLUTION,
                 "ranker": "2rd",
                 "bounds" : BOUNDS
             },
@@ -224,6 +224,7 @@ CONFIG = {
             "class": EvolutionStrategyEmitter,
             "kwargs": {
                 "sigma0": 0.5,
+                "x0" : STARTING_SOLUTION,
                 "ranker": "2imp",
                 "bounds" : BOUNDS
             },
@@ -259,6 +260,7 @@ CONFIG = {
             "class": EvolutionStrategyEmitter,
             "kwargs": {
                 "sigma0": 0.5,
+                "x0" : STARTING_SOLUTION,
                 "ranker": "2rd",
                 "bounds" : BOUNDS
             },
@@ -267,6 +269,7 @@ CONFIG = {
             "class": EvolutionStrategyEmitter,
             "kwargs": {
                 "sigma0": 0.5,
+                "x0" : STARTING_SOLUTION,
                 "ranker": "2imp",
                 "bounds" : BOUNDS
             },
@@ -291,6 +294,7 @@ CONFIG = {
             "class": EvolutionStrategyEmitter,
             "kwargs": {
                 "sigma0": 0.5,
+                "x0" : STARTING_SOLUTION,
                 "ranker": "2imp",
                 "selection_rule": "filter",
                 "restart_rule": "no_improvement",
@@ -317,6 +321,7 @@ CONFIG = {
             "class": EvolutionStrategyEmitter,
             "kwargs": {
                 "sigma0": 0.5,
+                "x0" : STARTING_SOLUTION,
                 "ranker": "2imp",
                 "selection_rule": "mu",
                 "restart_rule": "no_improvement",
@@ -343,6 +348,7 @@ CONFIG = {
             "class": EvolutionStrategyEmitter,
             "kwargs": {
                 "sigma0": 0.5,
+                "x0" : STARTING_SOLUTION,
                 "ranker": "2rd",
                 "selection_rule": "filter",
                 "restart_rule": "no_improvement",
@@ -369,6 +375,7 @@ CONFIG = {
             "class": EvolutionStrategyEmitter,
             "kwargs": {
                 "sigma0": 0.5,
+                "x0" : STARTING_SOLUTION,
                 "ranker": "2rd",
                 "selection_rule": "mu",
                 "restart_rule": "no_improvement",
@@ -395,6 +402,7 @@ CONFIG = {
             "class": EvolutionStrategyEmitter,
             "kwargs": {
                 "sigma0": 0.5,
+                "x0" : STARTING_SOLUTION,
                 "ranker": "obj",
                 "selection_rule": "mu",
                 "restart_rule": "basic",
@@ -476,7 +484,8 @@ CONFIG = {
         "emitters": [{
             "class": GradientArborescenceEmitter,
             "kwargs": {
-                "sigma0": 10.0,
+                "sigma0": 0.5, #10.0,
+                "x0" : STARTING_SOLUTION,
                 "lr": 1.0,
                 "grad_opt": "gradient_ascent",
                 "selection_rule": "mu",
@@ -502,7 +511,8 @@ CONFIG = {
         "emitters": [{
             "class": GradientArborescenceEmitter,
             "kwargs": {
-                "sigma0": 10.0,
+                "sigma0": 0.5, #10.0,
+                "x0" : STARTING_SOLUTION,
                 "lr": 0.002,
                 "grad_opt": "adam",
                 "selection_rule": "mu",
@@ -530,6 +540,7 @@ CONFIG = {
             "class": EvolutionStrategyEmitter,
             "kwargs": {
                 "sigma0": 0.5,
+                "x0" : STARTING_SOLUTION,
                 "ranker": "imp",
                 "selection_rule": "mu",
                 "restart_rule": "basic",
@@ -556,7 +567,8 @@ CONFIG = {
         "emitters": [{
             "class": GradientArborescenceEmitter,
             "kwargs": {
-                "sigma0": 10.0,
+                "sigma0": 0.5, #10.0,
+                "x0" : STARTING_SOLUTION,
                 "lr": 1.0,
                 "ranker": "imp",
                 "grad_opt": "gradient_ascent",
