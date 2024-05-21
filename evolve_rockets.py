@@ -89,7 +89,11 @@ from rocket_design import GENOME_LENGTH
 import orhelper
 from orhelper import FlightDataType, FlightEvent
 
-BOUNDS = [(0.0,1.0)] * GENOME_LENGTH 
+# CMA-ME and other algorithms do not like tight bounds in [0,1], 
+# so evolve in a larger range instead,
+# then re-scale right before decoding genome.
+MAX_GENOME_VALUE = 100.0
+BOUNDS = [(0.0,MAX_GENOME_VALUE)] * GENOME_LENGTH 
 
 CONFIG = {
     "map_elites": {
@@ -580,7 +584,8 @@ def evaluate_rocket_genome(genome):
     global opts
     global orh
     rocket = opts.getRocket()
-    rd.apply_genome_to_rocket(orh, rocket, genome)
+    squeezed_genome = list(map(lambda x : x / MAX_GENOME_VALUE, genome))
+    rd.apply_genome_to_rocket(orh, rocket, squeezed_genome)
     return re.simulate_rocket(orh, sim, opts)
 
 def evolve_rockets(solution_batch):
