@@ -69,7 +69,7 @@ def simulate_rocket(orh, sim, opts, plt = None):
     # Need to know diameter
     rocket = opts.getRocket()
     nose = orh.get_component_named(rocket, 'Nose cone')
-    diamter = nose.getAftRadius() * 2
+    diameter = nose.getAftRadius() * 2
 
     # For BC/measures
     cg = bmc.getCG(conf, mct).x
