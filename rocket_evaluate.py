@@ -18,6 +18,8 @@ NUM_ROCKET_EVALS = 3
 
 MAX_FITNESS = 40 # Higher?
 
+DEBUG = False
+
 def prepare_for_rocket_simulation(sim):
     # Once the instance starts, Java classes can be imported using JPype
     from net.sf.openrocket.masscalc import BasicMassCalculator
@@ -113,6 +115,15 @@ def simulate_rocket(orh, sim, opts, plt = None):
 
         apogees.append(apogee)
 
+        if DEBUG: print("Apogee:",apogee)
+
+    average_apogee = statistics.mean(apogees)
+    apogee_stdev = statistics.pstdev(apogees)
+
+    if DEBUG:
+        print("Average Apogee:",average_apogee)
+        print("Stability:",stability)
+
     # If this script is being used to evaluate previously evolved rockets, then plot details
     if plt != None:
 
@@ -129,8 +140,6 @@ def simulate_rocket(orh, sim, opts, plt = None):
         ax1.grid(True)
         plt.show()
 
-    average_apogee = statistics.mean(apogees)
-    apogee_stdev = statistics.pstdev(apogees)
     # Fitness is max minus the standard deviation in the max altitude attained
     return (MAX_FITNESS - apogee_stdev, stability, average_apogee)
 
@@ -140,9 +149,15 @@ def extract_row(filename, row_number):
         header = next(csv_reader)  # Skip the header row
         for i, row in enumerate(csv_reader):
             if i == row_number:
+                num_measures = 2
+                end_count = 1 + num_measures + 1 + 1 # objective, measures, threshold, index
                 # Convert the row contents (excluding the first element) to floats
                 row_data = [float(item) for item in row[1:]]
-                return row_data
+                data_len = len(row_data)
+                genome = row_data[:(data_len - end_count)]
+                objective = row_data[len(genome)]
+                measures = row_data[len(genome)+1:(data_len - 2)]
+                return (genome, measures, objective)
     return None  # Return None if the row number is out of bounds
 
 def sigmoid(arr):
@@ -155,11 +170,18 @@ if __name__ == "__main__":
         print("Example:")
         print("python rocket_evaluate.py evolve_rockets_output/map_elites_archive.csv 3")
     else:
+        DEBUG = True
+
         filename = sys.argv[1]
         row_number = int(sys.argv[2])
         row_data = extract_row(filename, row_number)
         print(row_data)
-        genome = row_data
+        (genome, measures, objective) = row_data
+
+        print("Genome:",genome)
+        print("Stability:",measures[0])
+        print("Altitude:",measures[1])
+        print("Consistency:",objective)
 
         import rocket_design as rd
         rd.DEBUG = True
