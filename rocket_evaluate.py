@@ -66,10 +66,15 @@ def simulate_rocket(orh, sim, opts, plt = None):
     global warnings
     global adc
 
+    # Need to know diameter
+    rocket = opts.getRocket()
+    nose = orh.get_component_named(rocket, 'Nose cone')
+    diamter = nose.getAftRadius() * 2
+
     # For BC/measures
     cg = bmc.getCG(conf, mct).x
     cp = adc.getCP(conf, conds, warnings).x
-    stability = cp - cg
+    stability = (cp - cg) / diameter
 
     plot_data = list()
 
