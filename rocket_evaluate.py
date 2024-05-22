@@ -164,16 +164,22 @@ def sigmoid(arr):
     return 1/(1 + np.exp(-arr))
 
 if __name__ == "__main__":
-    if len(sys.argv) != 3:
+    if len(sys.argv) != 3 and len(sys.argv) != 4:
         print("Improper usage. Should be:")
         print("python rocket_evaluate.py <archive file> <row>")
         print("Example:")
         print("python rocket_evaluate.py evolve_rockets_output/map_elites_archive.csv 3")
+        print("Optionally, specify an .ork file to save")
+        print("python rocket_evaluate.py evolve_rockets_output/map_elites_archive.csv 3 evolved.ork")
     else:
         DEBUG = True
 
         filename = sys.argv[1]
         row_number = int(sys.argv[2])
+        save_file = None
+        if len(sys.argv) == 4:
+            save_file = sys.argv[3] # An .ork file to save
+
         row_data = extract_row(filename, row_number)
         print(row_data)
         (genome, measures, objective) = row_data
@@ -213,3 +219,7 @@ if __name__ == "__main__":
             rd.apply_genome_to_rocket(orh, rocket, squeezed_genome)
             result = simulate_rocket(orh, sim, opts, plt)
             print(result)
+
+            if save_file: 
+                orh.save_doc(save_file, doc)
+                print("Saved file:",save_file)
