@@ -122,6 +122,8 @@ def simulate_rocket(orh, sim, opts, plt = None):
 
     if DEBUG:
         print("Average Apogee:",average_apogee)
+        print("CG:",cg)
+        print("CP:",cp)
         print("Stability:",stability)
 
     # If this script is being used to evaluate previously evolved rockets, then plot details
