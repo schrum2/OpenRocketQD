@@ -18,7 +18,7 @@ GENOME_INDEX_FIN_POINT3_X = 11
 
 # The number range appropriate for each element of genome
 SCALES = [(0.01, 0.04), # Aft radius
-          (0.1, 1.0),   # Nose length
+          (0.05, 0.3),  # Nose length
           (0,5),        # Nose type: [0 = nose.Shape.OGIVE,1 = nose.Shape.CONICAL,2 = nose.Shape.ELLIPSOID,3 = nose.Shape.POWER,4 = nose.Shape.PARABOLIC,5 = nose.Shape.HAACK]
           (0.0,1.0),    # Nose shape (only affects some types)
           (0.001,0.009),# Nose thickness

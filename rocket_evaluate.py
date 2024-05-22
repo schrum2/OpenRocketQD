@@ -8,11 +8,11 @@ import csv
 import os
 
 # To test the robustness of the rocket design, it is evaluated at varying wind speeds
-WIND_SPEED_MIN = 2.0
-WIND_SPEED_MAX = 10.0
+WIND_SPEED_MIN = 2.0   # m/s 
+WIND_SPEED_MAX = 6.7   # m/s (6.7 m/s = 14.988 mph)
 
-WIND_DEVIATION_MIN = 0.2
-WIND_DEVIATION_MAX = 4.0
+WIND_DEVIATION_MIN = 0.2  # m/s
+WIND_DEVIATION_MAX = 4.0  # m/s
 
 NUM_ROCKET_EVALS = 3
 
