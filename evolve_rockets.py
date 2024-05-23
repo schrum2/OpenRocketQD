@@ -741,7 +741,7 @@ def save_heatmap(plt, archive, heatmap_path):
 
 
 def evolve_rockets_main(algorithm,
-                itrs=400,
+                itrs=300,
                 learning_rate=None,
                 es=None,
                 outdir="evolve_rockets_output",
