@@ -50,6 +50,12 @@ def prepare_for_rocket_simulation(sim):
     warnings = WarningSet()
     warnings.clear()
 
+    if DEBUG:
+        print("Mach:", conds.getMach())
+        print("AOA:", conds.getAOA())
+        print("RollRate:", conds.getRollRate())
+        print("Theta:", conds.getTheta())
+
 def simulate_rocket(orh, sim, opts, plt = None):
     """
         Simulate the rocket and return performance information.
