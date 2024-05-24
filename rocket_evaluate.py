@@ -58,7 +58,7 @@ def prepare_for_rocket_simulation(sim):
         print("RollRate:", conds.getRollRate())
         print("Theta:", conds.getTheta())
 
-def simulate_rocket(orh, sim, opts, plt = None):
+def simulate_rocket(orh, sim, opts, doc, plt = None):
     """
         Simulate the rocket and return performance information.
 
@@ -79,9 +79,16 @@ def simulate_rocket(orh, sim, opts, plt = None):
     nose = orh.get_component_named(rocket, 'Nose cone')
     diameter = nose.getAftRadius() * 2
 
-    # For BC/measures
-    cg = bmc.getCG(conf, mct).x
-    cp = adc.getCP(conf, conds, warnings).x
+    try:
+        # For BC/measures
+        cg = bmc.getCG(conf, mct).x
+        cp = adc.getCP(conf, conds, warnings).x
+    except Exception as e:
+        print("Error in CG/CP calculation")
+        print("Save error.ork")
+        orh.save_doc("error.ork", doc)
+        raise e
+
     stability = (cp - cg) / diameter
 
     plot_data = list()
@@ -237,7 +244,7 @@ if __name__ == "__main__":
             rocket = opts.getRocket()
             squeezed_genome = sigmoid(np.array(genome))
             rd.apply_genome_to_rocket(orh, rocket, squeezed_genome)
-            result = simulate_rocket(orh, sim, opts, plt)
+            result = simulate_rocket(orh, sim, opts, doc, plt)
             print(result)
 
             if save_file: 

@@ -585,13 +585,14 @@ def evaluate_rocket_genome(genome):
     global sim
     global opts
     global orh
+    global doc
     rocket = opts.getRocket()
     # Confine to [0,1] by scaling
     #squeezed_genome = list(map(lambda x : x / MAX_GENOME_VALUE, genome))
     # Confine to (0,1) with sigmoid function
     squeezed_genome = sigmoid(genome)
     rd.apply_genome_to_rocket(orh, rocket, squeezed_genome)
-    return re.simulate_rocket(orh, sim, opts)
+    return re.simulate_rocket(orh, sim, opts, doc)
 
 def evolve_rockets(solution_batch):
     """Sphere function evaluation and measures for a batch of solutions.
@@ -871,6 +872,7 @@ if __name__ == '__main__':
         global sim
         global opts
         global rocket
+        global doc
     
         from net.sf.openrocket.preset import ComponentPreset
         body_tube_presets = instance.preset_loader.getDatabase().listForType(ComponentPreset.Type.BODY_TUBE)
