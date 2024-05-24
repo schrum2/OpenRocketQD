@@ -3,7 +3,9 @@ import math
 
 DEBUG = False
 
-GENOME_INDEX_NOSE_AFT_RADIUS = 0
+#GENOME_INDEX_NOSE_AFT_RADIUS = 0
+
+GENOME_INDEX_BODY_TUBE_PRESET = 0 # Replaces aft radius since it also defines the radius/diameter
 GENOME_INDEX_NOSE_LENGTH = 1
 GENOME_INDEX_NOSE_TYPE = 2
 GENOME_INDEX_NOSE_SHAPE = 3
@@ -17,7 +19,8 @@ GENOME_INDEX_FIN_POINT2_Y = 10
 GENOME_INDEX_FIN_POINT3_X = 11
 
 # The number range appropriate for each element of genome
-SCALES = [(0.01, 0.04), # Aft radius
+SCALES = [#(0.01, 0.04), # Aft radius
+          None,         # Has to be set after list of presets is loaded
           (0.05, 0.3),  # Nose length
           (0,5),        # Nose type: [0 = nose.Shape.OGIVE,1 = nose.Shape.CONICAL,2 = nose.Shape.ELLIPSOID,3 = nose.Shape.POWER,4 = nose.Shape.PARABOLIC,5 = nose.Shape.HAACK]
           (0.0,1.0),    # Nose shape (only affects some types)
@@ -38,6 +41,12 @@ GENOME_LENGTH = len(SCALES)
 def define_nose_types(nose):
     global NOSE_TYPES
     NOSE_TYPES = [nose.Shape.OGIVE,nose.Shape.CONICAL,nose.Shape.ELLIPSOID,nose.Shape.POWER,nose.Shape.PARABOLIC,nose.Shape.HAACK]
+
+def define_body_tube_presets(presets):
+    global body_tube_presets
+    global SCALES
+    body_tube_presets = presets
+    SCALES[GENOME_INDEX_BODY_TUBE_PRESET] = (0, len(body_tube_presets) - 1)
 
 def random_genome(count):
     """
@@ -135,9 +144,17 @@ def apply_genome_to_rocket(orh, rocket, genome):
     body = orh.get_component_named(rocket, 'Body tube')
     fins = orh.get_component_named(body, 'Freeform fin set')
 
-    aftRadius = decode_genome_element_scale(SCALES, genome, GENOME_INDEX_NOSE_AFT_RADIUS)
-    if DEBUG: print("Aft Radius:",aftRadius)
-    nose.setAftRadius(aftRadius)
+    #aftRadius = decode_genome_element_scale(SCALES, genome, GENOME_INDEX_NOSE_AFT_RADIUS)
+    #if DEBUG: print("Aft Radius:",aftRadius)
+    #nose.setAftRadius(aftRadius)
+
+    global body_tube_presets
+    body_tube_index = decode_genome_element_discrete(SCALES, genome, GENOME_INDEX_BODY_TUBE_PRESET)
+    if DEBUG: 
+        print("Body Tube Index:",body_tube_index)
+        print("Body Tube Preset:",body_tube_presets[body_tube_index])
+    # TODO: Actually set the Body Tube Type
+
     noseLength = decode_genome_element_scale(SCALES, genome, GENOME_INDEX_NOSE_LENGTH)
     if DEBUG: print("Nose Length:",noseLength)
     nose.setLength(noseLength)

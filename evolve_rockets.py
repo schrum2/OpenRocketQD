@@ -871,9 +871,9 @@ if __name__ == '__main__':
         global sim
         global opts
         global rocket
-
+    
         from net.sf.openrocket.preset import ComponentPreset
-        #print(instance.preset_loader.getDatabase().listForType(ComponentPreset.Type.BODY_TUBE))
+        body_tube_presets = instance.preset_loader.getDatabase().listForType(ComponentPreset.Type.BODY_TUBE)
 
         orh = orhelper.Helper(instance)
         doc = orh.load_doc(os.path.join('examples', 'modified.ork')) # File was modified to replace Trapezoidal fin set with Freeform fin set
@@ -884,6 +884,7 @@ if __name__ == '__main__':
         re.prepare_for_rocket_simulation(sim) # Sets some global variables for rocket evaluation
         nose = orh.get_component_named(rocket, 'Nose cone')
         rd.define_nose_types(nose)
+        rd.define_body_tube_presets(body_tube_presets)
 
         #import random
         #genome = list()

@@ -120,3 +120,4 @@ venv/
 *.swp
 /evolve_rockets_output
 *.ork
+*.csv
