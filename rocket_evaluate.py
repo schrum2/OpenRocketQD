@@ -35,6 +35,8 @@ def prepare_for_rocket_simulation(sim):
     global warnings
     global adc
 
+    opts = sim.getOptions()
+    rocket = opts.getRocket()
     conf = rocket.getDefaultConfiguration() # This config seems to give CP results that match OpenRocket GUI more often 
     #conf = sim.getConfiguration() # Or is this the right configuration?
     bmc = BasicMassCalculator()
