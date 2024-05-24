@@ -153,7 +153,8 @@ def apply_genome_to_rocket(orh, rocket, genome):
     if DEBUG: 
         print("Body Tube Index:",body_tube_index)
         print("Body Tube Preset:",body_tube_presets[body_tube_index])
-    # TODO: Actually set the Body Tube Type
+    body.loadPreset(body_tube_presets[body_tube_index])
+    nose.setAftRadius(body.getOuterRadius()) # Define Nose Cone Base Radius to match Body Tube
 
     noseLength = decode_genome_element_scale(SCALES, genome, GENOME_INDEX_NOSE_LENGTH)
     if DEBUG: print("Nose Length:",noseLength)
