@@ -31,6 +31,7 @@ class OpenRocketInstance:
             log_level can be either OFF, ERROR, WARN, INFO, DEBUG, TRACE and ALL
         """
         self.openrocket = None
+        self.preset_loader = None
         self.started = False
 
         if not os.path.exists(jar_path):
@@ -69,8 +70,8 @@ class OpenRocketInstance:
 
         # Ensure that loaders are done loading before continuing
         # Without this there seems to be a race condition bug that leads to the whole thing freezing
-        preset_loader = _get_private_field(gui_module, "presetLoader")
-        preset_loader.blockUntilLoaded()
+        self.preset_loader = _get_private_field(gui_module, "presetLoader")
+        self.preset_loader.blockUntilLoaded()
         motor_loader = _get_private_field(gui_module, "motorLoader")
         motor_loader.blockUntilLoaded()
 

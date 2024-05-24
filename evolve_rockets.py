@@ -871,6 +871,10 @@ if __name__ == '__main__':
         global sim
         global opts
         global rocket
+
+        from net.sf.openrocket.preset import ComponentPreset
+        #print(instance.preset_loader.getDatabase().listForType(ComponentPreset.Type.BODY_TUBE))
+
         orh = orhelper.Helper(instance)
         doc = orh.load_doc(os.path.join('examples', 'modified.ork')) # File was modified to replace Trapezoidal fin set with Freeform fin set
         sim = doc.getSimulation(0)
