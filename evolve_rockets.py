@@ -658,7 +658,7 @@ def create_scheduler(config, algorithm, seed=None):
     use_result_archive = config["use_result_archive"]
     
     # These are guesses that go beyond what I expect is reasonable
-    MIN_STABILITY = 0.5
+    MIN_STABILITY = 1.0
     MAX_STABILITY = 3.0
     MIN_ALTITUDE = 0.0
     MAX_ALTITUDE = 200.0 # Should this allow higher?
