@@ -1,13 +1,23 @@
-# orhelper
-orhelper is a module which aims to facilitate interacting and scripting with OpenRocket from Python.
+# Quality Diversity in Open Rocket
+
+This code evolves model rocket designs using Pyribs and evaluates them using
+the OpenRocket simulator.
 
 ## Prerequisites
-- OpenRocket 15.03
-- Java JDK 1.8
+- Java JDK 1.8 (note that an older version of Java is required)
      - [Open JDK 1.8](https://github.com/ojdkbuild/ojdkbuild)
      - [Oracle JDK 8](https://www.oracle.com/java/technologies/javase/javase8-archive-downloads.html) (requires signup)
      - Ubuntu: `sudo apt-get install openjdk-8-jre`
-- Python >=3.6
+- Python >= 3.10
+
+## Installation
+
+Install necessary Python packages with:
+```
+pip install -r requirements.txt
+```
+You will also need to assure that the environment variable 
+`JAVA_HOME` is set to the path for your JDK 1.8 installation.
 
 ## Setup JDK
 
@@ -36,29 +46,30 @@ For most people jpype will be able to automatically find the JDK. However, if it
         JAVA_HOME = C:\Program Files\ojdkbuild\[YOUR JDK 1.8 FOLDER HERE]
         ```
 
-## Installing
+## Usage
 
-- Install orhelper from pip
-    ```
-    pip install orhelper
-    ```
+The main Python script is `evolve_rockets.py`. At a minimum, it requires a command line
+parameter specifying which QD algorithm to apply. Because this code was adapted from 
+other examples using Pyribs, the source code mentions some algorithms that are not
+fully supported. However, the following commands will work:
 
-- [Download](https://github.com/openrocket/openrocket/releases/download/release-15.03/OpenRocket-15.03.jar) the OpenRocket .jar file (if you don't already have it)
-    - Linux  
-        ```
-        wget https://github.com/openrocket/openrocket/releases/download/release-15.03/OpenRocket-15.03.jar
-        ```
++ Plain MAP-Elites
+  ```
+  python evolve_rockets.py map_elites
+  ```
++ Covariance Matrix Adaptation MAP-Elites (What emitters?)
+  ```
+  python evolve_rockets.py cma_me_imp
+  ```
++ CMA-MAE???
+  ```
+  python evolve_rockets.py cma_mae
+  ```
 
-- Set environment variable `CLASSPATH` path to OpenRocket .jar file. (Only required if it's not already at `.\OpenRocket-15.03.jar`)
-    ```
-    CLASSPATH=\some\path\to\OpenRocket-15.03.jar
-    ```
+Once evolution completes, results are stored in the subdirectory `evolve_rockets`.
+In particular, there will be a `csv` file associated with the algorithm used 
+for evolution. This represents the contents of the final archive, and any
+rocket in this archive can be evaluated individually using the `rocket_evaluate.py`
+script. Here is a example of how to use it:
 
-- See `examples/` for usage examples
-- See [the OpenRocket wiki](https://github.com/openrocket/openrocket/wiki/Scripting-with-Python-and-JPype) for more info on usage and the examples 
-
-
-## Credits
-- Richard Graham for the original script: [Source](https://sourceforge.net/p/openrocket/mailman/openrocket-devel/thread/4F17AA0C.1040002@rdg.cc/)
-- @not7cd for some initial organization and clean-up: [Source](https://github.com/not7cd/orhelper)
-- And of course everyone who has contributed to OpenRocket over the years.
+TODO
