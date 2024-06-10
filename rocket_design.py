@@ -4,23 +4,25 @@ import math
 DEBUG = False
 
 #GENOME_INDEX_NOSE_AFT_RADIUS = 0
+# Would replace aft radius since it also defines the radius/diameter.
+# However, Cody says to just hardcode the diameter.
+#GENOME_INDEX_BODY_TUBE_PRESET = 0 
 
-GENOME_INDEX_BODY_TUBE_PRESET = 0 # Replaces aft radius since it also defines the radius/diameter
-GENOME_INDEX_NOSE_LENGTH = 1
-GENOME_INDEX_NOSE_TYPE = 2
-GENOME_INDEX_NOSE_SHAPE = 3
-GENOME_INDEX_NOSE_THICKNESS = 4
-GENOME_INDEX_BODY_LENGTH = 5
-GENOME_INDEX_FIN_COUNT = 6
-GENOME_INDEX_FIN_POINT1_X = 7
-GENOME_INDEX_FIN_POINT1_Y = 8
-GENOME_INDEX_FIN_POINT2_X = 9
-GENOME_INDEX_FIN_POINT2_Y = 10
-GENOME_INDEX_FIN_POINT3_X = 11
+GENOME_INDEX_NOSE_LENGTH = 0
+GENOME_INDEX_NOSE_TYPE = 1
+GENOME_INDEX_NOSE_SHAPE = 2
+GENOME_INDEX_NOSE_THICKNESS = 3
+GENOME_INDEX_BODY_LENGTH = 4
+GENOME_INDEX_FIN_COUNT = 5
+GENOME_INDEX_FIN_POINT1_X = 6
+GENOME_INDEX_FIN_POINT1_Y = 7
+GENOME_INDEX_FIN_POINT2_X = 8
+GENOME_INDEX_FIN_POINT2_Y = 9
+GENOME_INDEX_FIN_POINT3_X = 10
 
 # The number range appropriate for each element of genome
-SCALES = [#(0.01, 0.04), # Aft radius
-          None,         # Has to be set after list of presets is loaded
+SCALES = [#(0.01, 0.04),# Aft radius
+          # None,       # Body Tube Present index: Has to be set after list of presets is loaded
           (0.05, 0.3),  # Nose length
           (0,5),        # Nose type: [0 = nose.Shape.OGIVE,1 = nose.Shape.CONICAL,2 = nose.Shape.ELLIPSOID,3 = nose.Shape.POWER,4 = nose.Shape.PARABOLIC,5 = nose.Shape.HAACK]
           (0.0,1.0),    # Nose shape (only affects some types)
@@ -36,17 +38,21 @@ SCALES = [#(0.01, 0.04), # Aft radius
          ]
 # Note: might want to generalize to more fin points later
 
+DEFAULT_BODY_TUBE_OUTER_RADIUS = 0.012 # Cody said to hard code outer diameter to 24mm
+DEFAULT_BODY_TUBE_INNER_RADIUS = 0.009 # Cody said to hard code inner diameter to 18mm
+
 GENOME_LENGTH = len(SCALES)
 
 def define_nose_types(nose):
     global NOSE_TYPES
     NOSE_TYPES = [nose.Shape.OGIVE,nose.Shape.CONICAL,nose.Shape.ELLIPSOID,nose.Shape.POWER,nose.Shape.PARABOLIC,nose.Shape.HAACK]
 
-def define_body_tube_presets(presets):
-    global body_tube_presets
-    global SCALES
-    body_tube_presets = presets
-    SCALES[GENOME_INDEX_BODY_TUBE_PRESET] = (0, len(body_tube_presets) - 1)
+# Do not use
+#def define_body_tube_presets(presets):
+#    global body_tube_presets
+#    global SCALES
+#    body_tube_presets = presets
+#    SCALES[GENOME_INDEX_BODY_TUBE_PRESET] = (0, len(body_tube_presets) - 1)
 
 def random_genome(count):
     """
@@ -148,13 +154,18 @@ def apply_genome_to_rocket(orh, rocket, genome):
     #if DEBUG: print("Aft Radius:",aftRadius)
     #nose.setAftRadius(aftRadius)
 
-    global body_tube_presets
-    body_tube_index = decode_genome_element_discrete(SCALES, genome, GENOME_INDEX_BODY_TUBE_PRESET)
-    if DEBUG: 
-        print("Body Tube Index:",body_tube_index)
-        print("Body Tube Preset:",body_tube_presets[body_tube_index])
-    body.loadPreset(body_tube_presets[body_tube_index])
-    nose.setAftRadius(body.getOuterRadius()) # Define Nose Cone Base Radius to match Body Tube
+    # Do not select a preset
+    #global body_tube_presets
+    #body_tube_index = decode_genome_element_discrete(SCALES, genome, GENOME_INDEX_BODY_TUBE_PRESET)
+    #if DEBUG: 
+    #    print("Body Tube Index:",body_tube_index)
+    #    print("Body Tube Preset:",body_tube_presets[body_tube_index])
+    #body.loadPreset(body_tube_presets[body_tube_index])
+    #nose.setAftRadius(body.getOuterRadius()) # Define Nose Cone Base Radius to match Body Tube
+
+    nose.setAftRadius(DEFAULT_BODY_TUBE_OUTER_RADIUS) # Cody said to hard code 
+    body.setOuterRadius(DEFAULT_BODY_TUBE_OUTER_RADIUS) # Cody said to hard code 
+    body.setInnerRadius(DEFAULT_BODY_TUBE_INNER_RADIUS) # Cody said to hard code 
 
     noseLength = decode_genome_element_scale(SCALES, genome, GENOME_INDEX_NOSE_LENGTH)
     if DEBUG: print("Nose Length:",noseLength)
