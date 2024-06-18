@@ -29,11 +29,11 @@ SCALES = [#(0.01, 0.04),# Aft radius
           (0.001,0.009),# Nose thickness
           (0.2,1.0),    # Body length
           (2,5),        # Fin count (integer)
-          (0.0,0.3),    # Fin point 1 x-coordinate
-          (0.0,0.3),    # Fin point 1 y-coordinate
-          (0.0,0.3),    # Fin point 2 x-coordinate
-          (0.0,0.3),    # Fin point 2 y-coordinate
-          (0.02,0.3)    # Fin point 3 x-coordinate (final x-coordinate must be far enough from start to create a surface to attach to the rocket)
+          (0.0,0.1),    # Fin point 1 x-coordinate
+          (0.0,0.1),    # Fin point 1 y-coordinate
+          (0.0,0.1),    # Fin point 2 x-coordinate
+          (0.0,0.1),    # Fin point 2 y-coordinate
+          (0.02,0.1)    # Fin point 3 x-coordinate (final x-coordinate must be far enough from start to create a surface to attach to the rocket)
                         # final y-coordinate must be 0.0
          ]
 # Note: might want to generalize to more fin points later
