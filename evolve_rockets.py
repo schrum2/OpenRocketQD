@@ -742,6 +742,7 @@ def save_heatmap(plt, archive, heatmap_path):
 
 
 def evolve_rockets_main(algorithm,
+                run_num=0,
                 itrs=300,
                 learning_rate=None,
                 es=None,
@@ -783,7 +784,7 @@ def evolve_rockets_main(algorithm,
             if e["class"] == EvolutionStrategyEmitter:
                 e["kwargs"]["es"] = es
 
-    name = f"{algorithm}"
+    name = f"{algorithm}{run_num}"
     if es is not None:
         name += f"_{es}"
     outdir = Path(outdir)
