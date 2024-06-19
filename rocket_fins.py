@@ -47,9 +47,11 @@ def shortest_distance_to_polygon(point, polygon_vertices):
     min_distance = float('inf')
     num_vertices = len(polygon_vertices)
     
-    for i in range(num_vertices):
+    #for i in range(num_vertices):
+    for i in range(num_vertices - 1):
         line_start = polygon_vertices[i]
-        line_end = polygon_vertices[(i + 1) % num_vertices]
+        #line_end = polygon_vertices[(i + 1) % num_vertices]
+        line_end = polygon_vertices[(i + 1)]
         distance = point_to_line_distance(point, line_start, line_end)
         min_distance = min(min_distance, distance)
     
@@ -64,12 +66,17 @@ def shortest_distance_to_polygon(point, polygon_vertices):
 # Code beneath this point written by me
 
 def shortest_distance_across_fin(vertices):
-
-    # DOES NOT WORK!
-
-    dists = [shortest_distance_to_polygon(p, vertices) for p in vertices]
+    num = len(vertices)
+    dists = []
+    for i in range(num):
+        p = vertices[0] 
+        # Remove point to avoid distance of 0 (since point is on line)
+        del vertices[0]
+        d = shortest_distance_to_polygon(p, vertices)
+        dists.append(d) # Save the distance
+        vertices.append(p) # put the point back at the end
     return min(dists)
 
-polygon = [(0, 0), (4, 0), (4, 3), (0, 3)]
-distance = shortest_distance_across_fin(polygon)
-print(f"The shortest distance from the point to the polygon is: {distance}")
+#polygon = [(0, 0), (4, 0), (3.9, 3), (3.5, 1)]
+#distance = shortest_distance_across_fin(polygon)
+#print(f"The shortest distance from the point to the polygon is: {distance}")

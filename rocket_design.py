@@ -1,5 +1,6 @@
 import random
 import math
+import rocket_fins as rf
 
 DEBUG = False
 
@@ -40,6 +41,8 @@ SCALES = [#(0.01, 0.04),# Aft radius
 
 DEFAULT_BODY_TUBE_OUTER_RADIUS = 0.012 # Cody said to hard code outer diameter to 24mm
 DEFAULT_BODY_TUBE_INNER_RADIUS = 0.009 # Cody said to hard code inner diameter to 18mm
+
+MINIMUM_FIN_CROSS_SECTION = 0.02 # 2cm
 
 GENOME_LENGTH = len(SCALES)
 
@@ -202,7 +205,9 @@ def apply_genome_to_rocket(orh, rocket, genome):
     non_zero_y = False
     non_zero_x = False
     num_all_zero = 0
+    simple_vertices = []
     for p in fin_points:
+        simple_vertices.append( (p.x,p.y) )
         if p.y > 0.0: 
             non_zero_y = True
         if p.x > 0.0:
@@ -213,6 +218,8 @@ def apply_genome_to_rocket(orh, rocket, genome):
             print("Not (0,0):", p.x, ",", p.y)
 
     duplicate_coordinates = len(fin_points) != len(set(fin_points)) 
+
+    shortest_cross_section_length = rf.shortest_distance_across_fin(simple_vertices)
 
     if DEBUG:
         print("non zero x:",non_zero_x)
@@ -225,6 +232,7 @@ def apply_genome_to_rocket(orh, rocket, genome):
         if not non_zero_x: raise ValueError("x-coordinates are all zero. Use default fins.")
         if num_all_zero > 1: raise ValueError("There should only be one (0,0) point. Use default fins.") # Seemingly redundant with 0.0 check, but maybe not
         if duplicate_coordinates: raise ValueError("There should be no duplicates. Use default fins.")
+        if shortest_cross_section_length < MINIMUM_FIN_CROSS_SECTION: raise ValueError("")
         fins.setPoints(fin_points)
         if DEBUG: print("Use provided fin points")
     except (ValueError,Exception) as e:
