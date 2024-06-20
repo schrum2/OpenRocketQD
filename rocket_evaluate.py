@@ -228,7 +228,7 @@ if __name__ == "__main__":
         if len(sys.argv) == 4:
             save_file = sys.argv[3] # An .ork file to save
 
-        # Testing
+        # Print top altitude rockets
         rows = all_rows(filename)
         top_rows = highest_fliers(rows, 10)
         print("TOP")
