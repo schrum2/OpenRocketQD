@@ -204,8 +204,8 @@ def all_rows(filename):
         return rows
 
 def highest_fliers(rows, top_count):
-    # Measures are index 2, altitude is the measure 0, and negating will sort in descending order
-    top = sorted(rows, key=lambda r : -r[2][0])
+    # Measures are index 2, altitude is the measure 1, and negating will sort in descending order
+    top = sorted(rows, key=lambda r : -r[2][1])
     return top[:top_count]
 
 def sigmoid(arr):
@@ -231,11 +231,12 @@ if __name__ == "__main__":
         # Testing
         rows = all_rows(filename)
         top_rows = highest_fliers(rows, 10)
+        print("TOP")
         for (index, genome, measures, objective) in top_rows:
             print(index, measures)
+        print("END")
 
         row_data = extract_row(filename, row_number)
-        print(row_data)
         (genome, measures, objective) = row_data
 
         print("Genome:",genome)
