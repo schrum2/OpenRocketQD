@@ -165,22 +165,48 @@ def simulate_rocket(orh, sim, opts, doc, plt = None):
     # Fitness is max minus the standard deviation in the max altitude attained
     return (MAX_FITNESS - apogee_stdev, stability, average_apogee)
 
+
+def row_info(row):
+    """
+        Get the data from a row separated out into three meaningful pieces of data.
+        Parameters:
+        row - list of numbers from one row of the file
+        Return:
+        tuple of (genome list, measure score list, objective score)
+    """
+    num_measures = 2
+    end_count = 1 + num_measures + 1 + 1 # objective, measures, threshold, index
+    # Convert the row contents (excluding the first element) to floats
+    row_data = [float(item) for item in row[1:]]
+    data_len = len(row_data)
+    genome = row_data[:(data_len - end_count)]
+    objective = row_data[len(genome)]
+    measures = row_data[len(genome)+1:(data_len - 2)]
+    return (genome, measures, objective)
+
 def extract_row(filename, row_number):
     with open(filename, mode='r') as file:
         csv_reader = csv.reader(file)
         header = next(csv_reader)  # Skip the header row
         for i, row in enumerate(csv_reader):
             if i == row_number:
-                num_measures = 2
-                end_count = 1 + num_measures + 1 + 1 # objective, measures, threshold, index
-                # Convert the row contents (excluding the first element) to floats
-                row_data = [float(item) for item in row[1:]]
-                data_len = len(row_data)
-                genome = row_data[:(data_len - end_count)]
-                objective = row_data[len(genome)]
-                measures = row_data[len(genome)+1:(data_len - 2)]
-                return (genome, measures, objective)
+                return row_info(row)
     return None  # Return None if the row number is out of bounds
+
+def all_rows(filename):
+    with open(filename, mode='r') as file:
+        csv_reader = csv.reader(file)
+        header = next(csv_reader)  # Skip the header row
+        rows = []
+        for i, row in enumerate(csv_reader):
+            (genome,measures,objective) = row_info(row)
+            rows.append((i, genome, measures, objective))
+        return rows
+
+def highest_fliers(rows, top_count):
+    # Measures are index 2, altitude is the measure 0, and negating will sort in descending order
+    top = sorted(rows, key=lambda r : -r[2][0])
+    return top[:top_count]
 
 def sigmoid(arr):
     return 1/(1 + np.exp(-arr))
@@ -201,6 +227,12 @@ if __name__ == "__main__":
         save_file = None
         if len(sys.argv) == 4:
             save_file = sys.argv[3] # An .ork file to save
+
+        # Testing
+        rows = all_rows(filename)
+        top_rows = highest_fliers(rows, 10)
+        for (index, genome, measures, objective) in top_rows:
+            print(index, measures)
 
         row_data = extract_row(filename, row_number)
         print(row_data)
