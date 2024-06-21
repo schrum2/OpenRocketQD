@@ -212,21 +212,19 @@ def sigmoid(arr):
     return 1/(1 + np.exp(-arr))
 
 if __name__ == "__main__":
-    if len(sys.argv) != 3 and len(sys.argv) != 4:
+    if len(sys.argv) != 3 and len(sys.argv) != 4 and len(sys.argv) != 2:
         print("Improper usage. Should be:")
         print("python rocket_evaluate.py <archive file> <row>")
         print("Example:")
         print("python rocket_evaluate.py evolve_rockets_output/map_elites_archive.csv 3")
         print("Optionally, specify an .ork file to save")
         print("python rocket_evaluate.py evolve_rockets_output/map_elites_archive.csv 3 evolved.ork")
+        print("Can also list top 10 altitude values with this:")
+        print("python rocket_evaluate.py <archive file>")
     else:
         DEBUG = True
 
         filename = sys.argv[1]
-        row_number = int(sys.argv[2])
-        save_file = None
-        if len(sys.argv) == 4:
-            save_file = sys.argv[3] # An .ork file to save
 
         # Print top altitude rockets
         rows = all_rows(filename)
@@ -235,6 +233,13 @@ if __name__ == "__main__":
         for (index, genome, measures, objective) in top_rows:
             print(index, measures)
         print("END")
+
+        if len(sys.argv) == 2: exit(0)
+
+        row_number = int(sys.argv[2])
+        save_file = None
+        if len(sys.argv) == 4:
+            save_file = sys.argv[3] # An .ork file to save
 
         row_data = extract_row(filename, row_number)
         (genome, measures, objective) = row_data
