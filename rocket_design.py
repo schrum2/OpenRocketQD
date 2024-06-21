@@ -39,10 +39,10 @@ SCALES = [#(0.01, 0.04),# Aft radius
          ]
 # Note: might want to generalize to more fin points later
 
-DEFAULT_BODY_TUBE_OUTER_RADIUS = 0.012 # Cody said to hard code outer diameter to 24mm
-DEFAULT_BODY_TUBE_INNER_RADIUS = 0.009 # Cody said to hard code inner diameter to 18mm
+DEFAULT_BODY_TUBE_OUTER_RADIUS = 0.0124 # Cody said to hard code outer diameter to 24.8mm
+DEFAULT_BODY_TUBE_INNER_RADIUS = 0.01205 # Cody said to hard code inner diameter to 24.1mm
 
-MINIMUM_FIN_CROSS_SECTION = 0.02 # 2cm
+MINIMUM_FIN_CROSS_SECTION = 0.005 # 5mm
 
 GENOME_LENGTH = len(SCALES)
 
