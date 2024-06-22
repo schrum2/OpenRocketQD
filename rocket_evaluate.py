@@ -212,13 +212,15 @@ def sigmoid(arr):
     return 1/(1 + np.exp(-arr))
 
 if __name__ == "__main__":
-    if len(sys.argv) != 3 and len(sys.argv) != 4 and len(sys.argv) != 2:
+    if len(sys.argv) != 3 and len(sys.argv) != 4 and len(sys.argv) != 2 and len(sys.argv) != 5:
         print("Improper usage. Should be:")
         print("python rocket_evaluate.py <archive file> <row>")
         print("Example:")
         print("python rocket_evaluate.py evolve_rockets_output/map_elites_archive.csv 3")
         print("Optionally, specify an .ork file to save")
         print("python rocket_evaluate.py evolve_rockets_output/map_elites_archive.csv 3 evolved.ork")
+        print("Can also skip simulation and only save the .ork file")
+        print("python rocket_evaluate.py evolve_rockets_output/map_elites_archive.csv 3 evolved.ork skip")
         print("Can also list top 10 altitude values with this:")
         print("python rocket_evaluate.py <archive file>")
     else:
@@ -238,8 +240,10 @@ if __name__ == "__main__":
 
         row_number = int(sys.argv[2])
         save_file = None
-        if len(sys.argv) == 4:
+        if len(sys.argv) >= 4:
             save_file = sys.argv[3] # An .ork file to save
+
+        skip = len(sys.argv) == 5 and sys.argv[4] == "skip"
 
         row_data = extract_row(filename, row_number)
         (genome, measures, objective) = row_data
@@ -282,8 +286,10 @@ if __name__ == "__main__":
             rocket = opts.getRocket()
             squeezed_genome = sigmoid(np.array(genome))
             rd.apply_genome_to_rocket(orh, rocket, squeezed_genome)
-            result = simulate_rocket(orh, sim, opts, doc, plt)
-            print(result)
+
+            if not skip:
+                result = simulate_rocket(orh, sim, opts, doc, plt)
+                print(result)
 
             if save_file: 
                 orh.save_doc(save_file, doc)
