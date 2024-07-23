@@ -46,9 +46,9 @@ For most people jpype will be able to automatically find the JDK. However, if it
         JAVA_HOME = C:\Program Files\ojdkbuild\[YOUR JDK 1.8 FOLDER HERE]
         ```
 - These variables can be set in Windows Advanced System Settings, or from the Powershell with the command:
-        ```
-       $env:JAVA_HOME = "C:\Program Files\Java\[JDK folder]"
-        ```
+   ```
+   $env:JAVA_HOME = "C:\Program Files\Java\[JDK folder]"
+   ```
 
 ## Usage
 
