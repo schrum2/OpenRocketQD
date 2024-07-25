@@ -116,3 +116,4 @@ launch this version of OpenRocket from within the project directory with the com
 ```
 java -jar OpenRocket-15.03.jar
 ```
+You can view the source code for OpenRocket version 15.03 [here](https://github.com/openrocket/openrocket/tree/release-15.03)
