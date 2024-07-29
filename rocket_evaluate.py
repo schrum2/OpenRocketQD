@@ -162,8 +162,9 @@ def simulate_rocket(orh, sim, opts, doc, plt = None):
         ax1.grid(True)
         plt.show()
 
-    # Fitness is max minus the standard deviation in the max altitude attained
-    return (MAX_FITNESS - apogee_stdev, stability, average_apogee)
+    # Fitness is max minus the standard deviation in the max altitude attained.
+    # (fitness based on deviation of apogee, stability score, average apogee, type of the nose cone (Java object))
+    return (MAX_FITNESS - apogee_stdev, stability, average_apogee, nose.getType())
 
 
 def row_info(row):

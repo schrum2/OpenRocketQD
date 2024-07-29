@@ -50,6 +50,14 @@ def define_nose_types(nose):
     global NOSE_TYPES
     NOSE_TYPES = [nose.Shape.OGIVE,nose.Shape.CONICAL,nose.Shape.ELLIPSOID,nose.Shape.POWER,nose.Shape.PARABOLIC,nose.Shape.HAACK]
 
+def nose_type_index(nose_type):
+    global NOSE_TYPES
+    for i in range(len(NOSE_TYPES)):
+        if nose_type == NOSE_TYPES[i]:
+            return i
+
+    raise ValueError("Invalid nose_type")
+
 # Do not use
 #def define_body_tube_presets(presets):
 #    global body_tube_presets

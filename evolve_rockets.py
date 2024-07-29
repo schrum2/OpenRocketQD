@@ -580,7 +580,7 @@ def evaluate_rocket_genome(genome):
 
         genome -- numbers that are mapped to rocket design parameters
 
-        Return: (fitness, stability, max altitude)
+        Return: (fitness, stability, max altitude, nose type)
     """
     global sim
     global opts
@@ -625,8 +625,12 @@ def evolve_rockets(solution_batch):
     objective_batch = [] 
     measures_batch = []
 
-    for obj, stability, altitude in results:
+    for obj, stability, altitude, nose_type in results:
         objective_batch.append(obj)
+        # TODO
+        # nose_type not currently used, but I could have an alternative 
+        # binning scheme that takes it into consideration. Would need to map
+        # from Java object to an integer though.
         measures_batch.append([stability, altitude])
 
     # I have no idea how to compute gradients for a problem like this, if it is even possible
