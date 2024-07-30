@@ -625,13 +625,21 @@ def evolve_rockets(solution_batch):
     objective_batch = [] 
     measures_batch = []
 
+    global global_bin_model
+    global MAX_STABILITY
+    global MIN_STABILITY
+
     for obj, stability, altitude, nose_type in results:
         objective_batch.append(obj)
-        # TODO
-        # nose_type not currently used, but I could have an alternative 
-        # binning scheme that takes it into consideration. Would need to map
-        # from Java object to an integer though.
-        measures_batch.append([stability, altitude])
+        if global_bin_model == "stability_altitude":
+            measures_batch.append([stability, altitude])
+        elif global_bin_model == "stabilitynose_altitude":
+            nose_index = rd.nose_type_index(nose_type)
+            stabilitynose = (nose_index * (MAX_STABILITY - MIN_STABILITY)) + stability
+            measures_batch.append([stabilitynose, altitude])
+        else:
+            print("global_bin_model not valid:", global_bin_model)
+            quit()
 
     # I have no idea how to compute gradients for a problem like this, if it is even possible
     objective_grad_batch = None 
@@ -657,17 +665,34 @@ def create_scheduler(config, algorithm, seed=None):
         ribs.schedulers.Scheduler: A ribs scheduler for running the algorithm.
     """
     solution_dim = GENOME_LENGTH
-    archive_dims = (100,100) # Hard-coding archive size 
     learning_rate = 1.0 if "learning_rate" not in config["archive"]["kwargs"] else config["archive"]["kwargs"]["learning_rate"]
     use_result_archive = config["use_result_archive"]
     
     # These are guesses that go beyond what I expect is reasonable
+    global MAX_STABILITY
+    global MIN_STABILITY
+    global MAX_NOSE_TYPE_INDEX
+
     MIN_STABILITY = 1.0
     MAX_STABILITY = 3.0
     MIN_ALTITUDE = 0.0
     MAX_ALTITUDE = 110.0 
-    
-    bounds = [(MIN_STABILITY, MAX_STABILITY), (MIN_ALTITUDE, MAX_ALTITUDE)]
+    MIN_NOSE_TYPE_INDEX = 0
+    MAX_NOSE_TYPE_INDEX = 5
+
+    global global_bin_model
+    global_bin_model = config["bin_model"]
+
+    if config["bin_model"] == "stability_altitude":
+        archive_dims = (100,100) # Hard-coding archive size 
+        bounds = [(MIN_STABILITY, MAX_STABILITY), (MIN_ALTITUDE, MAX_ALTITUDE)]
+    elif config["bin_model"] == "stabilitynose_altitude":
+        archive_dims = (100,100) # Hard-coding archive size 
+        bounds = [(0, ((MAX_STABILITY - MIN_STABILITY) * (MAX_NOSE_TYPE_INDEX+1)) ), (MIN_ALTITUDE, MAX_ALTITUDE)]
+    else:
+        print("Invalid bin_model:", config["bin_model"])
+        quit()
+
     initial_sol = np.array(STARTING_SOLUTION)
     mode = "batch"
 
@@ -747,6 +772,7 @@ def save_heatmap(plt, archive, heatmap_path):
 
 def evolve_rockets_main(algorithm,
                 run_num=0,
+                bin_model="stability_altitude",
                 itrs=300,
                 learning_rate=None,
                 es=None,
@@ -794,6 +820,12 @@ def evolve_rockets_main(algorithm,
     outdir = Path(outdir)
     if not outdir.is_dir():
         outdir.mkdir()
+
+    # Allow different bin models
+    config["bin_model"] = bin_model
+    # Default is "stability_altitude" with fitness of altitude consistency
+    # Other options:
+    # "stabilitynose_altitude" with fitness of altitude consistency
 
     scheduler = create_scheduler(config, algorithm, seed=seed)
     result_archive = scheduler.result_archive
