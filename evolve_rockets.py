@@ -628,9 +628,7 @@ def evolve_rockets(solution_batch):
     global global_bin_model
     global MAX_STABILITY
     global MIN_STABILITY
-
-    # Creates space between different nose cone types when mapping 3D archive to 2D
-    buffer = 0.5
+    global BUFFER
 
     for obj, stability, altitude, nose_type in results:
         objective_batch.append(obj)
@@ -642,7 +640,7 @@ def evolve_rockets(solution_batch):
                 stability = MIN_STABILITY # Not strictly true, but makes the mapping correct
             elif stability > MAX_STABILITY:
                 stability = MAX_STABILITY # Also inaccurate, but less likely to cause issues
-            stabilitynose = (nose_index * (buffer + (MAX_STABILITY - MIN_STABILITY))) + (stability - MIN_STABILITY)
+            stabilitynose = (nose_index * (BUFFER + (MAX_STABILITY - MIN_STABILITY))) + (stability - MIN_STABILITY)
             measures_batch.append([stabilitynose, altitude])
         #elif global_bin_model == "stability_nose_altitude":
         #    nose_index = rd.nose_type_index(nose_type)
@@ -682,6 +680,9 @@ def create_scheduler(config, algorithm, seed=None):
     global MAX_STABILITY
     global MIN_STABILITY
     global MAX_NOSE_TYPE_INDEX
+    global BUFFER
+
+    BUFFER = 0.5 # Create space between nose cone types in 3D archived mapped to 2D
 
     MIN_STABILITY = 1.0
     MAX_STABILITY = 3.0
@@ -698,7 +699,7 @@ def create_scheduler(config, algorithm, seed=None):
         bounds = [(MIN_STABILITY, MAX_STABILITY), (MIN_ALTITUDE, MAX_ALTITUDE)]
     elif config["bin_model"] == "stabilitynose_altitude":
         archive_dims = (100,100) # Hard-coding archive size 
-        bounds = [(0, ((MAX_STABILITY - MIN_STABILITY) * (MAX_NOSE_TYPE_INDEX+1)) ), (MIN_ALTITUDE, MAX_ALTITUDE)]
+        bounds = [(0, ( (BUFFER + (MAX_STABILITY - MIN_STABILITY)) * (MAX_NOSE_TYPE_INDEX+1)) ), (MIN_ALTITUDE, MAX_ALTITUDE)]
     #elif config["bin_model"] == "stability_nose_altitude":
     #    archive_dims = (100,6,100) # Hard-coding archive size 
     #    bounds = [(MIN_STABILITY, MAX_STABILITY), (MIN_NOSE_TYPE_INDEX, MAX_NOSE_TYPE_INDEX), (MIN_ALTITUDE, MAX_ALTITUDE)]
