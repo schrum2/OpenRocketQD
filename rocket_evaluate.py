@@ -234,7 +234,7 @@ if __name__ == "__main__":
         top_rows = highest_fliers(rows, 10)
         print("TOP")
         for (index, genome, measures, objective) in top_rows:
-            print(index, measures)
+            print("Index:",index, "Objective:", objective, "Measures:", measures)
         print("END")
 
         if len(sys.argv) == 2: exit(0)
