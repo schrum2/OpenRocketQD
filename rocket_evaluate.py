@@ -204,9 +204,21 @@ def all_rows(filename):
             rows.append((i, genome, measures, objective))
         return rows
 
-def highest_fliers(rows, top_count):
+def highest_stable_fliers(rows, top_count, min_stability):
+    """
+        From the rows, filter out rows whose stability value is too low,
+        and then from those get the ones with the highest altitudes.
+
+        Parameters:
+        rows - data from the saved CSV archive
+        top_count - number of top rows to keep
+        min_stability - min stability required of the top results
+    """
+    # Measures are index 2, and index 0 is either the stability, or a combination of stability and nose type
+    # TODO: This filtering approach won't work for the new archive that tracks nose cone type
+    filtered = filter(lambda r : r[2][0] >= min_stability, rows)
     # Measures are index 2, altitude is the measure 1, and negating will sort in descending order
-    top = sorted(rows, key=lambda r : -r[2][1])
+    top = sorted(filtered, key=lambda r : -r[2][1])
     return top[:top_count]
 
 def sigmoid(arr):
@@ -231,7 +243,7 @@ if __name__ == "__main__":
 
         # Print top altitude rockets
         rows = all_rows(filename)
-        top_rows = highest_fliers(rows, 10)
+        top_rows = highest_stable_fliers(rows, 10, 1.0) # requires min stability of 1.0
         print("TOP")
         for (index, genome, measures, objective) in top_rows:
             print("Index:",index, "Objective:", objective, "Measures:", measures)
