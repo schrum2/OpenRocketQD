@@ -25,11 +25,11 @@ GENOME_INDEX_FIN_POINT3_X = 10
 SCALES = [#(0.01, 0.04),# Aft radius
           # None,       # Body Tube Present index: Has to be set after list of presets is loaded
           (0.05, 0.3),  # Nose length
-          (0,5),        # Nose type: [0 = nose.Shape.OGIVE,1 = nose.Shape.CONICAL,2 = nose.Shape.ELLIPSOID,3 = nose.Shape.POWER,4 = nose.Shape.PARABOLIC,5 = nose.Shape.HAACK]
+          (0,6),        # Nose type: [0 = nose.Shape.OGIVE,1 = nose.Shape.CONICAL,2 = nose.Shape.ELLIPSOID,3 = nose.Shape.POWER,4 = nose.Shape.PARABOLIC,5 = nose.Shape.HAACK]
           (0.0,1.0),    # Nose shape (only affects some types)
           (0.001,0.009),# Nose thickness
           (0.2,1.0),    # Body length
-          (2,5),        # Fin count (integer)
+          (2,6),        # Fin count (integer). This only allows values from 2 - 5 (6 excluded)
           (0.0,0.1),    # Fin point 1 x-coordinate
           (0.0,0.1),    # Fin point 1 y-coordinate
           (0.0,0.1),    # Fin point 2 x-coordinate
@@ -107,11 +107,13 @@ def decode_genome_element_discrete(scales, genome, index):
         Return: value from genome index scaled and rounded down to an int according to same index in scales
     """
     scaled = decode_genome_element_scale(scales, genome, index)
+    if scales[index][1] == scaled:
+        scaled -= 1 # For discrete scaling, the ceiling is out of bounds
     return int(math.floor(scaled))
 
 def decode_genome_element_nose_type(scales, genome, index):
     """
-        Convert specific genome element to a particular nose code type
+        Convert specific genome element to a particular nose cone type
 
         scales -- 2-tuples with (min,max) pairs
         genome -- evolved genome of values in [0,1]
