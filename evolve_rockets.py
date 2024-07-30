@@ -637,6 +637,9 @@ def evolve_rockets(solution_batch):
             nose_index = rd.nose_type_index(nose_type)
             stabilitynose = (nose_index * (MAX_STABILITY - MIN_STABILITY)) + stability
             measures_batch.append([stabilitynose, altitude])
+        #elif global_bin_model == "stability_nose_altitude":
+        #    nose_index = rd.nose_type_index(nose_type)
+        #    measures_batch.append([stability, nose_index, altitude])
         else:
             print("global_bin_model not valid:", global_bin_model)
             quit()
@@ -689,6 +692,9 @@ def create_scheduler(config, algorithm, seed=None):
     elif config["bin_model"] == "stabilitynose_altitude":
         archive_dims = (100,100) # Hard-coding archive size 
         bounds = [(0, ((MAX_STABILITY - MIN_STABILITY) * (MAX_NOSE_TYPE_INDEX+1)) ), (MIN_ALTITUDE, MAX_ALTITUDE)]
+    #elif config["bin_model"] == "stability_nose_altitude":
+    #    archive_dims = (100,6,100) # Hard-coding archive size 
+    #    bounds = [(MIN_STABILITY, MAX_STABILITY), (MIN_NOSE_TYPE_INDEX, MAX_NOSE_TYPE_INDEX), (MIN_ALTITUDE, MAX_ALTITUDE)]
     else:
         print("Invalid bin_model:", config["bin_model"])
         quit()
@@ -814,7 +820,7 @@ def evolve_rockets_main(algorithm,
             if e["class"] == EvolutionStrategyEmitter:
                 e["kwargs"]["es"] = es
 
-    name = f"{algorithm}{run_num}"
+    name = f"{algorithm}_{bin_model}_{run_num}"
     if es is not None:
         name += f"_{es}"
     outdir = Path(outdir)
