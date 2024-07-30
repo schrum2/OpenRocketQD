@@ -629,13 +629,20 @@ def evolve_rockets(solution_batch):
     global MAX_STABILITY
     global MIN_STABILITY
 
+    # Creates space between different nose cone types when mapping 3D archive to 2D
+    buffer = 0.5
+
     for obj, stability, altitude, nose_type in results:
         objective_batch.append(obj)
         if global_bin_model == "stability_altitude":
             measures_batch.append([stability, altitude])
         elif global_bin_model == "stabilitynose_altitude":
             nose_index = rd.nose_type_index(nose_type)
-            stabilitynose = (nose_index * (MAX_STABILITY - MIN_STABILITY)) + stability
+            if stability < MIN_STABILITY:
+                stability = MIN_STABILITY # Not strictly true, but makes the mapping correct
+            elif stability > MAX_STABILITY:
+                stability = MAX_STABILITY # Also inaccurate, but less likely to cause issues
+            stabilitynose = (nose_index * (buffer + (MAX_STABILITY - MIN_STABILITY))) + (stability - MIN_STABILITY)
             measures_batch.append([stabilitynose, altitude])
         #elif global_bin_model == "stability_nose_altitude":
         #    nose_index = rd.nose_type_index(nose_type)
