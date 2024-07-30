@@ -94,8 +94,9 @@ printed, and then a plot will be displayed of how its altitude changes over time
 in three simulated launches.
 
 If you leave out the line number, then the script will actually show you
-a listing of the line numbers for the top 10 evolved rockets in terms of altitude,
-to help you identify interesting line numbers.
+a listing of the line numbers for the top 10 "stable" evolved rockets in terms of altitude,
+to help you identify interesting line numbers. Note here that "stable" means that any
+rocket with a stability score of less than 1.0 is filtered out. 
 
 If you want to create an `ork` file representing the rocket so that you can analyze it
 further in OpenRocket, then add the name of the file to the end of the command line:
