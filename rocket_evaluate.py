@@ -6,6 +6,7 @@ import statistics
 import sys
 import csv
 import os
+import math
 
 # To test the robustness of the rocket design, it is evaluated at varying wind speeds
 WIND_SPEED_MIN = 2.0   # m/s 
@@ -224,22 +225,36 @@ def highest_stable_fliers(rows, top_count, min_stability, by_nose_type):
         MIN_STABILITY = 1.0  # Also doubly defined
         MAX_STABILITY = 3.0  # Also doubly defined
 
+        global NUM_NOSE_TYPES
+
         range_per_nose_type = (MAX_STABILITY - MIN_STABILITY) + BUFFER
         # There are 6 nose types, and the bottom of each range contains rockets with either the min stability or less.
         # Therefore, any value that is a multiple of range_per_nose_type should be excluded
         epsilon = 0.0001 # To check for approximate floating point equality
 
         # r[2][0] is the combined stability and nose type value.
-        filtered = filter(lambda r : abs( (r[2][0]/range_per_nose_type) - int(r[2][0]/range_per_nose_type) ) > epsilon, rows)
+        filtered = list(filter(lambda r : abs( (r[2][0]/range_per_nose_type) - int(r[2][0]/range_per_nose_type) ) > epsilon, rows))
 
-        # TODO: Currently the same as below, but I want to have representatives of each nose type in the future
-        top = sorted(filtered, key=lambda r : -r[2][1])
+        # Change count to allow a few extra, so each nose type is equally represented
+        count_per_nose = math.ceil(top_count / NUM_NOSE_TYPES)
+       
+        top = list()
+        for t in range(NUM_NOSE_TYPES):
+            lower_bound = t*range_per_nose_type
+            upper_bound = lower_bound + (MAX_STABILITY - MIN_STABILITY)
+
+            for_this_nose = filter(lambda r : r[2][0] > lower_bound and r[2][0] <= upper_bound, filtered)
+            top_for_nose = sorted(for_this_nose, key=lambda r : -r[2][1])
+            
+            top = top + top_for_nose[:count_per_nose]
+
+        return top
     else:
         filtered = filter(lambda r : r[2][0] >= min_stability, rows)
         # Measures are index 2, altitude is the measure 1, and negating will sort in descending order
         top = sorted(filtered, key=lambda r : -r[2][1])
 
-    return top[:top_count]
+        return top[:top_count]
 
 def sigmoid(arr):
     return 1/(1 + np.exp(-arr))
@@ -258,15 +273,20 @@ if __name__ == "__main__":
         print("python rocket_evaluate.py <archive file>")
     else:
         DEBUG = True
+        global NUM_NOSE_TYPES
+        NUM_NOSE_TYPES = 6
 
         filename = sys.argv[1]
 
         by_nose_type = "nose" in filename
 
         # Print top altitude rockets
+        top_count = 12
         rows = all_rows(filename)
-        top_rows = highest_stable_fliers(rows, 10, 1.0, by_nose_type) # requires min stability of 1.0
+        top_rows = highest_stable_fliers(rows, top_count, 1.0, by_nose_type) # requires min stability of 1.0
         print("TOP")
+        if by_nose_type:
+            print(top_count / NUM_NOSE_TYPES, "per nose type")
         for (index, genome, measures, objective) in top_rows:
             print("Index:",index, "Objective:", objective, "Measures:", measures)
         print("END")
