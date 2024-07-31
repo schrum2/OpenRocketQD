@@ -204,7 +204,7 @@ def all_rows(filename):
             rows.append((i, genome, measures, objective))
         return rows
 
-def highest_stable_fliers(rows, top_count, min_stability):
+def highest_stable_fliers(rows, top_count, min_stability, by_nose_type):
     """
         From the rows, filter out rows whose stability value is too low,
         and then from those get the ones with the highest altitudes.
@@ -213,12 +213,32 @@ def highest_stable_fliers(rows, top_count, min_stability):
         rows - data from the saved CSV archive
         top_count - number of top rows to keep
         min_stability - min stability required of the top results
+        by_nose_type - whether to split up results by nose type
     """
     # Measures are index 2, and index 0 is either the stability, or a combination of stability and nose type
-    # TODO: This filtering approach won't work for the new archive that tracks nose cone type
-    filtered = filter(lambda r : r[2][0] >= min_stability, rows)
-    # Measures are index 2, altitude is the measure 1, and negating will sort in descending order
-    top = sorted(filtered, key=lambda r : -r[2][1])
+    if by_nose_type:
+        # min_stability does not matter if nose type is factored in, since those archives
+        # have their stability/nose values artificially changed to fit into the right bin
+
+        BUFFER = 0.5 # This value is also defined in evolve_rockets.py. Should have one shared value rather than double definition
+        MIN_STABILITY = 1.0  # Also doubly defined
+        MAX_STABILITY = 3.0  # Also doubly defined
+
+        range_per_nose_type = (MAX_STABILITY - MIN_STABILITY) + BUFFER
+        # There are 6 nose types, and the bottom of each range contains rockets with either the min stability or less.
+        # Therefore, any value that is a multiple of range_per_nose_type should be excluded
+        epsilon = 0.0001 # To check for approximate floating point equality
+
+        # r[2][0] is the combined stability and nose type value.
+        filtered = filter(lambda r : abs( (r[2][0]/range_per_nose_type) - int(r[2][0]/range_per_nose_type) ) > epsilon, rows)
+
+        # TODO: Currently the same as below, but I want to have representatives of each nose type in the future
+        top = sorted(filtered, key=lambda r : -r[2][1])
+    else:
+        filtered = filter(lambda r : r[2][0] >= min_stability, rows)
+        # Measures are index 2, altitude is the measure 1, and negating will sort in descending order
+        top = sorted(filtered, key=lambda r : -r[2][1])
+
     return top[:top_count]
 
 def sigmoid(arr):
@@ -241,9 +261,11 @@ if __name__ == "__main__":
 
         filename = sys.argv[1]
 
+        by_nose_type = "nose" in filename
+
         # Print top altitude rockets
         rows = all_rows(filename)
-        top_rows = highest_stable_fliers(rows, 10, 1.0) # requires min stability of 1.0
+        top_rows = highest_stable_fliers(rows, 10, 1.0, by_nose_type) # requires min stability of 1.0
         print("TOP")
         for (index, genome, measures, objective) in top_rows:
             print("Index:",index, "Objective:", objective, "Measures:", measures)
@@ -262,7 +284,7 @@ if __name__ == "__main__":
         (genome, measures, objective) = row_data
 
         print("Genome:",genome)
-        print("Stability:",measures[0])
+        print("Stability (and Nose?):",measures[0])
         print("Altitude:",measures[1])
         print("Consistency:",objective)
 
