@@ -631,6 +631,11 @@ def evolve_rockets(solution_batch):
     global BUFFER
 
     for obj, stability, altitude, nose_type in results:
+
+        # Punish low stability: Cody says stability should be at least 1.0
+        if stability < MIN_STABILITY:
+            obj = 0
+
         objective_batch.append(obj)
         if global_bin_model == "stability_altitude":
             measures_batch.append([stability, altitude])
