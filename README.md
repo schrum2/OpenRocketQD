@@ -118,3 +118,16 @@ launch this version of OpenRocket from within the project directory with the com
 java -jar OpenRocket-15.03.jar
 ```
 You can view the source code for OpenRocket version 15.03 [here](https://github.com/openrocket/openrocket/tree/release-15.03)
+
+If you want to quickly create `ork` files for all of the rockets that are returned by
+looking at the top altitudes, then you can use the `save_multiple.bat` batch file in Windows.
+Here are its expected parameters:
+```
+save_multiple.bat <csv archive> <output ork file prefix> <line num>*
+```
+Notice that `<line num>*` has an asterisk indicating that you can list as many space separated line numbers
+from the archive file that you like. An example usage looks like this
+```
+save_multiple.bat evolve_rockets_output\cma_me_imp_stabilitynose_altitude_2_archive.csv cma_me_imp_result 5175 5210 5322
+```
+This outputs three files named `cma_me_imp_result5175.ork`, `cma_me_imp_result5210.ork`, and `cma_me_imp_result5322.ork`.

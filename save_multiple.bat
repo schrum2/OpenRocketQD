@@ -11,7 +11,14 @@ set "prefix=%~2"
 shift
 shift
 
-set "numbers=%*"
+set "numbers="
+:loop
+if "%~1"=="" goto :done
+set "numbers=!numbers! %~1"
+shift
+goto :loop
+:done
+
 for %%i in (%numbers%) do (
     set "num=%%i"
     python rocket_evaluate.py "!csv_file!" !num! "!prefix!!num!.ork" skip
