@@ -1,5 +1,9 @@
+@echo off
+setlocal enabledelayedexpansion
 
-REM need to find way to generalize this
-
-$numbers = @(7874, 7844, 7865, 7832, 6297, 7853, 7839, 7867, 7830); 
-foreach ($num in $numbers) { python rocket_evaluate.py .\evolve_rockets_output\cma_mae0_archive.csv $num cma_mae0_$num.ork skip; }
+set numbers=5210 5175 5534 5402 5570 5571 5628 6077 5892 6598 5908 5322
+for %%i in (%numbers%) do (
+    set num=%%i
+    python rocket_evaluate.py .\evolve_rockets_output\cma_me_imp_stabilitynose_altitude_2_archive.csv !num! cma_mae0_!num!.ork skip
+)
+endlocal
