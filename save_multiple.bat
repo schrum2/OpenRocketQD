@@ -1,9 +1,19 @@
 @echo off
 setlocal enabledelayedexpansion
 
-set numbers=5210 5175 5534 5402 5570 5571 5628 6077 5892 6598 5908 5322
+if "%~1"=="" (
+    echo Usage: %0 csv_file prefix number1 number2 ...
+    exit /b 1
+)
+
+set "csv_file=%~1"
+set "prefix=%~2"
+shift
+shift
+
+set "numbers=%*"
 for %%i in (%numbers%) do (
-    set num=%%i
-    python rocket_evaluate.py .\evolve_rockets_output\cma_me_imp_stabilitynose_altitude_2_archive.csv !num! cma_mae0_!num!.ork skip
+    set "num=%%i"
+    python rocket_evaluate.py "!csv_file!" !num! "!prefix!!num!.ork" skip
 )
 endlocal
