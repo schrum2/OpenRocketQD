@@ -1,6 +1,7 @@
 
 import rocket_evaluate as re
 import sys
+import math
 
 def stable_top_of_range(rows, min_stability, by_nose_type, current_ceiling, top_count):
     """
@@ -17,11 +18,44 @@ def stable_top_of_range(rows, min_stability, by_nose_type, current_ceiling, top_
     """
     # Measures are index 2, and index 0 is either the stability, or a combination of stability and nose type.
     # Measure index 1 is the altitude.
-    filtered = filter(lambda r : r[2][0] >= min_stability and r[2][1] < current_ceiling, rows)
-        
-    top = sorted(filtered, key=lambda r : -r[2][1])
+    if by_nose_type:
+        # min_stability does not matter if nose type is factored in, since those archives
+        # have their stability/nose values artificially changed to fit into the right bin
 
-    return top[:top_count]
+        BUFFER = 0.5 # This value is also defined in evolve_rockets.py. Should have one shared value rather than double definition
+        MIN_STABILITY = 1.0  # Also doubly defined
+        MAX_STABILITY = 3.0  # Also doubly defined
+
+        global NUM_NOSE_TYPES
+
+        range_per_nose_type = (MAX_STABILITY - MIN_STABILITY) + BUFFER
+        # There are 6 nose types, and the bottom of each range contains rockets with either the min stability or less.
+        # Therefore, any value that is a multiple of range_per_nose_type should be excluded
+        epsilon = 0.0001 # To check for approximate floating point equality
+
+        # r[2][0] is the combined stability and nose type value.
+        filtered = list(filter(lambda r : r[2][1] < current_ceiling and abs( (r[2][0]/range_per_nose_type) - int(r[2][0]/range_per_nose_type) ) > epsilon, rows))
+
+        # Change count to allow a few extra, so each nose type is equally represented
+        count_per_nose = math.ceil(top_count / NUM_NOSE_TYPES)
+       
+        top = list()
+        for t in range(NUM_NOSE_TYPES):
+            lower_bound = t*range_per_nose_type
+            upper_bound = lower_bound + (MAX_STABILITY - MIN_STABILITY)
+
+            for_this_nose = filter(lambda r : r[2][0] > lower_bound and r[2][0] <= upper_bound, filtered)
+            top_for_nose = sorted(for_this_nose, key=lambda r : -r[2][1])
+            
+            top = top + top_for_nose[:count_per_nose]
+
+        return top
+    else:
+        filtered = filter(lambda r : r[2][0] >= min_stability and r[2][1] < current_ceiling, rows)
+        
+        top = sorted(filtered, key=lambda r : -r[2][1])
+
+        return top[:top_count]
 
 if __name__ == "__main__":
     if len(sys.argv) != 4:
@@ -39,7 +73,7 @@ if __name__ == "__main__":
         ceiling = float(sys.argv[3])
 
         by_nose_type = "nose" in filename
-        top_count = 3
+        top_count = 6
 
         rows = re.all_rows(filename)
         current_ceiling = step
