@@ -346,6 +346,7 @@ if __name__ == "__main__":
                 result = simulate_rocket(orh, sim, opts, doc, plt)
                 print(result)
 
-            if save_file: 
-                orh.save_doc(save_file, doc)
-                print("Saved file:",save_file)
+            if save_file:
+                alt = measures[1]
+                orh.save_doc(f"Alt_{alt}_{save_file}", doc)
+                print("Saved file:",f"Alt_{alt}_{save_file}")
