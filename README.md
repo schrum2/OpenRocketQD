@@ -105,13 +105,22 @@ printed, and then a plot will be displayed of how its altitude changes over time
 in three simulated launches.
 
 If you leave out the line number, then the script will actually show you
-a listing of the line numbers for the top 10 "stable" evolved rockets in terms of altitude,
+a listing of the line numbers for the top 12 "stable" evolved rockets in terms of altitude,
 to help you identify interesting line numbers. Note here that "stable" means that any
 rocket with a stability score of less than 1.0 is filtered out. 
 However, if the bin model is `stabilitynose_altitude` then the output is slightly
 different. In this case, there are 2 rockets per nose type, of which there are 6.
 
-If you want to create an `ork` file representing the rocket so that you can analyze it
+Note that there is also a script called `rocket_spread.py` that is used to identify
+rockets that achieve various altitudes. Here is an example usage:
+```
+python rocket_spread.py .\evolve_rockets_output\cma_me_imp_stabilitynose_altitude_2_archive.csv 10 110
+```
+This command finds rocket line numbers that achieve different altitudes. In this example specifically, 
+the user is shown the 6 stable rockets whose altitude is closest to 10 meters without exceeding it, and 
+the output continues in increments of 10 meters: 20, 30, 40, and so on up to 110.
+
+Back to `rocket_evaluate.py`: If you want to create an `ork` file representing the rocket so that you can analyze it
 further in OpenRocket, then add the name of the file to the end of the command line:
 ```
 python rocket_evaluate.py .\evolve_rockets_output\map_elites_stability_altitude_0_archive.csv 2000 map_elites0_2000.ork
