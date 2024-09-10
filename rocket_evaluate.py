@@ -328,7 +328,7 @@ if __name__ == "__main__":
             #body_tube_presets = instance.preset_loader.getDatabase().listForType(ComponentPreset.Type.BODY_TUBE)
 
             orh = orhelper.Helper(instance)
-            doc = orh.load_doc(os.path.join('examples', 'base.ork')) # File was modified to replace Trapezoidal fin set with Freeform fin set
+            doc = orh.load_doc(os.path.join('examples', 'modified.ork')) # File was modified to replace Trapezoidal fin set with Freeform fin set
             sim = doc.getSimulation(0)
             opts = sim.getOptions()
             rocket = opts.getRocket()
