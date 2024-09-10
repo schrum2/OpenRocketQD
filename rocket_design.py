@@ -20,6 +20,8 @@ GENOME_INDEX_FIN_POINT1_Y = 7
 GENOME_INDEX_FIN_POINT2_X = 8
 GENOME_INDEX_FIN_POINT2_Y = 9
 GENOME_INDEX_FIN_POINT3_X = 10
+GENOME_INDEX_FIN_POINT3_Y = 11
+GENOME_INDEX_FIN_POINT4_X = 12
 
 # The number range appropriate for each element of genome
 SCALES = [#(0.01, 0.04),# Aft radius
@@ -34,7 +36,9 @@ SCALES = [#(0.01, 0.04),# Aft radius
           (0.0,0.1),    # Fin point 1 y-coordinate
           (0.0,0.1),    # Fin point 2 x-coordinate
           (0.0,0.1),    # Fin point 2 y-coordinate
-          (0.02,0.1)    # Fin point 3 x-coordinate (final x-coordinate must be far enough from start to create a surface to attach to the rocket)
+          (0.0,0.1),    # Fin point 3 x-coordinate
+          (0.0,0.1),    # Fin point 3 y-coordinate
+          (0.02,0.1)    # Fin point 4 x-coordinate (final x-coordinate must be far enough from start to create a surface to attach to the rocket)
                         # final y-coordinate must be 0.0
          ]
 # Note: might want to generalize to more fin points later
@@ -205,7 +209,8 @@ def apply_genome_to_rocket(orh, rocket, genome):
     fin_points.append( Coordinate(0.0,0.0,0.0) ) # Always start at (0,0,0)
     fin_points.append( decode_genome_element_coordinate(Coordinate, SCALES, genome, GENOME_INDEX_FIN_POINT1_X, GENOME_INDEX_FIN_POINT1_Y) )
     fin_points.append( decode_genome_element_coordinate(Coordinate, SCALES, genome, GENOME_INDEX_FIN_POINT2_X, GENOME_INDEX_FIN_POINT2_Y) )
-    fin_points.append( Coordinate( round(decode_genome_element_scale(SCALES, genome, GENOME_INDEX_FIN_POINT3_X), 3), 0.0, 0.0) ) # Last y-coordinate must be 0
+    fin_points.append( decode_genome_element_coordinate(Coordinate, SCALES, genome, GENOME_INDEX_FIN_POINT3_X, GENOME_INDEX_FIN_POINT3_Y) )
+    fin_points.append( Coordinate( round(decode_genome_element_scale(SCALES, genome, GENOME_INDEX_FIN_POINT4_X), 3), 0.0, 0.0) ) # Last y-coordinate must be 0
 
     if DEBUG:
         print("Fin points")
