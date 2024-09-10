@@ -3,7 +3,7 @@ setlocal enabledelayedexpansion
 
 REM Check if N is provided as a command line parameter
 if "%~1"=="" (
-    echo Please provide the value of N as a command line parameter.
+    echo Please provide the value of N as an experiment number.
     exit /b 1
 )
 
