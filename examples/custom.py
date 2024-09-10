@@ -224,7 +224,7 @@ with orhelper.OpenRocketInstance() as instance:
 
     # Load document, run simulation and get data and events
 
-    doc = orh.load_doc(os.path.join('examples', 'modified.ork')) # File was modified to replace Trapezoidal fin set with Freeform fin set
+    doc = orh.load_doc(os.path.join('examples', 'base.ork')) # File was modified to replace Trapezoidal fin set with Freeform fin set
     sim = doc.getSimulation(0)
 
     # Added code here
