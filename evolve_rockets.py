@@ -692,7 +692,7 @@ def create_scheduler(config, algorithm, seed=None):
     MIN_STABILITY = 1.0
     MAX_STABILITY = 3.0
     MIN_ALTITUDE = 0.0
-    MAX_ALTITUDE = 110.0 
+    MAX_ALTITUDE = 90.0 # Max under 'base_15.03.ork' seems to be around 80
     MIN_NOSE_TYPE_INDEX = 0
     MAX_NOSE_TYPE_INDEX = 5
 
