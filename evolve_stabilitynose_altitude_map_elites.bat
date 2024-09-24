@@ -1,15 +1,20 @@
 @echo off
 setlocal enabledelayedexpansion
 
-REM Check if N is provided as a command line parameter
 if "%~1"=="" (
-    echo Please provide the value of N as an experiment number.
+    echo Please provide the value of N as starting experiment number.
+    exit /b 1
+)
+
+if "%~2"=="" (
+    echo Please provide the value of M as ending experiment number.
     exit /b 1
 )
 
 set N=%~1
+set M=%~1
 
-for /L %%i in (0,1,%N%-1) do (
+for /L %%i in (%N%,1,%M%) do (
     python evolve_rockets.py map_elites %%i stabilitynose_altitude
 )
 
