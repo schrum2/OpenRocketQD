@@ -348,5 +348,7 @@ if __name__ == "__main__":
 
             if save_file:
                 alt = measures[1]
-                orh.save_doc(f"Alt_{alt}_{save_file}", doc)
-                print("Saved file:",f"Alt_{alt}_{save_file}")
+                nose_type = nose.getType()
+                full_name = f"Alt_{alt}_Nose_{nose_type}_{save_file}"
+                orh.save_doc(full_name, doc)
+                print("Saved file:", full_name)
