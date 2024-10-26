@@ -57,19 +57,31 @@ map_elites_qd_score_mean, map_elites_qd_score_ci = calculate_mean_and_ci(map_eli
 # X values (assumed to be the same across all files)
 x_values = cma_data["Archive Coverage"]["x"]
 
+# Configure matplotlib to embed fonts in the PDF
+plt.rcParams['pdf.fonttype'] = 42
+# Increase font sizes
+plt.rcParams.update({'font.size': 14})
+
 # Plot Archive Coverage comparison
 plt.figure(figsize=(10, 6))
+# Plot CMA-ES coverage with confidence interval
 plt.plot(x_values, cma_coverage_mean, label="CMA-ES", color="blue")
 plt.fill_between(x_values, cma_coverage_mean - cma_coverage_ci, cma_coverage_mean + cma_coverage_ci, color="blue", alpha=0.2)
+# Plot MAP-Elites coverage with confidence interval
 plt.plot(x_values, map_elites_coverage_mean, label="MAP-Elites", color="green")
 plt.fill_between(x_values, map_elites_coverage_mean - map_elites_coverage_ci, map_elites_coverage_mean + map_elites_coverage_ci, color="green", alpha=0.2)
-plt.xlabel("Generations")
-plt.ylabel("Average Archive Coverage")
-plt.title("Average Archive Coverage with 95% Confidence Interval (CMA-ES vs MAP-Elites)")
-plt.legend()
-plt.savefig("Archive_Coverage_Comparison.pdf")
+# Labels, title, and legend with adjustments
+plt.xlabel("Generations", fontsize=16)
+plt.ylabel("Average Archive Coverage", fontsize=16)
+plt.title("Average Archive Coverage", fontsize=18)
+plt.legend(loc="lower right", fontsize=14)
+# Apply tight layout to reduce white space
+plt.tight_layout()
+# Save the figure
+plt.savefig("Archive_Coverage_Comparison.pdf", bbox_inches='tight')
 print("Archive_Coverage_Comparison.pdf saved")
 plt.close()
+
 
 # Plot QD Score comparison
 plt.figure(figsize=(10, 6))
@@ -77,10 +89,11 @@ plt.plot(x_values, cma_qd_score_mean, label="CMA-ES", color="blue")
 plt.fill_between(x_values, cma_qd_score_mean - cma_qd_score_ci, cma_qd_score_mean + cma_qd_score_ci, color="blue", alpha=0.2)
 plt.plot(x_values, map_elites_qd_score_mean, label="MAP-Elites", color="green")
 plt.fill_between(x_values, map_elites_qd_score_mean - map_elites_qd_score_ci, map_elites_qd_score_mean + map_elites_qd_score_ci, color="green", alpha=0.2)
-plt.xlabel("Generations")
-plt.ylabel("Average QD Score")
-plt.title("Average QD Score with 95% Confidence Interval (CMA-ES vs MAP-Elites)")
-plt.legend()
-plt.savefig("QD_Score_Comparison.pdf")
+plt.xlabel("Generations", fontsize=16)
+plt.ylabel("Average QD Score", fontsize=16)
+plt.title("Average QD Score", fontsize=18)
+plt.legend(loc="lower right", fontsize=14)
+plt.tight_layout()
+plt.savefig("QD_Score_Comparison.pdf", bbox_inches='tight')
 print("QD_Score_Comparison.pdf saved")
 plt.close()
