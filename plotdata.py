@@ -97,3 +97,37 @@ plt.tight_layout()
 plt.savefig("QD_Score_Comparison.pdf", bbox_inches='tight')
 print("QD_Score_Comparison.pdf saved")
 plt.close()
+
+
+# Known data points (percentages and corresponding counts)
+known_percentages = np.array([0.652, 0.6108, 0.622])
+known_counts = np.array([6520, 6108, 6220])
+
+# Calculate scaling factor
+scaling_factors = known_counts / known_percentages
+average_scaling_factor = np.mean(scaling_factors)
+print(average_scaling_factor)
+
+# Convert CMA-ES and MAP-Elites Archive Coverage to counts (Occupied Cells)
+cma_occupied_cells = cma_coverage_mean * average_scaling_factor
+map_elites_occupied_cells = map_elites_coverage_mean * average_scaling_factor
+
+# Plot Number of Individuals in Archive (Occupied Cells) comparison
+plt.figure(figsize=(10, 6))
+# Plot CMA-ES occupied cells with confidence interval
+plt.plot(x_values, cma_occupied_cells, label="CMA-ES", color="blue")
+plt.fill_between(x_values, (cma_occupied_cells - cma_coverage_ci * average_scaling_factor),
+                 (cma_occupied_cells + cma_coverage_ci * average_scaling_factor), color="blue", alpha=0.2)
+# Plot MAP-Elites occupied cells with confidence interval
+plt.plot(x_values, map_elites_occupied_cells, label="MAP-Elites", color="green")
+plt.fill_between(x_values, (map_elites_occupied_cells - map_elites_coverage_ci * average_scaling_factor),
+                 (map_elites_occupied_cells + map_elites_coverage_ci * average_scaling_factor), color="green", alpha=0.2)
+plt.xlabel("Generations", fontsize=16)
+plt.ylabel("Occupied Cells", fontsize=16)
+plt.title("Number of Individuals in Archive", fontsize=18)
+plt.legend(loc="lower right", fontsize=14)
+plt.tight_layout()
+plt.savefig("Occupied_Cells_Comparison.pdf", bbox_inches='tight')
+print("Occupied_Cells_Comparison.pdf saved")
+plt.close()
+
