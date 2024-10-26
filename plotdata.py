@@ -62,26 +62,22 @@ plt.rcParams['pdf.fonttype'] = 42
 # Increase font sizes
 plt.rcParams.update({'font.size': 14})
 
+# Fixed left margin to ensure consistent plot box width
+left_margin = 0.15  # Adjust this value if necessary
+
 # Plot Archive Coverage comparison
 plt.figure(figsize=(10, 6))
-# Plot CMA-ES coverage with confidence interval
 plt.plot(x_values, cma_coverage_mean, label="CMA-ES", color="blue")
 plt.fill_between(x_values, cma_coverage_mean - cma_coverage_ci, cma_coverage_mean + cma_coverage_ci, color="blue", alpha=0.2)
-# Plot MAP-Elites coverage with confidence interval
 plt.plot(x_values, map_elites_coverage_mean, label="MAP-Elites", color="green")
 plt.fill_between(x_values, map_elites_coverage_mean - map_elites_coverage_ci, map_elites_coverage_mean + map_elites_coverage_ci, color="green", alpha=0.2)
-# Labels, title, and legend with adjustments
 plt.xlabel("Generations", fontsize=16)
 plt.ylabel("Average Archive Coverage", fontsize=16)
 plt.title("Average Archive Coverage", fontsize=18)
 plt.legend(loc="lower right", fontsize=14)
-# Apply tight layout to reduce white space
-plt.tight_layout()
-# Save the figure
+plt.subplots_adjust(left=left_margin)
 plt.savefig("Archive_Coverage_Comparison.pdf", bbox_inches='tight')
-print("Archive_Coverage_Comparison.pdf saved")
 plt.close()
-
 
 # Plot QD Score comparison
 plt.figure(figsize=(10, 6))
@@ -93,11 +89,9 @@ plt.xlabel("Generations", fontsize=16)
 plt.ylabel("Average QD Score", fontsize=16)
 plt.title("Average QD Score", fontsize=18)
 plt.legend(loc="lower right", fontsize=14)
-plt.tight_layout()
+plt.subplots_adjust(left=left_margin)
 plt.savefig("QD_Score_Comparison.pdf", bbox_inches='tight')
-print("QD_Score_Comparison.pdf saved")
 plt.close()
-
 
 average_scaling_factor = 10000.0
 
@@ -107,11 +101,9 @@ map_elites_occupied_cells = map_elites_coverage_mean * average_scaling_factor
 
 # Plot Number of Individuals in Archive (Occupied Cells) comparison
 plt.figure(figsize=(10, 6))
-# Plot CMA-ES occupied cells with confidence interval
 plt.plot(x_values, cma_occupied_cells, label="CMA-ES", color="blue")
 plt.fill_between(x_values, (cma_occupied_cells - cma_coverage_ci * average_scaling_factor),
                  (cma_occupied_cells + cma_coverage_ci * average_scaling_factor), color="blue", alpha=0.2)
-# Plot MAP-Elites occupied cells with confidence interval
 plt.plot(x_values, map_elites_occupied_cells, label="MAP-Elites", color="green")
 plt.fill_between(x_values, (map_elites_occupied_cells - map_elites_coverage_ci * average_scaling_factor),
                  (map_elites_occupied_cells + map_elites_coverage_ci * average_scaling_factor), color="green", alpha=0.2)
@@ -119,8 +111,8 @@ plt.xlabel("Generations", fontsize=16)
 plt.ylabel("Occupied Cells", fontsize=16)
 plt.title("Number of Individuals in Archive", fontsize=18)
 plt.legend(loc="lower right", fontsize=14)
-plt.tight_layout()
+plt.subplots_adjust(left=left_margin)
 plt.savefig("Occupied_Cells_Comparison.pdf", bbox_inches='tight')
-print("Occupied_Cells_Comparison.pdf saved")
 plt.close()
+
 
