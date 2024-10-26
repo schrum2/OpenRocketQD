@@ -99,14 +99,7 @@ print("QD_Score_Comparison.pdf saved")
 plt.close()
 
 
-# Known data points (percentages and corresponding counts)
-known_percentages = np.array([0.652, 0.6108, 0.622])
-known_counts = np.array([6520, 6108, 6220])
-
-# Calculate scaling factor
-scaling_factors = known_counts / known_percentages
-average_scaling_factor = np.mean(scaling_factors)
-print(average_scaling_factor)
+average_scaling_factor = 10000.0
 
 # Convert CMA-ES and MAP-Elites Archive Coverage to counts (Occupied Cells)
 cma_occupied_cells = cma_coverage_mean * average_scaling_factor
