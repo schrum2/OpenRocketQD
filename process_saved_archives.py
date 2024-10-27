@@ -48,18 +48,13 @@ def load_grid_archive_from_csv(filepath, config=None):
     
     # Add each solution to the archive
     for _, row in df.iterrows():
-        solution = row[solution_cols].values
-        objective = row['objective']
-        measures = row[[f'measures_{i}' for i in range(2)]].values  # 2D measures space
+        # Reshape arrays to match expected batch dimensions
+        solution = row[solution_cols].values.reshape(1, -1)  # Shape: (1, solution_dim)
+        objective = np.array([row['objective']])  # Shape: (1,)
+        measures = row[[f'measures_{i}' for i in range(2)]].values.reshape(1, -1)  # Shape: (1, 2)
         
-        # If threshold was saved, we can set it through the add method
+        # Add the solution to the archive
         archive.add(solution, objective, measures)
-        
-        # Then update the threshold if it exists in the data
-        if 'threshold' in row:
-            idx = row['index']
-            # Access the threshold array through the protected name
-            archive._threshold[idx] = row['threshold']
     
     return archive
 
