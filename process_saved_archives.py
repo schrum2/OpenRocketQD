@@ -1,6 +1,9 @@
 import pandas as pd
 import numpy as np
 from ribs.archives import GridArchive
+from ribs.visualize import cvt_archive_heatmap, grid_archive_heatmap
+
+from rocket_evaluate import MAX_FITNESS
 
 # Constants from original configuration
 BUFFER = 0.5
@@ -83,3 +86,13 @@ if __name__ == "__main__":
     print(f"Measure ranges: {list(zip(archive.lower_bounds, archive.upper_bounds))}")
     print(f"First measure range: {bounds[0]}")  # Stability-nose combined range
     print(f"Second measure range: {bounds[1]}")  # Altitude range
+
+    import matplotlib
+    matplotlib.use('Agg')
+    import matplotlib.pyplot as plt
+
+    plt.figure(figsize=(8, 6))
+    grid_archive_heatmap(archive, vmin=0, vmax=MAX_FITNESS)
+    plt.tight_layout()
+    plt.savefig("test.png")
+    plt.close(plt.gcf())
