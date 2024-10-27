@@ -22,6 +22,8 @@ def load_grid_archive_from_csv(filepath, config=None):
     Returns:
         GridArchive: Reconstructed archive with the saved solutions
     """
+    global bounds
+
     # Load the CSV data
     df = pd.read_csv(filepath)
     
