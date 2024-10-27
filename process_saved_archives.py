@@ -52,18 +52,20 @@ def load_grid_archive_from_csv(filepath, config=None):
         objective = row['objective']
         measures = row[[f'measures_{i}' for i in range(2)]].values  # 2D measures space
         
-        # If threshold was saved, we can restore it (optional)
+        # If threshold was saved, we can set it through the add method
+        archive.add(solution, objective, measures)
+        
+        # Then update the threshold if it exists in the data
         if 'threshold' in row:
             idx = row['index']
-            archive._thresholds[idx] = row['threshold']
-        
-        archive.add(solution, objective, measures)
+            # Access the threshold array through the protected name
+            archive._threshold[idx] = row['threshold']
     
     return archive
 
 # Example usage:
 if __name__ == "__main__":
-    # Example configuration dictionary (if needed)
+    # Set up configuration with threshold_min
     config = {
         "archive": {
             "kwargs": {
