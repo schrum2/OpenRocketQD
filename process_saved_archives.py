@@ -69,16 +69,17 @@ def load_grid_archive_from_csv(filepath, config=None):
 # Custom plotting function
 def plot_custom_heatmap(archive):
     data = archive.data(return_type="pandas")
-    
+    print(data.columns)
+
     # Extract measures and fitness
-    measures = data[["measure_0", "measure_1"]]
+    measures = data[["measures_0", "measures_1"]]
     fitness = data["objective"]
     
     fig, ax = plt.subplots(figsize=(12, 8))
     
     # Create scatter plot (square cells) and remove the title
     scatter = ax.scatter(
-        measures["measure_0"], measures["measure_1"],
+        measures["measures_0"], measures["measures_1"],
         c=fitness, cmap="magma", norm=Normalize(vmin=0, vmax=MAX_FITNESS),
         s=15, marker="s"  # square cells
     )
