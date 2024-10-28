@@ -1,5 +1,7 @@
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
+
 from ribs.archives import GridArchive
 from ribs.visualize import cvt_archive_heatmap, grid_archive_heatmap
 
@@ -63,6 +65,48 @@ def load_grid_archive_from_csv(filepath, config=None):
     
     return archive
 
+def plot_custom_heatmap(archive):
+    # Retrieve archive data in pandas format
+    archive_data = archive.data(return_type='pandas')
+
+    # Extract columns
+    stability_nose_values = archive_data['measures_0']
+    altitude_values = archive_data['measures_1']
+    fitness_values = archive_data['objective']
+
+    # Plotting configuration
+    fig, ax = plt.subplots(figsize=(10, 6))
+    
+    # Separate by nose type and plot each as a column
+    for nose_type_index in range(MIN_NOSE_TYPE_INDEX, MAX_NOSE_TYPE_INDEX + 1):
+        mask = (stability_nose_values >= nose_type_index * (BUFFER + (MAX_STABILITY - MIN_STABILITY))) & \
+               (stability_nose_values < (nose_type_index + 1) * (BUFFER + (MAX_STABILITY - MIN_STABILITY)))
+        
+        # Select rows that match the current nose type
+        nose_data = archive_data[mask]
+        stabilities = nose_data['measures_0'] % (BUFFER + (MAX_STABILITY - MIN_STABILITY)) + MIN_STABILITY
+        altitudes = nose_data['measures_1']
+        fitnesses = nose_data['objective']
+
+        # Create a scatter plot for the current nose type
+        scatter = ax.scatter(
+            stabilities + nose_type_index * (BUFFER + (MAX_STABILITY - MIN_STABILITY)),
+            altitudes,
+            c=fitnesses,
+            cmap="magma",
+            vmin=0,
+            vmax=MAX_FITNESS,
+            s=5
+        )
+    
+    # Color bar and labels
+    fig.colorbar(scatter, ax=ax, label="Fitness")
+    ax.set_xlabel("Stability + Nose Type Index")
+    ax.set_ylabel("Altitude")
+    ax.set_title("Custom Heatmap by Nose Type and Stability")
+
+    plt.show()
+
 # Example usage:
 if __name__ == "__main__":
     # Set up configuration with threshold_min
@@ -87,12 +131,15 @@ if __name__ == "__main__":
     print(f"First measure range: {bounds[0]}")  # Stability-nose combined range
     print(f"Second measure range: {bounds[1]}")  # Altitude range
 
-    import matplotlib
-    matplotlib.use('Agg')
-    import matplotlib.pyplot as plt
+    # Plot the custom heatmap
+    plot_custom_heatmap(archive)
 
-    plt.figure(figsize=(8, 6))
-    grid_archive_heatmap(archive, vmin=0, vmax=MAX_FITNESS)
-    plt.tight_layout()
-    plt.savefig("test.png")
-    plt.close(plt.gcf())
+#    import matplotlib
+#    matplotlib.use('Agg')
+#    import matplotlib.pyplot as plt
+#
+#    plt.figure(figsize=(8, 6))
+#    grid_archive_heatmap(archive, vmin=0, vmax=MAX_FITNESS)
+#    plt.tight_layout()
+#    plt.savefig("test.png")
+#    plt.close(plt.gcf())
