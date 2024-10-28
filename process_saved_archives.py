@@ -68,58 +68,64 @@ def load_grid_archive_from_csv(filepath, config=None):
 
 # Custom plotting function
 def plot_custom_heatmap(archive):
-    data = archive.data(return_type="pandas")
-    print(data.columns)
+    # Load data from the archive
+    data = archive.data(return_type='pandas')
+    fitness_values = data["objective"].values
+    measures = data[["measures_0", "measures_1"]].values
 
-    # Extract measures and fitness
-    measures = data[["measures_0", "measures_1"]]
-    fitness = data["objective"]
+    # Extract stability and altitude values
+    stability_values = measures[:, 0]
+    altitude_values = measures[:, 1]
     
+    # Prepare the plot
     fig, ax = plt.subplots(figsize=(12, 8))
     
-    # Create scatter plot (square cells) and remove the title
-    scatter = ax.scatter(
-        measures["measures_0"], measures["measures_1"],
-        c=fitness, cmap="magma", norm=Normalize(vmin=0, vmax=MAX_FITNESS),
-        s=15, marker="s"  # square cells
-    )
+    # Set up parameters for nose types and stability ranges
+    nose_types = ["OGIVE", "CONICAL", "ELLIPSOID", "POWER", "PARABOLIC", "HAACK"]
+    num_nose_types = len(nose_types)
+    stability_range = MAX_STABILITY - MIN_STABILITY
+    stability_bin_width = stability_range / 100  # Based on archive resolution
     
-    # Configure color bar with "Consistency" label
-    cbar = fig.colorbar(scatter, ax=ax)
-    cbar.set_label("Consistency", fontsize=12)
-
-    # Set limits and ticks on y-axis (Altitude)
-    ax.set_ylim(MIN_ALTITUDE, MAX_ALTITUDE)
-    ax.set_ylabel("Altitude", fontsize=12)
-
-    # Set limits on x-axis and add nose type labels
-    ax.set_xlim(0, ((BUFFER + (MAX_STABILITY - MIN_STABILITY)) * (MAX_NOSE_TYPE_INDEX + 1)))
-    ax.set_xlabel("Stability", fontsize=12)
-
-    # Create custom ticks and labels for stability sections
-    ticks = []
-    tick_labels = []
-    stability_ticks = np.linspace(MIN_STABILITY, MAX_STABILITY, num=5)
-    
-    for i in range(MIN_NOSE_TYPE_INDEX, MAX_NOSE_TYPE_INDEX + 1):
-        section_start = i * (BUFFER + (MAX_STABILITY - MIN_STABILITY))
-        section_ticks = section_start + stability_ticks
+    # Plot each cell as a square
+    for i in range(len(fitness_values)):
+        stability = stability_values[i]
+        altitude = altitude_values[i]
+        nose_index = int(stability // stability_range)
+        local_stability = stability % stability_range + MIN_STABILITY
         
-        ticks.extend(section_ticks)
-        tick_labels.extend([f"{stability:.1f}" for stability in stability_ticks])
-
-    ax.set_xticks(ticks)
-    ax.set_xticklabels(tick_labels, rotation=45, ha='right', fontsize=8)
+        # X and Y positions
+        x_pos = nose_index + (local_stability - MIN_STABILITY) / stability_range
+        y_pos = altitude / MAX_ALTITUDE * 90
+        
+        # Plot a square patch for each cell
+        ax.add_patch(plt.Rectangle((x_pos, y_pos), stability_bin_width, 0.9,
+                                   color=plt.cm.inferno(fitness_values[i] / MAX_FITNESS)))
     
-    # Add nose type labels
-    nose_labels = ["OGIVE", "CONICAL", "ELLIPSOID", "POWER", "PARABOLIC", "HAACK"]
-    nose_positions = [(i + 0.5) * (BUFFER + (MAX_STABILITY - MIN_STABILITY)) for i in range(6)]
-    ax_secondary = ax.secondary_xaxis("top")
-    ax_secondary.set_xticks(nose_positions)
-    ax_secondary.set_xticklabels(nose_labels, fontsize=10)
-    ax_secondary.set_xlabel("Nose Type", fontsize=12)
+    # Label adjustments
+    ax.set_xlim(0, num_nose_types)
+    ax.set_ylim(0, MAX_ALTITUDE)
+    ax.set_yticks(np.linspace(0, MAX_ALTITUDE, 10))
+    ax.set_ylabel("Altitude")
+    ax.set_xlabel("Stability / Nose Type")
+    
+    # Custom x-axis labels
+    ax.set_xticks([i + 0.5 for i in range(num_nose_types)])
+    ax.set_xticklabels(nose_types)
+    
+    # Secondary stability labels
+    secax = ax.secondary_xaxis('top')
+    secax.set_xticks([i + (stability - MIN_STABILITY) / stability_range for i in range(num_nose_types) for stability in [MIN_STABILITY, MAX_STABILITY]])
+    secax.set_xticklabels([f"{stability:.1f}" for stability in np.tile([MIN_STABILITY, MAX_STABILITY], num_nose_types)])
+    secax.set_xlabel("Stability")
 
-    plt.tight_layout()
+    # Draw vertical lines at stability boundaries
+    for i in range(num_nose_types + 1):
+        ax.axvline(x=i, color="black", linewidth=1)
+    
+    # Add color bar
+    cbar = plt.colorbar(plt.cm.ScalarMappable(cmap="inferno", norm=plt.Normalize(vmin=0, vmax=MAX_FITNESS)), ax=ax)
+    cbar.set_label("Consistency")
+    
     plt.show()
 
 # Example usage:
