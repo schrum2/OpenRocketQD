@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
 from matplotlib.colors import Normalize
 import matplotlib.ticker as ticker
 from ribs.archives import GridArchive
@@ -77,65 +78,72 @@ def plot_custom_heatmap(archive):
     stability_values = measures[:, 0]
     altitude_values = measures[:, 1]
     
-    # Prepare the plot
-    fig, ax = plt.subplots(figsize=(14, 8))
-    
-    # Set up parameters for nose types and stability ranges
-    nose_types = ["OGIVE", "CONICAL", "ELLIPSOID", "POWER", "PARABOLIC", "HAACK"]
-    num_nose_types = len(nose_types)
+    # Set up parameters for the grid and plot
+    num_nose_types = 6
+    stability_bins = 100
+    altitude_bins = 90
+
+    # Create a grid to populate fitness values based on stability and altitude positions
+    heatmap_grid = np.full((altitude_bins, stability_bins * num_nose_types), np.nan)
+
     stability_range = MAX_STABILITY - MIN_STABILITY
-    stability_bin_width = stability_range / 100  # Cell width based on archive resolution
-    altitude_bin_height = MAX_ALTITUDE / 90     # Cell height based on archive resolution
-    
-    # Define total width for each nose type segment, including BUFFER
     total_segment_width = stability_range + BUFFER
     
-    # Plot each cell as a square in its corresponding nose type segment
+    # Map each fitness value to its corresponding grid cell
     for i in range(len(fitness_values)):
         stability = stability_values[i]
         altitude = altitude_values[i]
-        nose_index = int(stability // (stability_range + BUFFER))
-        local_stability = (stability % (stability_range + BUFFER)) + MIN_STABILITY
+        nose_index = int(stability // total_segment_width)
+        local_stability = (stability % total_segment_width) + MIN_STABILITY
+        
+        # Calculate grid indices
+        x_idx = int((nose_index * stability_bins) + ((local_stability - MIN_STABILITY) / stability_range * stability_bins))
+        y_idx = int((altitude / MAX_ALTITUDE) * (altitude_bins - 1))
 
-        # Calculate x and y positions based on the nose type and stability within its segment
-        x_pos = nose_index * total_segment_width + (local_stability - MIN_STABILITY)
-        y_pos = altitude / MAX_ALTITUDE * 90
+        print(x_idx,",",y_idx)
 
-        # Plot a square patch for each cell
-        ax.add_patch(plt.Rectangle((x_pos, y_pos), stability_bin_width, altitude_bin_height,
-                                   color=plt.cm.inferno(fitness_values[i] / MAX_FITNESS), linewidth=0))
+        # Place the fitness value in the appropriate cell of the heatmap grid
+        heatmap_grid[y_idx, x_idx] = fitness_values[i]
+
+    # Prepare the plot
+    fig, ax = plt.subplots(figsize=(14, 8))
+    
+    # Display the grid as a heatmap
+    cmap = plt.cm.inferno
+    norm = mcolors.Normalize(vmin=0, vmax=MAX_FITNESS)
+    cbar = ax.pcolormesh(heatmap_grid, cmap=cmap, norm=norm, shading='nearest')
 
     # Set limits and labels for the axes
-    ax.set_xlim(0, num_nose_types * total_segment_width)
-    ax.set_ylim(0, MAX_ALTITUDE)
-    ax.set_yticks(np.linspace(0, MAX_ALTITUDE, 10))
+    ax.set_ylim(0, altitude_bins)
+    ax.set_yticks(np.linspace(0, altitude_bins - 1, 10))
+    ax.set_yticklabels(np.linspace(0, MAX_ALTITUDE, 10).astype(int))
     ax.set_ylabel("Altitude")
     ax.set_xlabel("Stability / Nose Type")
-    
+
     # Custom x-axis labels for nose types
-    ax.set_xticks([i * total_segment_width + stability_range / 2 for i in range(num_nose_types)])
-    ax.set_xticklabels(nose_types)
+    ax.set_xticks([(i + 0.5) * stability_bins for i in range(num_nose_types)])
+    ax.set_xticklabels(["OGIVE", "CONICAL", "ELLIPSOID", "POWER", "PARABOLIC", "HAACK"])
     
     # Secondary x-axis for stability labels
     secax = ax.secondary_xaxis('top')
-    stability_ticks = [i * total_segment_width + offset for i in range(num_nose_types) for offset in [0, stability_range / 2, stability_range]]
+    stability_ticks = [i * stability_bins + offset for i in range(num_nose_types) for offset in [0, stability_bins / 2, stability_bins]]
     secax.set_xticks(stability_ticks)
     secax.set_xticklabels([f"{val:.1f}" for val in [1.0, 2.0, 3.0] * num_nose_types])
     secax.set_xlabel("Stability")
 
     # Draw vertical lines for stability boundaries (1.0 and 3.0) for each nose type segment
     for i in range(num_nose_types):
-        left_edge = i * total_segment_width
+        left_edge = i * stability_bins
         ax.axvline(x=left_edge, color="black", linewidth=1)  # Left boundary of each nose type
-        ax.axvline(x=left_edge + stability_range, color="black", linewidth=1)  # 3.0 stability line within each nose type
+        ax.axvline(x=left_edge + stability_bins, color="black", linewidth=1)  # 3.0 stability line within each nose type
 
-    # Add color bar
-    cbar = plt.colorbar(plt.cm.ScalarMappable(cmap="inferno", norm=plt.Normalize(vmin=0, vmax=MAX_FITNESS)), ax=ax)
-    cbar.set_label("Consistency")
-    
+    # Add color bar with label
+    colorbar = fig.colorbar(cbar, ax=ax, orientation="vertical", fraction=0.046, pad=0.04)
+    colorbar.set_label("Consistency")
+
     plt.tight_layout()
-    plt.savefig("test2.png")
-    plt.close(plt.gcf())
+    plt.savefig("test3.png")
+    plt.close(fig)
 
 # Example usage:
 if __name__ == "__main__":
