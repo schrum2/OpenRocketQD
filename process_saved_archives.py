@@ -1,7 +1,8 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-
+from matplotlib.colors import Normalize
+import matplotlib.ticker as ticker
 from ribs.archives import GridArchive
 from ribs.visualize import cvt_archive_heatmap, grid_archive_heatmap
 
@@ -65,46 +66,59 @@ def load_grid_archive_from_csv(filepath, config=None):
     
     return archive
 
+# Custom plotting function
 def plot_custom_heatmap(archive):
-    # Retrieve archive data in pandas format
-    archive_data = archive.data(return_type='pandas')
-
-    # Extract columns
-    stability_nose_values = archive_data['measures_0']
-    altitude_values = archive_data['measures_1']
-    fitness_values = archive_data['objective']
-
-    # Plotting configuration
-    fig, ax = plt.subplots(figsize=(10, 6))
+    data = archive.data(return_type="pandas")
     
-    # Separate by nose type and plot each as a column
-    for nose_type_index in range(MIN_NOSE_TYPE_INDEX, MAX_NOSE_TYPE_INDEX + 1):
-        mask = (stability_nose_values >= nose_type_index * (BUFFER + (MAX_STABILITY - MIN_STABILITY))) & \
-               (stability_nose_values < (nose_type_index + 1) * (BUFFER + (MAX_STABILITY - MIN_STABILITY)))
+    # Extract measures and fitness
+    measures = data[["measure_0", "measure_1"]]
+    fitness = data["objective"]
+    
+    fig, ax = plt.subplots(figsize=(12, 8))
+    
+    # Create scatter plot (square cells) and remove the title
+    scatter = ax.scatter(
+        measures["measure_0"], measures["measure_1"],
+        c=fitness, cmap="magma", norm=Normalize(vmin=0, vmax=MAX_FITNESS),
+        s=15, marker="s"  # square cells
+    )
+    
+    # Configure color bar with "Consistency" label
+    cbar = fig.colorbar(scatter, ax=ax)
+    cbar.set_label("Consistency", fontsize=12)
+
+    # Set limits and ticks on y-axis (Altitude)
+    ax.set_ylim(MIN_ALTITUDE, MAX_ALTITUDE)
+    ax.set_ylabel("Altitude", fontsize=12)
+
+    # Set limits on x-axis and add nose type labels
+    ax.set_xlim(0, ((BUFFER + (MAX_STABILITY - MIN_STABILITY)) * (MAX_NOSE_TYPE_INDEX + 1)))
+    ax.set_xlabel("Stability", fontsize=12)
+
+    # Create custom ticks and labels for stability sections
+    ticks = []
+    tick_labels = []
+    stability_ticks = np.linspace(MIN_STABILITY, MAX_STABILITY, num=5)
+    
+    for i in range(MIN_NOSE_TYPE_INDEX, MAX_NOSE_TYPE_INDEX + 1):
+        section_start = i * (BUFFER + (MAX_STABILITY - MIN_STABILITY))
+        section_ticks = section_start + stability_ticks
         
-        # Select rows that match the current nose type
-        nose_data = archive_data[mask]
-        stabilities = nose_data['measures_0'] % (BUFFER + (MAX_STABILITY - MIN_STABILITY)) + MIN_STABILITY
-        altitudes = nose_data['measures_1']
-        fitnesses = nose_data['objective']
+        ticks.extend(section_ticks)
+        tick_labels.extend([f"{stability:.1f}" for stability in stability_ticks])
 
-        # Create a scatter plot for the current nose type
-        scatter = ax.scatter(
-            stabilities + nose_type_index * (BUFFER + (MAX_STABILITY - MIN_STABILITY)),
-            altitudes,
-            c=fitnesses,
-            cmap="magma",
-            vmin=0,
-            vmax=MAX_FITNESS,
-            s=5
-        )
+    ax.set_xticks(ticks)
+    ax.set_xticklabels(tick_labels, rotation=45, ha='right', fontsize=8)
     
-    # Color bar and labels
-    fig.colorbar(scatter, ax=ax, label="Fitness")
-    ax.set_xlabel("Stability + Nose Type Index")
-    ax.set_ylabel("Altitude")
-    ax.set_title("Custom Heatmap by Nose Type and Stability")
+    # Add nose type labels
+    nose_labels = ["OGIVE", "CONICAL", "ELLIPSOID", "POWER", "PARABOLIC", "HAACK"]
+    nose_positions = [(i + 0.5) * (BUFFER + (MAX_STABILITY - MIN_STABILITY)) for i in range(6)]
+    ax_secondary = ax.secondary_xaxis("top")
+    ax_secondary.set_xticks(nose_positions)
+    ax_secondary.set_xticklabels(nose_labels, fontsize=10)
+    ax_secondary.set_xlabel("Nose Type", fontsize=12)
 
+    plt.tight_layout()
     plt.show()
 
 # Example usage:
