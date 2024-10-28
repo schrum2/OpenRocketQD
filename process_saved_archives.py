@@ -100,6 +100,9 @@ def plot_custom_heatmap(archive, save_path="heatmap.png"):
     altitude_bin_height = MAX_ALTITUDE / 90
     total_segment_width = stability_range + BUFFER
     
+    print("stability_bin_width=",stability_bin_width)
+    print("altitude_bin_height=",altitude_bin_height)
+
     # Plot data points
     for i, (stability, altitude, fitness) in enumerate(zip(stability_values, 
                                                          altitude_values, 
@@ -115,7 +118,7 @@ def plot_custom_heatmap(archive, save_path="heatmap.png"):
         # Add colored rectangle for this data point
         ax.add_patch(plt.Rectangle(
             (x_pos, y_pos),
-            stability_bin_width,
+            stability_bin_width*4, #stability_bin_width,
             altitude_bin_height,
             color=plt.cm.inferno(fitness / MAX_FITNESS),
             linewidth=0
@@ -160,6 +163,7 @@ def plot_custom_heatmap(archive, save_path="heatmap.png"):
     # Finalize and save
     plt.tight_layout()
     plt.savefig(save_path)
+    plt.show()
     plt.close(plt.gcf())
 
 # Example usage:
