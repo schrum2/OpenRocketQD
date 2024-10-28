@@ -100,10 +100,10 @@ def plot_custom_heatmap(archive):
         x_idx = int((nose_index * stability_bins) + ((local_stability - MIN_STABILITY) / stability_range * stability_bins))
         y_idx = int((altitude / MAX_ALTITUDE) * (altitude_bins - 1))
 
-        print(x_idx,",",y_idx)
-
-        # Place the fitness value in the appropriate cell of the heatmap grid
-        heatmap_grid[y_idx, x_idx] = fitness_values[i]
+        # Ensure indices are within bounds
+        if 0 <= x_idx < stability_bins * num_nose_types and 0 <= y_idx < altitude_bins:
+            # Place the fitness value in the appropriate cell of the heatmap grid
+            heatmap_grid[y_idx, x_idx] = fitness_values[i]
 
     # Prepare the plot
     fig, ax = plt.subplots(figsize=(14, 8))
