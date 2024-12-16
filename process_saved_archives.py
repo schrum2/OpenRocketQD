@@ -4,7 +4,8 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import Normalize
 import matplotlib.ticker as ticker
 from ribs.archives import GridArchive
-from ribs.visualize import cvt_archive_heatmap, grid_archive_heatmap
+
+#from ribs.visualize import cvt_archive_heatmap, grid_archive_heatmap
 
 from rocket_evaluate import MAX_FITNESS
 
@@ -67,11 +68,71 @@ def load_grid_archive_from_csv(filepath, config=None):
     return archive
 
 # Custom plotting function
-def plot_custom_heatmap(archive, save_path="heatmap.png"):
-    # TODO
+def plot_custom_heatmap(archive, save_path="custom_heatmap.png"):
+    """
+    Custom implementation of a heatmap plot for a GridArchive without using ribs.visualize.
 
-    return None    
+    Args:
+        archive: A GridArchive instance containing the archive data.
+        save_path: Path to save the generated heatmap image.
+    """
+    import matplotlib.pyplot as plt
+    from matplotlib.colors import Normalize
+    import numpy as np
 
+    # Extract the archive data (fitness and measures) into a 2D grid.
+    data = archive.data(return_type='pandas')
+    fitness_values = data['objective'].values
+    measures = data[['measures_0', 'measures_1']].values
+
+    # Set up grid dimensions based on the archive
+    grid_width, grid_height = archive.dims  # Archive resolution
+    lower_bounds = archive.lower_bounds
+    upper_bounds = archive.upper_bounds
+
+    # Calculate grid cell sizes
+    cell_width = (upper_bounds[0] - lower_bounds[0]) / grid_width
+    cell_height = (upper_bounds[1] - lower_bounds[1]) / grid_height
+
+    # Initialize a grid to hold fitness values
+    heatmap_grid = np.full((grid_height, grid_width), np.nan)
+
+    # Fill the grid with fitness values
+    for i in range(len(fitness_values)):
+        stability, altitude = measures[i]
+        x_idx = int((stability - lower_bounds[0]) / cell_width)
+        y_idx = int((altitude - lower_bounds[1]) / cell_height)
+        
+        if 0 <= x_idx < grid_width and 0 <= y_idx < grid_height:
+            heatmap_grid[y_idx, x_idx] = fitness_values[i]
+
+    # Plot the heatmap
+    fig, ax = plt.subplots(figsize=(8, 6))
+    cmap = plt.cm.inferno  # Color map for consistency
+    norm = Normalize(vmin=0, vmax=MAX_FITNESS)  # Normalize color scale
+    
+    c = ax.imshow(
+        heatmap_grid,
+        origin="lower",
+        extent=[lower_bounds[0], upper_bounds[0], lower_bounds[1], upper_bounds[1]],
+        cmap=cmap,
+        norm=norm,
+        aspect="auto"
+    )
+
+    # Add a colorbar
+    cbar = fig.colorbar(c, ax=ax)
+    cbar.set_label("Objective (Consistency)")
+
+    # Labels and ticks
+    ax.set_xlabel("Stability / Nose Type")
+    ax.set_ylabel("Altitude")
+    ax.xaxis.set_major_locator(plt.MaxNLocator(integer=True))  # Integer ticks for x-axis
+
+    plt.tight_layout()
+    plt.savefig(save_path)
+    plt.close(fig)
+   
 # Example usage:
 if __name__ == "__main__":
     # Set up configuration with threshold_min
@@ -97,14 +158,14 @@ if __name__ == "__main__":
     print(f"Second measure range: {bounds[1]}")  # Altitude range
 
     # Plot the custom heatmap: once this call is enabled, it replaces the code below
-    #plot_custom_heatmap(archive)
+    plot_custom_heatmap(archive)
 
-    import matplotlib
-    matplotlib.use('Agg')
-    import matplotlib.pyplot as plt
-
-    plt.figure(figsize=(8, 6))
-    grid_archive_heatmap(archive, vmin=0, vmax=MAX_FITNESS)
-    plt.tight_layout()
-    plt.savefig("test.png")
-    plt.close(plt.gcf())
+#    import matplotlib
+#    matplotlib.use('Agg')
+#    import matplotlib.pyplot as plt
+#
+#    plt.figure(figsize=(8, 6))
+#    grid_archive_heatmap(archive, vmin=0, vmax=MAX_FITNESS)
+#    plt.tight_layout()
+#    plt.savefig("test.png")
+#    plt.close(plt.gcf())
