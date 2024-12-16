@@ -73,7 +73,7 @@ def load_grid_archive_from_csv(filepath, config=None):
     return archive
 
 # Custom plotting function
-def plot_custom_heatmap(archive, save_path="custom_heatmap.png"):
+def plot_custom_heatmap(archive, save_path="custom_heatmap.pdf"):
     """
     Custom implementation of a heatmap plot for a GridArchive with labeled intervals on the x-axis.
 
@@ -159,7 +159,7 @@ def plot_custom_heatmap(archive, save_path="custom_heatmap.png"):
 
     secax.set_xticks(secax_ticks)  # Boundary ticks
     secax.set_xticklabels([""] * len(secax_ticks))  # No labels on boundaries
-    secax.set_xlabel("Stability Score", fontsize=10)
+    secax.set_xlabel("Stability Score", fontsize=20)
 
     # Main axis stability labels within each nose type
     stability_positions = [
@@ -173,7 +173,7 @@ def plot_custom_heatmap(archive, save_path="custom_heatmap.png"):
 
     # Set the x-axis ticks for stability
     secax.set_xticks(stability_positions)  # The main stability positions
-    secax.set_xticklabels(stability_labels, fontsize=8)  # Stability values like 1.0, 2.0, etc.
+    secax.set_xticklabels(stability_labels, fontsize=10)  # Stability values like 1.0, 2.0, etc.
 
     # Draw vertical lines to separate each nose type
     for i in range(NUM_NOSE_TYPES+1):
@@ -184,26 +184,31 @@ def plot_custom_heatmap(archive, save_path="custom_heatmap.png"):
     nose_type_positions = [i * nose_type_width + stability_range_width / 2 for i in range(NUM_NOSE_TYPES)]
     nose_types = ["OGIVE", "CONICAL", "ELLIPSOID", "POWER", "PARABOLIC", "HAACK"]
 
-    print(stability_ticks)
+    #print(stability_ticks)
     ax.set_xticks(stability_ticks)
-    ax.set_xticklabels(NOSE_TYPE_LABELS, fontsize=10)
+    ax.set_xticklabels(NOSE_TYPE_LABELS, fontsize=15)
 
     # Set the x-axis ticks for the nose types (minor ticks) and their labels
     #ax.set_xticks(nose_type_positions, minor=True)  # The positions where nose types should be
     #ax.tick_params(axis='x', which='minor', length=0)  # Hide minor ticks for better visibility
-    #ax.set_xticklabels(nose_types, fontsize=10, minor=True)  # Nose type labels below stability ticks
+    #ax.set_xticklabels(nose_types, fontsize=20, minor=True)  # Nose type labels below stability ticks
 
 
     # Labels and formatting
-    ax.set_xlabel("Nose Type", fontsize=12)
-    ax.set_ylabel("Altitude", fontsize=12)
+    ax.set_xlabel("Nose Type", fontsize=20)
+    ax.set_ylabel("Altitude", fontsize=20)
 
     # Add a colorbar
     cbar = fig.colorbar(c, ax=ax)
-    cbar.set_label("Consistency Score")
+    cbar.set_label("Consistency Score", fontsize=20)
 
+    # Configure matplotlib to embed fonts in the PDF
+    plt.rcParams['pdf.fonttype'] = 42
+    # Increase font sizes
+    plt.rcParams.update({'font.size': 14})
+    
     plt.tight_layout()
-    plt.savefig(save_path)
+    plt.savefig(save_path, bbox_inches='tight')
     plt.close(fig)
 
    
@@ -232,7 +237,7 @@ if __name__ == "__main__":
     print(f"Second measure range: {bounds[1]}")  # Altitude range
 
     # Plot the custom heatmap: once this call is enabled, it replaces the code below
-    plot_custom_heatmap(archive)
+    plot_custom_heatmap(archive, "cma_me_imp_stabilitynose_altitude_0_archive.pdf")
 
 #    import matplotlib
 #    matplotlib.use('Agg')
