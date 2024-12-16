@@ -70,7 +70,7 @@ def load_grid_archive_from_csv(filepath, config=None):
 # Custom plotting function
 def plot_custom_heatmap(archive, save_path="custom_heatmap.png"):
     """
-    Custom implementation of a heatmap plot for a GridArchive without using ribs.visualize.
+    Custom implementation of a heatmap plot for a GridArchive with labeled intervals on the x-axis.
 
     Args:
         archive: A GridArchive instance containing the archive data.
@@ -80,7 +80,13 @@ def plot_custom_heatmap(archive, save_path="custom_heatmap.png"):
     from matplotlib.colors import Normalize
     import numpy as np
 
-    # Extract the archive data (fitness and measures) into a 2D grid.
+    # Constants
+    NOSE_TYPE_LABELS = ["OGIVE", "CONICAL", "ELLIPSOID", "POWER", "PARABOLIC", "HAACK"]
+    NUM_NOSE_TYPES = len(NOSE_TYPE_LABELS)
+    MIN_STABILITY = 1.0
+    MAX_STABILITY = 3.0
+
+    # Extract the archive data (fitness and measures) into a 2D grid
     data = archive.data(return_type='pandas')
     fitness_values = data['objective'].values
     measures = data[['measures_0', 'measures_1']].values
@@ -107,7 +113,7 @@ def plot_custom_heatmap(archive, save_path="custom_heatmap.png"):
             heatmap_grid[y_idx, x_idx] = fitness_values[i]
 
     # Plot the heatmap
-    fig, ax = plt.subplots(figsize=(8, 6))
+    fig, ax = plt.subplots(figsize=(10, 6))
     cmap = plt.cm.inferno  # Color map for consistency
     norm = Normalize(vmin=0, vmax=MAX_FITNESS)  # Normalize color scale
     
@@ -120,18 +126,42 @@ def plot_custom_heatmap(archive, save_path="custom_heatmap.png"):
         aspect="auto"
     )
 
+    # Add vertical lines to divide the x-axis into nose type segments
+    total_x_range = upper_bounds[0] - lower_bounds[0]
+    nose_type_width = total_x_range / NUM_NOSE_TYPES
+    for i in range(1, NUM_NOSE_TYPES):  # Vertical lines between intervals
+        ax.axvline(x=lower_bounds[0] + i * nose_type_width, color="white", linestyle="--", linewidth=1)
+
+    # Update x-axis ticks and labels
+    stability_ticks = [
+        lower_bounds[0] + i * nose_type_width + (nose_type_width / 2)
+        for i in range(NUM_NOSE_TYPES)
+    ]
+    ax.set_xticks(stability_ticks)
+    ax.set_xticklabels(NOSE_TYPE_LABELS, fontsize=10, rotation=45)
+
+    # Add stability labels as secondary ticks
+    secax = ax.secondary_xaxis('top')
+    secax_ticks = [lower_bounds[0] + i * nose_type_width for i in range(NUM_NOSE_TYPES + 1)]
+    secax.set_xticks(secax_ticks)
+    #secax.set_xticklabels([f"{MIN_STABILITY:.1f}", f"{(MIN_STABILITY + MAX_STABILITY)/2:.1f}", f"{MAX_STABILITY:.1f}"] * NUM_NOSE_TYPES)
+    secax.set_xticklabels([f"{MIN_STABILITY:.1f}"] + 
+                      [f"{(MIN_STABILITY + MAX_STABILITY) / 2:.1f}"] * (NUM_NOSE_TYPES - 1) +
+                      [f"{MAX_STABILITY:.1f}"])
+    secax.set_xlabel("Stability Range", fontsize=10)
+
     # Add a colorbar
     cbar = fig.colorbar(c, ax=ax)
     cbar.set_label("Objective (Consistency)")
 
-    # Labels and ticks
-    ax.set_xlabel("Stability / Nose Type")
-    ax.set_ylabel("Altitude")
-    ax.xaxis.set_major_locator(plt.MaxNLocator(integer=True))  # Integer ticks for x-axis
+    # Labels and formatting
+    ax.set_xlabel("Nose Type", fontsize=12)
+    ax.set_ylabel("Altitude", fontsize=12)
 
     plt.tight_layout()
     plt.savefig(save_path)
     plt.close(fig)
+
    
 # Example usage:
 if __name__ == "__main__":
