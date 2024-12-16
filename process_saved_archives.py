@@ -142,17 +142,50 @@ def plot_custom_heatmap(archive, save_path="custom_heatmap.png"):
 
     # Add stability labels as secondary ticks
     secax = ax.secondary_xaxis('top')
-    secax_ticks = [lower_bounds[0] + i * nose_type_width for i in range(NUM_NOSE_TYPES + 1)]
-    secax.set_xticks(secax_ticks)
-    #secax.set_xticklabels([f"{MIN_STABILITY:.1f}", f"{(MIN_STABILITY + MAX_STABILITY)/2:.1f}", f"{MAX_STABILITY:.1f}"] * NUM_NOSE_TYPES)
-    secax.set_xticklabels([f"{MIN_STABILITY:.1f}"] + 
-                      [f"{(MIN_STABILITY + MAX_STABILITY) / 2:.1f}"] * (NUM_NOSE_TYPES - 1) +
-                      [f"{MAX_STABILITY:.1f}"])
+
+    # Define ticks for the boundaries of each nose type, including BUFFER
+    stability_range_width = MAX_STABILITY - MIN_STABILITY
+    nose_type_width = stability_range_width + BUFFER
+    secax_ticks = [i * nose_type_width for i in range(NUM_NOSE_TYPES + 1)]  # Include all 6 boundaries
+
+    # Set stability range labels for each segment
+    stability_labels = []
+    for i in range(NUM_NOSE_TYPES):
+        stability_labels.extend([
+            f"{MIN_STABILITY:.1f}", 
+            f"{(MIN_STABILITY + MAX_STABILITY) / 2:.1f}", 
+            f"{MAX_STABILITY:.1f}"
+        ])
+
+    secax.set_xticks(secax_ticks)  # Boundary ticks
+    secax.set_xticklabels([""] * len(secax_ticks))  # No labels on boundaries
     secax.set_xlabel("Stability Range", fontsize=10)
 
-    # Add a colorbar
-    cbar = fig.colorbar(c, ax=ax)
-    cbar.set_label("Objective (Consistency)")
+    # Main axis stability labels within each nose type
+    stability_positions = [
+        i * nose_type_width + offset
+        for i in range(NUM_NOSE_TYPES)
+        for offset in [0, stability_range_width / 2, stability_range_width]
+    ]
+    stability_labels = [
+        f"{MIN_STABILITY:.1f}", f"{(MIN_STABILITY + MAX_STABILITY) / 2:.1f}", f"{MAX_STABILITY:.1f}"
+    ] * NUM_NOSE_TYPES
+
+    ax.set_xticks(stability_positions)
+    ax.set_xticklabels(stability_labels, rotation=45, fontsize=8)
+
+    # Draw vertical lines to separate each nose type
+    for i in range(NUM_NOSE_TYPES + 1):
+        line_position = i * nose_type_width
+        ax.axvline(x=line_position, color="black", linewidth=1, linestyle="--")
+
+    # Add primary x-axis nose type labels
+    nose_type_positions = [i * nose_type_width + stability_range_width / 2 for i in range(NUM_NOSE_TYPES)]
+    nose_types = ["OGIVE", "CONICAL", "ELLIPSOID", "POWER", "PARABOLIC", "HAACK"]
+
+    ax.set_xticks(nose_type_positions, minor=True)
+    ax.tick_params(axis='x', which='minor', length=0)
+    ax.set_xticklabels(nose_types, fontsize=10, minor=True)
 
     # Labels and formatting
     ax.set_xlabel("Nose Type", fontsize=12)
