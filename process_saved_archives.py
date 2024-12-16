@@ -17,6 +17,11 @@ MIN_ALTITUDE = 0.0
 MAX_ALTITUDE = 90.0
 MIN_NOSE_TYPE_INDEX = 0
 MAX_NOSE_TYPE_INDEX = 5
+NOSE_TYPE_LABELS = ["OGIVE", "CONICAL", "ELLIPSOID", "POWER", "PARABOLIC", "HAACK"]
+NUM_NOSE_TYPES = len(NOSE_TYPE_LABELS)
+#BLOCK_WIDTH = (MAX_STABILITY - MIN_STABILITY) / 100.0 # 100 is the dims from the original archive
+# Manual tinkering instead
+BLOCK_WIDTH = 0.1
 
 def load_grid_archive_from_csv(filepath, config=None):
     """
@@ -80,12 +85,6 @@ def plot_custom_heatmap(archive, save_path="custom_heatmap.png"):
     from matplotlib.colors import Normalize
     import numpy as np
 
-    # Constants
-    NOSE_TYPE_LABELS = ["OGIVE", "CONICAL", "ELLIPSOID", "POWER", "PARABOLIC", "HAACK"]
-    NUM_NOSE_TYPES = len(NOSE_TYPE_LABELS)
-    MIN_STABILITY = 1.0
-    MAX_STABILITY = 3.0
-
     # Extract the archive data (fitness and measures) into a 2D grid
     data = archive.data(return_type='pandas')
     fitness_values = data['objective'].values
@@ -112,6 +111,12 @@ def plot_custom_heatmap(archive, save_path="custom_heatmap.png"):
         if 0 <= x_idx < grid_width and 0 <= y_idx < grid_height:
             heatmap_grid[y_idx, x_idx] = fitness_values[i]
 
+            # If fitness value is 0, print coordinates
+            #if fitness_values[i] == 0:
+            #    print(f"Point with Objective 0 found at coordinates: (Stability: {stability}, Altitude: {altitude})")
+
+
+
     # Plot the heatmap
     fig, ax = plt.subplots(figsize=(10, 6))
     cmap = plt.cm.inferno  # Color map for consistency
@@ -129,8 +134,8 @@ def plot_custom_heatmap(archive, save_path="custom_heatmap.png"):
     # Add vertical lines to divide the x-axis into nose type segments
     total_x_range = upper_bounds[0] - lower_bounds[0]
     nose_type_width = total_x_range / NUM_NOSE_TYPES
-    for i in range(1, NUM_NOSE_TYPES):  # Vertical lines between intervals
-        ax.axvline(x=lower_bounds[0] + i * nose_type_width, color="white", linestyle="--", linewidth=1)
+    #for i in range(1, NUM_NOSE_TYPES):  # Vertical lines between intervals
+    #    ax.axvline(x=lower_bounds[0] + i * nose_type_width, color="white", linestyle="--", linewidth=1)
 
     # Update x-axis ticks and labels
     stability_ticks = [
@@ -172,12 +177,16 @@ def plot_custom_heatmap(archive, save_path="custom_heatmap.png"):
     ] * NUM_NOSE_TYPES
 
     ax.set_xticks(stability_positions)
-    ax.set_xticklabels(stability_labels, rotation=45, fontsize=8)
+    ax.set_xticklabels(stability_labels, fontsize=8)
 
     # Draw vertical lines to separate each nose type
-    for i in range(NUM_NOSE_TYPES + 1):
-        line_position = i * nose_type_width
-        ax.axvline(x=line_position, color="black", linewidth=1, linestyle="--")
+    # Give up on this. It simply does not align
+    # for i in range(NUM_NOSE_TYPES):
+    #     line_position = i * nose_type_width - 0.01 # prevent alignment of left edge with first tick. Creates some buffer
+    #     print(line_position)
+    #     ax.axvline(x=line_position, color="black", linewidth=1, linestyle="--")
+    #     line_position = i * nose_type_width + (MAX_STABILITY - MIN_STABILITY) + BLOCK_WIDTH
+    #     ax.axvline(x=line_position, color="black", linewidth=1, linestyle="-")
 
     # Add primary x-axis nose type labels
     nose_type_positions = [i * nose_type_width + stability_range_width / 2 for i in range(NUM_NOSE_TYPES)]
@@ -190,6 +199,10 @@ def plot_custom_heatmap(archive, save_path="custom_heatmap.png"):
     # Labels and formatting
     ax.set_xlabel("Nose Type", fontsize=12)
     ax.set_ylabel("Altitude", fontsize=12)
+
+    # Add a colorbar
+    cbar = fig.colorbar(c, ax=ax)
+    cbar.set_label("Objective (Consistency)")
 
     plt.tight_layout()
     plt.savefig(save_path)
