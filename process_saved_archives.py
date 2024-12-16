@@ -133,23 +133,18 @@ def plot_custom_heatmap(archive, save_path="custom_heatmap.png"):
 
     # Add vertical lines to divide the x-axis into nose type segments
     total_x_range = upper_bounds[0] - lower_bounds[0]
-    nose_type_width = total_x_range / NUM_NOSE_TYPES
-    #for i in range(1, NUM_NOSE_TYPES):  # Vertical lines between intervals
-    #    ax.axvline(x=lower_bounds[0] + i * nose_type_width, color="white", linestyle="--", linewidth=1)
+    stability_range_width = MAX_STABILITY - MIN_STABILITY
 
     # Update x-axis ticks and labels
     stability_ticks = [
-        lower_bounds[0] + i * nose_type_width + (nose_type_width / 2)
+        lower_bounds[0] + i * (stability_range_width + BUFFER) + stability_range_width / 2.0
         for i in range(NUM_NOSE_TYPES)
     ]
-    ax.set_xticks(stability_ticks)
-    ax.set_xticklabels(NOSE_TYPE_LABELS, fontsize=10, rotation=45)
 
     # Add stability labels as secondary ticks
     secax = ax.secondary_xaxis('top')
 
     # Define ticks for the boundaries of each nose type, including BUFFER
-    stability_range_width = MAX_STABILITY - MIN_STABILITY
     nose_type_width = stability_range_width + BUFFER
     secax_ticks = [i * nose_type_width for i in range(NUM_NOSE_TYPES + 1)]  # Include all 6 boundaries
 
@@ -164,7 +159,7 @@ def plot_custom_heatmap(archive, save_path="custom_heatmap.png"):
 
     secax.set_xticks(secax_ticks)  # Boundary ticks
     secax.set_xticklabels([""] * len(secax_ticks))  # No labels on boundaries
-    secax.set_xlabel("Stability Range", fontsize=10)
+    secax.set_xlabel("Stability Score", fontsize=10)
 
     # Main axis stability labels within each nose type
     stability_positions = [
@@ -176,25 +171,28 @@ def plot_custom_heatmap(archive, save_path="custom_heatmap.png"):
         f"{MIN_STABILITY:.1f}", f"{(MIN_STABILITY + MAX_STABILITY) / 2:.1f}", f"{MAX_STABILITY:.1f}"
     ] * NUM_NOSE_TYPES
 
-    ax.set_xticks(stability_positions)
-    ax.set_xticklabels(stability_labels, fontsize=8)
+    # Set the x-axis ticks for stability
+    secax.set_xticks(stability_positions)  # The main stability positions
+    secax.set_xticklabels(stability_labels, fontsize=8)  # Stability values like 1.0, 2.0, etc.
 
     # Draw vertical lines to separate each nose type
-    # Give up on this. It simply does not align
-    # for i in range(NUM_NOSE_TYPES):
-    #     line_position = i * nose_type_width - 0.01 # prevent alignment of left edge with first tick. Creates some buffer
-    #     print(line_position)
-    #     ax.axvline(x=line_position, color="black", linewidth=1, linestyle="--")
-    #     line_position = i * nose_type_width + (MAX_STABILITY - MIN_STABILITY) + BLOCK_WIDTH
-    #     ax.axvline(x=line_position, color="black", linewidth=1, linestyle="-")
-
+    for i in range(NUM_NOSE_TYPES+1):
+         line_position = i * nose_type_width - (BUFFER /2.0)
+         ax.axvline(x=line_position, color="black", linewidth=1, linestyle="-")
+    
     # Add primary x-axis nose type labels
     nose_type_positions = [i * nose_type_width + stability_range_width / 2 for i in range(NUM_NOSE_TYPES)]
     nose_types = ["OGIVE", "CONICAL", "ELLIPSOID", "POWER", "PARABOLIC", "HAACK"]
 
-    ax.set_xticks(nose_type_positions, minor=True)
-    ax.tick_params(axis='x', which='minor', length=0)
-    ax.set_xticklabels(nose_types, fontsize=10, minor=True)
+    print(stability_ticks)
+    ax.set_xticks(stability_ticks)
+    ax.set_xticklabels(NOSE_TYPE_LABELS, fontsize=10)
+
+    # Set the x-axis ticks for the nose types (minor ticks) and their labels
+    #ax.set_xticks(nose_type_positions, minor=True)  # The positions where nose types should be
+    #ax.tick_params(axis='x', which='minor', length=0)  # Hide minor ticks for better visibility
+    #ax.set_xticklabels(nose_types, fontsize=10, minor=True)  # Nose type labels below stability ticks
+
 
     # Labels and formatting
     ax.set_xlabel("Nose Type", fontsize=12)
@@ -202,7 +200,7 @@ def plot_custom_heatmap(archive, save_path="custom_heatmap.png"):
 
     # Add a colorbar
     cbar = fig.colorbar(c, ax=ax)
-    cbar.set_label("Objective (Consistency)")
+    cbar.set_label("Consistency Score")
 
     plt.tight_layout()
     plt.savefig(save_path)
