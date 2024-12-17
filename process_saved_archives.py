@@ -302,57 +302,84 @@ def compare_archives(archive1, archive2):
         ranges=list(zip(archive1.lower_bounds, archive1.upper_bounds))
     )
     
+    #print(archive1.cells)
+    #print(archive2.cells)
+
     # Get data from both archives
-    _, data1 = archive1._store.retrieve(np.arange(archive1.cells))
-    _, data2 = archive2._store.retrieve(np.arange(archive2.cells))
+    # _, data1 = archive1._store.retrieve(np.arange(archive1.cells))
+    # _, data2 = archive2._store.retrieve(np.arange(archive2.cells))
+    
+    data1 = archive1.data()
+    data2 = archive2.data()
+
+    #print(data1)
+    #print(data2)
     
     # Create masks for occupied cells
-    mask1 = np.vectorize(lambda x: x > 0)(data1['objective'])
-    mask2 = np.vectorize(lambda x: x > 0)(data2['objective'])
+    #mask1 = np.vectorize(lambda x: x > 0)(data1['objective'])
+    #mask2 = np.vectorize(lambda x: x > 0)(data2['objective'])
 
     #print(data1['objective'])
     #print(len(data1['objective']))
     #print(mask1)
     #print(len(mask1))
     #print(mask1.sum())
+
+    dict1 = dict()
+    for i in range(len(data1['index'])):
+        dict1[data1['index'][i]] = {'solution' : data1['solution'][i], 
+                                    'objective': data1['objective'][i],
+                                    'measures' : data1['measures'][i],
+                                    'threshold': data1['threshold'][i],
+                                    'index'    : data1['index'][i]}
+
+    dict2 = dict()
+    for i in range(len(data2['index'])):
+        dict2[data2['index'][i]] = {'solution' : data2['solution'][i], 
+                                    'objective': data2['objective'][i],
+                                    'measures' : data2['measures'][i],
+                                    'threshold': data2['threshold'][i],
+                                    'index'    : data2['index'][i]}
+
+    all_indexes = set()
+    all_indexes.update(data1['index'])
+    all_indexes.update(data2['index'])
     
-    # Create solution indices
-    indices = np.arange(archive1.cells)
-    
-    # Add solutions for cells where both archives have content (score 100)
-    both_mask = mask1 & mask2
-    if np.any(both_mask):
-        indices_both = indices[both_mask]
-        for idx in indices_both:
-            # Use solution from archive1 arbitrarily since we only care about presence
+    # Loop through each position
+    for index in all_indexes:
+        # Check if each archive has a solution at this position
+        has_solution1 = index in dict1
+        has_solution2 = index in dict2
+        
+        if has_solution1 and has_solution2:
+            # Both archives have solutions - score 40
+            # print("BOTH",data1['measures'][i])
             result_archive.add_single(
-                solution=data1['solution'][idx],
-                objective=100.0,
-                measures=data1['measures'][idx]
+                solution=dict1[index]['solution'],
+                objective=40.0,
+                measures=dict1[index]['measures']
             )
-    
-    # Add solutions for cells only in archive1 (score 75)
-    only1_mask = mask1 & ~mask2
-    if np.any(only1_mask):
-        indices_only1 = indices[only1_mask]
-        for idx in indices_only1:
+        elif has_solution1:
+            # Only archive1 has solution - score 25
             result_archive.add_single(
-                solution=data1['solution'][idx],
-                objective=75.0,
-                measures=data1['measures'][idx]
-            )
-    
-    # Add solutions for cells only in archive2 (score 25)
-    only2_mask = ~mask1 & mask2
-    if np.any(only2_mask):
-        indices_only2 = indices[only2_mask]
-        for idx in indices_only2:
-            result_archive.add_single(
-                solution=data2['solution'][idx],
+                solution=dict1[index]['solution'],
                 objective=25.0,
-                measures=data2['measures'][idx]
+                measures=dict1[index]['measures']
             )
-    
+        elif has_solution2:
+            # Only archive2 has solution - score 10
+            result_archive.add_single(
+                solution=dict2[index]['solution'],
+                objective=10.0,
+                measures=dict2[index]['measures']
+            )
+        else:
+            print("Problem with",index)
+            print(all_indexes)
+            print(dict1)
+            print(dict2)
+            quit()
+            
     return result_archive
    
 def main():
