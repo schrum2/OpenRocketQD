@@ -271,6 +271,83 @@ def plot_custom_heatmap(archive, save_path="custom_heatmap.pdf"):
     plt.savefig(save_path, bbox_inches='tight')
     plt.close(fig)
 
+def compare_archives(archive1, archive2):
+    """Creates a new GridArchive showing the overlap between two existing archives.
+    
+    Args:
+        archive1 (GridArchive): First archive to compare
+        archive2 (GridArchive): Second archive to compare
+        
+    Returns:
+        GridArchive: A new archive where:
+        - Cells with solutions in both archives have score 100
+        - Cells with solutions only in archive1 have score 75
+        - Cells with solutions only in archive2 have score 25
+        - Empty cells in both archives remain empty
+    
+    Raises:
+        ValueError: If the archives have different dimensions or ranges
+    """
+    # Verify archives have same configuration
+    if not np.array_equal(archive1.dims, archive2.dims):
+        raise ValueError("Archives must have same dimensions")
+    if not (np.array_equal(archive1.lower_bounds, archive2.lower_bounds) and 
+            np.array_equal(archive1.upper_bounds, archive2.upper_bounds)):
+        raise ValueError("Archives must have same ranges")
+    
+    # Create new archive with same configuration
+    result_archive = GridArchive(
+        solution_dim=archive1.solution_dim,
+        dims=archive1.dims,
+        ranges=list(zip(archive1.lower_bounds, archive1.upper_bounds))
+    )
+    
+    # Get data from both archives
+    _, data1 = archive1._store.retrieve(np.arange(archive1.cells))
+    _, data2 = archive2._store.retrieve(np.arange(archive2.cells))
+    
+    # Create masks for occupied cells
+    mask1 = ~np.isnan(data1['objective'])
+    mask2 = ~np.isnan(data2['objective'])
+    
+    # Create solution indices
+    indices = np.arange(archive1.cells)
+    
+    # Add solutions for cells where both archives have content (score 100)
+    both_mask = mask1 & mask2
+    if np.any(both_mask):
+        indices_both = indices[both_mask]
+        for idx in indices_both:
+            # Use solution from archive1 arbitrarily since we only care about presence
+            result_archive.add_single(
+                solution=data1['solution'][idx],
+                objective=100.0,
+                measures=data1['measures'][idx]
+            )
+    
+    # Add solutions for cells only in archive1 (score 75)
+    only1_mask = mask1 & ~mask2
+    if np.any(only1_mask):
+        indices_only1 = indices[only1_mask]
+        for idx in indices_only1:
+            result_archive.add_single(
+                solution=data1['solution'][idx],
+                objective=75.0,
+                measures=data1['measures'][idx]
+            )
+    
+    # Add solutions for cells only in archive2 (score 25)
+    only2_mask = ~mask1 & mask2
+    if np.any(only2_mask):
+        indices_only2 = indices[only2_mask]
+        for idx in indices_only2:
+            result_archive.add_single(
+                solution=data2['solution'][idx],
+                objective=25.0,
+                measures=data2['measures'][idx]
+            )
+    
+    return result_archive
    
 def main():
     """
@@ -299,6 +376,11 @@ def main():
                         help='Range of archive indices to load (inclusive)',
                         required=False)
     
+    # Optional secondary archive to compare against
+    parser.add_argument('-c', '--compare', 
+                        default=None, 
+                        help='File or prefix to compare against')
+
     # Optional output file specification
     parser.add_argument('-o', '--output', 
                         default='custom_heatmap.pdf', 
@@ -323,11 +405,21 @@ def main():
     # Load archives based on input type
     if args.file:
         archive = load_grid_archive_from_csv(args.file, config)
+        if args.compare:
+            other = load_grid_archive_from_csv(args.compare, config)
+            archive = compare_archives(archive, other)
     else:
         archive = load_multiple_archives(prefix=args.prefix,
                                          start_index=args.range[0], 
                                          end_index=args.range[1], 
                                          config=config)
+
+        if args.compare:
+            other = load_multiple_archives(prefix=args.compare,
+                                         start_index=args.range[0], 
+                                         end_index=args.range[1], 
+                                         config=config)
+            archive = compare_archives(archive, other)
     
     # Verify the loaded archive
     print(f"Number of elite solutions: {len(archive)}")
