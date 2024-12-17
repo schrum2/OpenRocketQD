@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
 from matplotlib.colors import Normalize
 import matplotlib.ticker as ticker
 from ribs.archives import GridArchive
@@ -137,7 +138,7 @@ def load_multiple_archives(prefix=None, start_index=None, end_index=None, config
     return archive
 
 # Custom plotting function
-def plot_custom_heatmap(archive, save_path="custom_heatmap.pdf"):
+def plot_custom_heatmap(archive, save_path="custom_heatmap.pdf", compare=False):
     """
     Custom implementation of a heatmap plot for a GridArchive with labeled intervals on the x-axis.
 
@@ -179,7 +180,8 @@ def plot_custom_heatmap(archive, save_path="custom_heatmap.pdf"):
 
     # Plot the heatmap
     fig, ax = plt.subplots(figsize=(10, 6))
-    cmap = plt.cm.inferno  # Color map for consistency
+    #cmap = plt.cm.inferno  # Color map for consistency
+    cmap = plt.cm.viridis  # Color map for consistency
     norm = Normalize(vmin=0, vmax=MAX_FITNESS)  # Normalize color scale
     
     c = ax.imshow(
@@ -258,9 +260,26 @@ def plot_custom_heatmap(archive, save_path="custom_heatmap.pdf"):
     ax.set_xlabel("Nose Type", fontsize=20)
     ax.set_ylabel("Altitude", fontsize=20)
 
-    # Add a colorbar
-    cbar = fig.colorbar(c, ax=ax)
-    cbar.set_label("Consistency Score", fontsize=20)
+    if compare:
+        # Get colors for each value
+        color_40 = cmap(norm(40))
+        color_25 = cmap(norm(25))
+        color_10 = cmap(norm(10))
+    
+        # Create patch objects for the legend
+        legend_elements = [
+            mpatches.Patch(facecolor=color_40, label='BOTH'),
+            mpatches.Patch(facecolor=color_25, label='Only MAP-Elites'),
+            mpatches.Patch(facecolor=color_10, label='Only CMA-ES')
+        ]
+    
+        # Add the legend to the plot
+        ax.legend(handles=legend_elements, loc='upper center',
+                   bbox_to_anchor=(0.5, -0.15), ncol=3, fontsize=16)
+    else:
+        # Add a colorbar
+        cbar = fig.colorbar(c, ax=ax)
+        cbar.set_label("Consistency Score", fontsize=20)
 
     # Configure matplotlib to embed fonts in the PDF
     plt.rcParams['pdf.fonttype'] = 42
@@ -460,7 +479,7 @@ def main():
     print(f"Measure ranges: {list(zip(archive.lower_bounds, archive.upper_bounds))}")
     
     # Plot the custom heatmap
-    plot_custom_heatmap(archive, args.output)
+    plot_custom_heatmap(archive, args.output, args.compare is not None)
 
 
 # Load a single specific file
