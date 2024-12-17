@@ -307,8 +307,14 @@ def compare_archives(archive1, archive2):
     _, data2 = archive2._store.retrieve(np.arange(archive2.cells))
     
     # Create masks for occupied cells
-    mask1 = ~np.isnan(data1['objective'])
-    mask2 = ~np.isnan(data2['objective'])
+    mask1 = np.vectorize(lambda x: x > 0)(data1['objective'])
+    mask2 = np.vectorize(lambda x: x > 0)(data2['objective'])
+
+    #print(data1['objective'])
+    #print(len(data1['objective']))
+    #print(mask1)
+    #print(len(mask1))
+    #print(mask1.sum())
     
     # Create solution indices
     indices = np.arange(archive1.cells)
