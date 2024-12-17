@@ -5,7 +5,8 @@ from matplotlib.colors import Normalize
 import matplotlib.ticker as ticker
 from ribs.archives import GridArchive
 
-#from ribs.visualize import cvt_archive_heatmap, grid_archive_heatmap
+import argparse
+import os
 
 from rocket_evaluate import MAX_FITNESS
 
@@ -19,9 +20,6 @@ MIN_NOSE_TYPE_INDEX = 0
 MAX_NOSE_TYPE_INDEX = 5
 NOSE_TYPE_LABELS = ["OGIVE", "CONICAL", "ELLIPSOID", "POWER", "PARABOLIC", "HAACK"]
 NUM_NOSE_TYPES = len(NOSE_TYPE_LABELS)
-#BLOCK_WIDTH = (MAX_STABILITY - MIN_STABILITY) / 100.0 # 100 is the dims from the original archive
-# Manual tinkering instead
-BLOCK_WIDTH = 0.1
 
 def load_grid_archive_from_csv(filepath, config=None):
     """
@@ -59,7 +57,21 @@ def load_grid_archive_from_csv(filepath, config=None):
         ranges=bounds,
         **archive_kwargs
     )
+   
+    return add_data_frame_to_archive(df, archive)
+
     
+def add_data_frame_to_archive(df, archive):
+    """
+    Takes all the solutions in a pandas dataframe and puts them into a pyribs GridArchive.
+
+    Args:
+        df: pandas dataframe
+        archive: pyribs GridArchive (would other types work too?)
+
+    Returns:
+        GridArchive with the solutions added
+    """
     # Add each solution to the archive
     for _, row in df.iterrows():
         # Reshape arrays to match expected batch dimensions
@@ -72,6 +84,49 @@ def load_grid_archive_from_csv(filepath, config=None):
     
     return archive
 
+def load_multiple_archives(prefix=None, start_index=None, end_index=None, config=None):
+    """
+    Load multiple archives from CSV files based on provided file prefix and index range
+    
+    Args:
+        prefix: Text prefix that all file names start with
+        start_index: Starting index for archive files (inclusive)
+        end_index: Ending index for archive files (inclusive)
+        config: Optional configuration dictionary
+        
+    Returns:
+        GridArchive: Merged archive containing solutions from multiple files
+    """
+    global bounds
+
+    # Extract dimensions of the problem
+    solution_cols = [col for col in df.columns if col.startswith('solution_')]
+    solution_dim = len(solution_cols)
+    
+    # Use the original archive parameters
+    archive_dims = (100, 100)
+    bounds = [
+        (0, ((BUFFER + (MAX_STABILITY - MIN_STABILITY)) * (MAX_NOSE_TYPE_INDEX + 1))),
+        (MIN_ALTITUDE, MAX_ALTITUDE)
+    ]
+    
+    # Create new archive with original parameters
+    archive_kwargs = {} if config is None else config.get("archive", {}).get("kwargs", {})
+    
+    archive = GridArchive(
+        solution_dim=solution_dim,
+        dims=archive_dims,
+        ranges=bounds,
+        **archive_kwargs
+    )
+ 
+    for i in range(start_index, end_index + 1):
+        # Load the CSV data
+        df = pd.read_csv("{prefix}_{i}_archive.csv")
+        archive = add_data_frame_to_archive(df, archive)
+
+    return archive
+
 # Custom plotting function
 def plot_custom_heatmap(archive, save_path="custom_heatmap.pdf"):
     """
@@ -81,10 +136,6 @@ def plot_custom_heatmap(archive, save_path="custom_heatmap.pdf"):
         archive: A GridArchive instance containing the archive data.
         save_path: Path to save the generated heatmap image.
     """
-    import matplotlib.pyplot as plt
-    from matplotlib.colors import Normalize
-    import numpy as np
-
     # Extract the archive data (fitness and measures) into a 2D grid
     data = archive.data(return_type='pandas')
     fitness_values = data['objective'].values
@@ -212,8 +263,30 @@ def plot_custom_heatmap(archive, save_path="custom_heatmap.pdf"):
     plt.close(fig)
 
    
-# Example usage:
-if __name__ == "__main__":
+def main():
+    # Set up argument parser
+    parser = argparse.ArgumentParser(description="Load and visualize rocket design archives")
+    
+    # Mutually exclusive group for input specification
+    input_group = parser.add_mutually_exclusive_group(required=True)
+    input_group.add_argument('-f', '--file', 
+                             help='Specific CSV file to load')
+    input_group.add_argument('-p', '--prefix', 
+                             help='Path and file name prefix shared by all CSV files in range to be loaded')
+    input_group.add_argument('-r', '--range', 
+                             nargs=2, 
+                             type=int, 
+                             metavar=('START', 'END'),
+                             help='Range of archive indices to load (inclusive)')
+    
+    # Optional output file specification
+    parser.add_argument('-o', '--output', 
+                        default='custom_heatmap.pdf', 
+                        help='Output file path for the heatmap')
+    
+    # Parse arguments
+    args = parser.parse_args()
+    
     # Set up configuration with threshold_min
     config = {
         "archive": {
@@ -223,28 +296,28 @@ if __name__ == "__main__":
         }
     }
     
-    # Load the archive
-    archive = load_grid_archive_from_csv(
-        "evolve_rockets_output/cma_me_imp_stabilitynose_altitude_0_archive.csv",
-        config=config
-    )
+    # Load archives based on input type
+    if args.file:
+        archive = load_grid_archive_from_csv(args.file, config)
+    else:
+        archive = load_multiple_archives(start_index=args.range[0], 
+                                         end_index=args.range[1], 
+                                         config=config)
     
     # Verify the loaded archive
     print(f"Number of elite solutions: {len(archive)}")
     print(f"Grid dimensions: {archive.dims}")
     print(f"Measure ranges: {list(zip(archive.lower_bounds, archive.upper_bounds))}")
-    print(f"First measure range: {bounds[0]}")  # Stability-nose combined range
-    print(f"Second measure range: {bounds[1]}")  # Altitude range
+    
+    # Plot the custom heatmap
+    plot_custom_heatmap(archive, args.output)
 
-    # Plot the custom heatmap: once this call is enabled, it replaces the code below
-    plot_custom_heatmap(archive, "cma_me_imp_stabilitynose_altitude_0_archive.pdf")
 
-#    import matplotlib
-#    matplotlib.use('Agg')
-#    import matplotlib.pyplot as plt
-#
-#    plt.figure(figsize=(8, 6))
-#    grid_archive_heatmap(archive, vmin=0, vmax=MAX_FITNESS)
-#    plt.tight_layout()
-#    plt.savefig("test.png")
-#    plt.close(plt.gcf())
+# Load a single specific file
+# python process_saved_archives.py -f evolve_rockets_output/cma_me_imp_stabilitynose_altitude_5_archive.csv
+
+# Load archives with indices 0 through 29 and specify output file
+# python process_saved_archives.py -r 0 29 -p evolve_rockets_output/cma_me_imp_stabilitynose_altitude -o cma_me_imp_stabilitynose_altitude.pdf
+
+if __name__ == "__main__":
+    main()
