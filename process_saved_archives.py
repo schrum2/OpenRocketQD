@@ -488,5 +488,8 @@ def main():
 # Load archives with indices 0 through 29 and specify output file
 # python process_saved_archives.py -r 0 29 -p evolve_rockets_output/cma_me_imp_stabilitynose_altitude -o cma_me_imp_stabilitynose_altitude.pdf
 
+# Compare with this:
+# python process_saved_archives.py -r 0 29 -p evolve_rockets_output/map_elites_stabilitynose_altitude -o compare_map_elites_vs_cma_me_imp_megaarchive.pdf -c evolve_rockets_output/cma_me_imp_stabilitynose_altitude
+
 if __name__ == "__main__":
     main()
