@@ -72,6 +72,9 @@ def add_data_frame_to_archive(df, archive):
     Returns:
         GridArchive with the solutions added
     """
+    # Redundant calculation?
+    solution_cols = [col for col in df.columns if col.startswith('solution_')]
+
     # Add each solution to the archive
     for _, row in df.iterrows():
         # Reshape arrays to match expected batch dimensions
@@ -99,6 +102,9 @@ def load_multiple_archives(prefix=None, start_index=None, end_index=None, config
     """
     global bounds
 
+    # Get information from first CSV file in collection
+    df = pd.read_csv(f"{prefix}_{start_index}_archive.csv")
+
     # Extract dimensions of the problem
     solution_cols = [col for col in df.columns if col.startswith('solution_')]
     solution_dim = len(solution_cols)
@@ -119,10 +125,13 @@ def load_multiple_archives(prefix=None, start_index=None, end_index=None, config
         ranges=bounds,
         **archive_kwargs
     )
+
+    archive = add_data_frame_to_archive(df, archive)
  
-    for i in range(start_index, end_index + 1):
+    # Start at +1 since first was read and added above
+    for i in range(start_index+1, end_index + 1):
         # Load the CSV data
-        df = pd.read_csv("{prefix}_{i}_archive.csv")
+        df = pd.read_csv(f"{prefix}_{i}_archive.csv")
         archive = add_data_frame_to_archive(df, archive)
 
     return archive
@@ -264,28 +273,43 @@ def plot_custom_heatmap(archive, save_path="custom_heatmap.pdf"):
 
    
 def main():
-    # Set up argument parser
+    """
+    Set up and validate argument parser for rocket design archive loading.
+    
+    Requires either:
+    1. A specific file with --file, OR
+    2. Both --prefix and --range together
+    
+    Output file is optional in both cases.
+    """
     parser = argparse.ArgumentParser(description="Load and visualize rocket design archives")
     
-    # Mutually exclusive group for input specification
+    # Create a group to enforce the file XOR (prefix + range) requirement
     input_group = parser.add_mutually_exclusive_group(required=True)
     input_group.add_argument('-f', '--file', 
                              help='Specific CSV file to load')
     input_group.add_argument('-p', '--prefix', 
                              help='Path and file name prefix shared by all CSV files in range to be loaded')
-    input_group.add_argument('-r', '--range', 
-                             nargs=2, 
-                             type=int, 
-                             metavar=('START', 'END'),
-                             help='Range of archive indices to load (inclusive)')
+    
+    # Add range as a required argument when prefix is used
+    parser.add_argument('-r', '--range', 
+                        nargs=2, 
+                        type=int, 
+                        metavar=('START', 'END'),
+                        help='Range of archive indices to load (inclusive)',
+                        required=False)
     
     # Optional output file specification
     parser.add_argument('-o', '--output', 
                         default='custom_heatmap.pdf', 
                         help='Output file path for the heatmap')
     
-    # Parse arguments
+    # Parse initial arguments
     args = parser.parse_args()
+    
+    # Custom validation
+    if args.prefix is not None and args.range is None:
+        parser.error("--prefix requires --range to be specified")
     
     # Set up configuration with threshold_min
     config = {
@@ -300,7 +324,8 @@ def main():
     if args.file:
         archive = load_grid_archive_from_csv(args.file, config)
     else:
-        archive = load_multiple_archives(start_index=args.range[0], 
+        archive = load_multiple_archives(prefix=args.prefix,
+                                         start_index=args.range[0], 
                                          end_index=args.range[1], 
                                          config=config)
     
