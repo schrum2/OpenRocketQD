@@ -11,7 +11,12 @@ import math
 # To test the robustness of the rocket design, it is evaluated at varying wind speeds
 WIND_SPEED_MIN = 2.0   # m/s 
 WIND_SPEED_MAX = 6.7   # m/s (6.7 m/s = 14.988 mph)
-
+# NOTE: The MAX values shown here (above and below) are misleading.
+#       I meant for these to be the final values tested at, but because
+#       the increments are defined by dividing by NUM_ROCKET_EVALS,
+#       the max values tested at are actually one increment short of
+#       the maxes I intended. These settings are left as-is to remain
+#       consistent with experiments done for publication.
 WIND_DEVIATION_MIN = 0.2  # m/s
 WIND_DEVIATION_MAX = 4.0  # m/s
 
@@ -102,6 +107,10 @@ def simulate_rocket(orh, sim, opts, doc, plt = None):
     # Evaluate the rocket with different wind conditions and take the average altitude.
     # The fitness goal is to minimize the variance in max altitude.
     for i in range(NUM_ROCKET_EVALS):
+
+        if DEBUG:
+            print(f"Wind speed: {wind_speed}")
+            print(f"Wind dev  : {wind_deviation}")
 
         opts.setWindSpeedAverage(wind_speed)
         opts.setWindSpeedDeviation(wind_deviation)
