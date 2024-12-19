@@ -572,7 +572,9 @@ CONFIG = {
 }
 
 def sigmoid(arr):
-    return 1/(1 + np.exp(-arr))
+    # Handle overflow/underflow
+    arr = np.clip(arr, -1000, 1000)
+    return 1 / (1 + np.exp(-arr))
 
 def evaluate_rocket_genome(genome):
     """
