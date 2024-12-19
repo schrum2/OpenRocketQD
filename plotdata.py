@@ -20,7 +20,7 @@ map_elites_coverage_data = []
 cma_qd_score_data = []
 map_elites_qd_score_data = []
 
-# Load data from CMA-ES files
+# Load data from CMA-ME files
 for i in range(num_files):
     cma_file_path = os.path.join(data_dir, cma_pattern.format(i))
     with open(cma_file_path, 'r') as f:
@@ -67,7 +67,7 @@ left_margin = 0.15  # Adjust this value if necessary
 
 # Plot Archive Coverage comparison
 plt.figure(figsize=(10, 6))
-plt.plot(x_values, cma_coverage_mean, label="CMA-ES", color="blue")
+plt.plot(x_values, cma_coverage_mean, label="CMA-ME", color="blue")
 plt.fill_between(x_values, cma_coverage_mean - cma_coverage_ci, cma_coverage_mean + cma_coverage_ci, color="blue", alpha=0.2)
 plt.plot(x_values, map_elites_coverage_mean, label="MAP-Elites", color="green")
 plt.fill_between(x_values, map_elites_coverage_mean - map_elites_coverage_ci, map_elites_coverage_mean + map_elites_coverage_ci, color="green", alpha=0.2)
@@ -81,7 +81,7 @@ plt.close()
 
 # Plot QD Score comparison
 plt.figure(figsize=(10, 6))
-plt.plot(x_values, cma_qd_score_mean, label="CMA-ES", color="blue")
+plt.plot(x_values, cma_qd_score_mean, label="CMA-ME", color="blue")
 plt.fill_between(x_values, cma_qd_score_mean - cma_qd_score_ci, cma_qd_score_mean + cma_qd_score_ci, color="blue", alpha=0.2)
 plt.plot(x_values, map_elites_qd_score_mean, label="MAP-Elites", color="green")
 plt.fill_between(x_values, map_elites_qd_score_mean - map_elites_qd_score_ci, map_elites_qd_score_mean + map_elites_qd_score_ci, color="green", alpha=0.2)
@@ -95,13 +95,13 @@ plt.close()
 
 average_scaling_factor = 10000.0
 
-# Convert CMA-ES and MAP-Elites Archive Coverage to counts (Occupied Cells)
+# Convert CMA-ME and MAP-Elites Archive Coverage to counts (Occupied Cells)
 cma_occupied_cells = cma_coverage_mean * average_scaling_factor
 map_elites_occupied_cells = map_elites_coverage_mean * average_scaling_factor
 
 # Plot Number of Individuals in Archive (Occupied Cells) comparison
 plt.figure(figsize=(10, 6))
-plt.plot(x_values, cma_occupied_cells, label="CMA-ES", color="blue")
+plt.plot(x_values, cma_occupied_cells, label="CMA-ME", color="blue")
 plt.fill_between(x_values, (cma_occupied_cells - cma_coverage_ci * average_scaling_factor),
                  (cma_occupied_cells + cma_coverage_ci * average_scaling_factor), color="blue", alpha=0.2)
 plt.plot(x_values, map_elites_occupied_cells, label="MAP-Elites", color="green")
