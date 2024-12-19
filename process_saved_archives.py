@@ -270,7 +270,7 @@ def plot_custom_heatmap(archive, save_path="custom_heatmap.pdf", compare=False):
         legend_elements = [
             mpatches.Patch(facecolor=color_40, label='BOTH'),
             mpatches.Patch(facecolor=color_25, label='Only MAP-Elites'),
-            mpatches.Patch(facecolor=color_10, label='Only CMA-ES')
+            mpatches.Patch(facecolor=color_10, label='Only CMA-ME')
         ]
     
         # Add the legend to the plot
