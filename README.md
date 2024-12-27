@@ -61,11 +61,11 @@ fully supported. However, the following commands will work:
   ```
   python evolve_rockets.py map_elites
   ```
-+ Covariance Matrix Adaptation MAP-Elites (TODO: More details)
++ Covariance Matrix Adaptation MAP-Elites (with 2-stage Improvement Emitters)
   ```
   python evolve_rockets.py cma_me_imp
   ```
-+ CMA-MAE (TODO: More details)
++ Covariance Matrix Adaptation MAP-Annealing
   ```
   python evolve_rockets.py cma_mae
   ```
@@ -86,9 +86,13 @@ However, an alternative option is the `stabilitynose_altitude` bin model:
 python evolve_rockets.py map_elites 5 stabilitynose_altitude
 ```
 
+The `stabilitynose_altitude` bin model is actually the one used in experiments
+submitted for publication.
+
 Once evolution completes, results are stored in the subdirectory `evolve_rockets_output`.
 In particular, there will be a `csv` file associated with the algorithm used 
-for evolution and the run number. Basically, all relevant files will have a name with a
+for evolution and the run number. Basically, all relevant files will 
+have a name with a
 prefix like `map_elites_stability_altitude_5` or whatever is appropriate for your chosen algorithm, 
 run number, and bin model.
 
@@ -114,11 +118,11 @@ different. In this case, there are 2 rockets per nose type, of which there are 6
 Note that there is also a script called `rocket_spread.py` that is used to identify
 rockets that achieve various altitudes. Here is an example usage:
 ```
-python rocket_spread.py .\evolve_rockets_output\cma_me_imp_stabilitynose_altitude_2_archive.csv 10 110
+python rocket_spread.py .\evolve_rockets_output\cma_me_imp_stabilitynose_altitude_2_archive.csv 10 90
 ```
 This command finds rocket line numbers that achieve different altitudes. In this example specifically, 
 the user is shown the 6 stable rockets whose altitude is closest to 10 meters without exceeding it, and 
-the output continues in increments of 10 meters: 20, 30, 40, and so on up to 110.
+the output continues in increments of 10 meters: 20, 30, 40, and so on up to 90.
 
 Back to `rocket_evaluate.py`: If you want to create an `ork` file representing the rocket so that you can analyze it
 further in OpenRocket, then add the name of the file to the end of the command line:
@@ -152,4 +156,26 @@ from the archive file that you like. An example usage looks like this
 ```
 save_multiple.bat evolve_rockets_output\cma_me_imp_stabilitynose_altitude_2_archive.csv cma_me_imp_result 5175 5210 5322
 ```
-This outputs three files named `cma_me_imp_result5175.ork`, `cma_me_imp_result5210.ork`, and `cma_me_imp_result5322.ork`.
+This outputs three files: one `ork` file corresponding to each line number in the archive `csv` file. The exact file name also contains information about the highest altitude and nose type of the rocket represented.
+
+The ability to create individual `ork` files allows specific designs to be analyzed in detail and potentially modified based on a designer's preferences. However, to analyze the aggregate output from one or multiple experiments in more detail, different scripts must be used.
+
+By default, Pyribs outputs some basic results to the `evolve_rockets_output` directory associated with each run. For example, running `cma_mae` with the `stabilitynose_altitude` bin model and an experiment number of 0 produces these files:
+
+* `cma_mae_stabilitynose_altitude_0_archive_coverage.png`: Archive coverage over time as a ratio of the total number of bins.
+* `cma_mae_stabilitynose_altitude_0_qd_score.png`: Archive QD score over time. QD score is the sum of the fitness scores of all occupied bins.
+* `cma_mae_stabilitynose_altitude_0_heatmap_*.png`: This is actually a collection of several files. The asterisk takes on different iteration numbers over the course of evolution based on the logging frequency, which is 20. Each file is a fitness heatmap of the archive. However, the axes are unlabeled, so a bit more processing is needed to make sense of these results.
+
+The `process_saved_archives.py` script can be used to process both individual archives and collections of archive. To display the final contents of an archive in a more readable form, use a command like this:
+```
+python process_saved_archives.py -f evolve_rockets_output/cma_mae_stabilitynose_altitude_0_archive.csv
+```
+This command creates a file `custom_heatmap.pdf` that displays the heatmap contents with clearly labeled axes. The name of the output file can be changed with the `-o` parameter:
+```
+python process_saved_archives.py -f evolve_rockets_output/cma_mae_stabilitynose_altitude_0_archive.csv -o cma_mae_stabilitynose_altitude_0_archive.pdf
+```
+The script also provides a way to aggregate all results from a given type of experiment into a mega-archive, meaning an archive containing the best results across several individual archives. For example, results from 30 `cma_mae` runs can be aggregated with the following command:
+```
+python process_saved_archives.py -r 0 29 -p evolve_rockets_output/cma_mae_stabilitynose_altitude -o cma_mae_stabilitynose_altitude_0to29_megaarchive.pdf
+```
+Note that there is an assumption here that the archives being aggregated used sequential experiment numbers 0 through 29.

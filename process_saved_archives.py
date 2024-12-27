@@ -289,6 +289,7 @@ def plot_custom_heatmap(archive, save_path="custom_heatmap.pdf", compare=False):
     plt.tight_layout()
     plt.savefig(save_path, bbox_inches='tight')
     plt.close(fig)
+    print(f"{save_path} saved")
 
 def compare_archives(archive1, archive2):
     """Creates a new GridArchive showing the overlap between two existing archives.
