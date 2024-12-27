@@ -145,6 +145,7 @@ def plot_custom_heatmap(archive, save_path="custom_heatmap.pdf", compare=False):
     Args:
         archive: A GridArchive instance containing the archive data.
         save_path: Path to save the generated heatmap image.
+        compare: whether there is a comparison with other archives
     """
     # Extract the archive data (fitness and measures) into a 2D grid
     data = archive.data(return_type='pandas')
@@ -250,11 +251,6 @@ def plot_custom_heatmap(archive, save_path="custom_heatmap.pdf", compare=False):
     ax.set_xticks(stability_ticks)
     ax.set_xticklabels(NOSE_TYPE_LABELS, fontsize=15)
 
-    # Set the x-axis ticks for the nose types (minor ticks) and their labels
-    #ax.set_xticks(nose_type_positions, minor=True)  # The positions where nose types should be
-    #ax.tick_params(axis='x', which='minor', length=0)  # Hide minor ticks for better visibility
-    #ax.set_xticklabels(nose_types, fontsize=20, minor=True)  # Nose type labels below stability ticks
-
 
     # Labels and formatting
     ax.set_xlabel("Nose Type", fontsize=20)
@@ -262,20 +258,28 @@ def plot_custom_heatmap(archive, save_path="custom_heatmap.pdf", compare=False):
 
     if compare:
         # Get colors for each value
-        color_40 = cmap(norm(40))
-        color_25 = cmap(norm(25))
-        color_10 = cmap(norm(10))
+        color_ALL = cmap(norm(40))
+        color_ME_CMAME = cmap(norm(35))
+        color_CMAME_CMAMAE = cmap(norm(30))
+        color_ME_CMAMAE = cmap(norm(25))
+        color_CMAMAE = cmap(norm(20))
+        color_CMAME = cmap(norm(15))
+        color_ME = cmap(norm(10))
     
         # Create patch objects for the legend
         legend_elements = [
-            mpatches.Patch(facecolor=color_40, label='BOTH'),
-            mpatches.Patch(facecolor=color_25, label='Only MAP-Elites'),
-            mpatches.Patch(facecolor=color_10, label='Only CMA-ME')
+            mpatches.Patch(facecolor=color_ALL, label='ALL'),
+            mpatches.Patch(facecolor=color_ME_CMAME, label='MAP-Elites+CMA-ME'),
+            mpatches.Patch(facecolor=color_CMAME_CMAMAE, label='CMA-ME+CMA-MAE'),
+            mpatches.Patch(facecolor=color_ME_CMAMAE, label='MAP-Elites+CMA-MAE'),
+            mpatches.Patch(facecolor=color_CMAMAE, label='Only CMA-MAE'),
+            mpatches.Patch(facecolor=color_CMAME, label='Only CMA-ME'),
+            mpatches.Patch(facecolor=color_ME, label='Only MAP-Elites')
         ]
     
         # Add the legend to the plot
         ax.legend(handles=legend_elements, loc='upper center',
-                   bbox_to_anchor=(0.5, -0.15), ncol=3, fontsize=16)
+                   bbox_to_anchor=(0.5, -0.15), ncol=4, fontsize=16)
     else:
         # Add a colorbar
         cbar = fig.colorbar(c, ax=ax)
@@ -291,113 +295,125 @@ def plot_custom_heatmap(archive, save_path="custom_heatmap.pdf", compare=False):
     plt.close(fig)
     print(f"{save_path} saved")
 
-def compare_archives(archive1, archive2):
+def compare_archives(map_elites_archive, cma_me_imp_archive, cma_mae_archive):
     """Creates a new GridArchive showing the overlap between two existing archives.
     
     Args:
-        archive1 (GridArchive): First archive to compare
-        archive2 (GridArchive): Second archive to compare
+        map_elites_archive (GridArchive): MAE-Elites archive to compare
+        cma_me_imp_archive (GridArchive): CMA-ME archive to compare
+        cma_mae_archive    (GridArchive): CMA-MAE archive to compare
         
     Returns:
         GridArchive: A new archive where:
-        - Cells with solutions in both archives have score 100
-        - Cells with solutions only in archive1 have score 75
-        - Cells with solutions only in archive2 have score 25
-        - Empty cells in both archives remain empty
+        - Cells with solutions in all archives have score 40
+        - Cells with solutions only in map_elites and cma_me_imp have score 35
+        - Cells with solutions only in cma_me_imp and cma_mae have score 30
+        - Cells with solutions only in cma_mae and map_elites have score 25
+        - Cells with solutions only in cma_mae_archive have score 20
+        - Cells with solutions only in cma_me_imp_archive have score 15
+        - Cells with solutions only in map_elites_archive have score 10
+        - Empty cells in all archives remain empty
     
-    Raises:
-        ValueError: If the archives have different dimensions or ranges
     """
-    # Verify archives have same configuration
-    if not np.array_equal(archive1.dims, archive2.dims):
-        raise ValueError("Archives must have same dimensions")
-    if not (np.array_equal(archive1.lower_bounds, archive2.lower_bounds) and 
-            np.array_equal(archive1.upper_bounds, archive2.upper_bounds)):
-        raise ValueError("Archives must have same ranges")
-    
+    model_archive = map_elites_archive if map_elites_archive is not None else cma_me_imp_archive
+
     # Create new archive with same configuration
     result_archive = GridArchive(
-        solution_dim=archive1.solution_dim,
-        dims=archive1.dims,
-        ranges=list(zip(archive1.lower_bounds, archive1.upper_bounds))
+        solution_dim=model_archive.solution_dim,
+        dims=model_archive.dims,
+        ranges=list(zip(model_archive.lower_bounds, model_archive.upper_bounds))
     )
-    
-    #print(archive1.cells)
-    #print(archive2.cells)
-
-    # Get data from both archives
-    # _, data1 = archive1._store.retrieve(np.arange(archive1.cells))
-    # _, data2 = archive2._store.retrieve(np.arange(archive2.cells))
-    
-    data1 = archive1.data()
-    data2 = archive2.data()
-
-    #print(data1)
-    #print(data2)
-    
-    # Create masks for occupied cells
-    #mask1 = np.vectorize(lambda x: x > 0)(data1['objective'])
-    #mask2 = np.vectorize(lambda x: x > 0)(data2['objective'])
-
-    #print(data1['objective'])
-    #print(len(data1['objective']))
-    #print(mask1)
-    #print(len(mask1))
-    #print(mask1.sum())
-
-    dict1 = dict()
-    for i in range(len(data1['index'])):
-        dict1[data1['index'][i]] = {'solution' : data1['solution'][i], 
-                                    'objective': data1['objective'][i],
-                                    'measures' : data1['measures'][i],
-                                    'threshold': data1['threshold'][i],
-                                    'index'    : data1['index'][i]}
-
-    dict2 = dict()
-    for i in range(len(data2['index'])):
-        dict2[data2['index'][i]] = {'solution' : data2['solution'][i], 
-                                    'objective': data2['objective'][i],
-                                    'measures' : data2['measures'][i],
-                                    'threshold': data2['threshold'][i],
-                                    'index'    : data2['index'][i]}
 
     all_indexes = set()
-    all_indexes.update(data1['index'])
-    all_indexes.update(data2['index'])
+    
+    if map_elites_archive is not None:
+        map_elites_data = map_elites_archive.data()
+        map_elites_dict = dict()
+        for i in range(len(map_elites_data['index'])):
+            map_elites_dict[map_elites_data['index'][i]] = {'solution' : map_elites_data['solution'][i], 
+                                                            'objective': map_elites_data['objective'][i],
+                                                            'measures' : map_elites_data['measures'][i],
+                                                            'threshold': map_elites_data['threshold'][i],
+                                                            'index'    : map_elites_data['index'][i]}
+        all_indexes.update(map_elites_data['index'])
+
+    if cma_me_imp_archive is not None:
+        cma_me_imp_data = cma_me_imp_archive.data()
+        cma_me_imp_dict = dict()
+        for i in range(len(cma_me_imp_data['index'])):
+            cma_me_imp_dict[cma_me_imp_data['index'][i]] = {'solution' : cma_me_imp_data['solution'][i], 
+                                                            'objective': cma_me_imp_data['objective'][i],
+                                                            'measures' : cma_me_imp_data['measures'][i],
+                                                            'threshold': cma_me_imp_data['threshold'][i],
+                                                            'index'    : cma_me_imp_data['index'][i]}
+        all_indexes.update(cma_me_imp_data['index'])
+
+    if cma_mae_archive is not None:
+        cma_mae_data = cma_mae_archive.data()
+        cma_mae_dict = dict()
+        for i in range(len(cma_mae_data['index'])):
+            cma_mae_dict[cma_mae_data['index'][i]] = {'solution' : cma_mae_data['solution'][i], 
+                                                      'objective': cma_mae_data['objective'][i],
+                                                      'measures' : cma_mae_data['measures'][i],
+                                                      'threshold': cma_mae_data['threshold'][i],
+                                                      'index'    : cma_mae_data['index'][i]}
+        all_indexes.update(cma_mae_data['index'])
     
     # Loop through each position
     for index in all_indexes:
         # Check if each archive has a solution at this position
-        has_solution1 = index in dict1
-        has_solution2 = index in dict2
+        map_elites_has_solution = map_elites_archive is not None and index in map_elites_dict
+        cma_me_imp_has_solution = cma_me_imp_archive is not None and index in cma_me_imp_dict
+        cma_mae_has_solution    = cma_mae_archive    is not None and index in cma_mae_dict
         
-        if has_solution1 and has_solution2:
-            # Both archives have solutions - score 40
-            # print("BOTH",data1['measures'][i])
+        if map_elites_has_solution and cma_me_imp_has_solution and cma_mae_has_solution:
             result_archive.add_single(
-                solution=dict1[index]['solution'],
+                solution=map_elites_dict[index]['solution'],
                 objective=40.0,
-                measures=dict1[index]['measures']
+                measures=map_elites_dict[index]['measures']
             )
-        elif has_solution1:
-            # Only archive1 has solution - score 25
+        elif map_elites_has_solution and cma_me_imp_has_solution:
             result_archive.add_single(
-                solution=dict1[index]['solution'],
+                solution=map_elites_dict[index]['solution'],
+                objective=35.0,
+                measures=map_elites_dict[index]['measures']
+            )
+        elif cma_me_imp_has_solution and cma_mae_has_solution:
+            result_archive.add_single(
+                solution=cma_me_imp_dict[index]['solution'],
+                objective=30.0,
+                measures=cma_me_imp_dict[index]['measures']
+            )
+        elif cma_mae_has_solution and map_elites_has_solution:
+            result_archive.add_single(
+                solution=map_elites_dict[index]['solution'],
                 objective=25.0,
-                measures=dict1[index]['measures']
+                measures=map_elites_dict[index]['measures']
             )
-        elif has_solution2:
-            # Only archive2 has solution - score 10
+        elif cma_mae_has_solution:
             result_archive.add_single(
-                solution=dict2[index]['solution'],
+                solution=cma_mae_dict[index]['solution'],
+                objective=20.0,
+                measures=cma_mae_dict[index]['measures']
+            )
+        elif cma_me_imp_has_solution:
+            result_archive.add_single(
+                solution=cma_me_imp_dict[index]['solution'],
+                objective=15.0,
+                measures=cma_me_imp_dict[index]['measures']
+            )
+        elif map_elites_has_solution:
+            result_archive.add_single(
+                solution=map_elites_dict[index]['solution'],
                 objective=10.0,
-                measures=dict2[index]['measures']
+                measures=map_elites_dict[index]['measures']
             )
         else:
             print("Problem with",index)
             print(all_indexes)
-            print(dict1)
-            print(dict2)
+            print(map_elites_dict if map_elites_dict is not None else "No map_elites_dict")
+            print(cma_me_imp_dict if cma_me_imp_dict is not None else "No cma_me_imp_dict")
+            print(cma_mae_dict    if cma_mae_dict    is not None else "No cma_mae_dict")
             quit()
             
     return result_archive
@@ -434,6 +450,11 @@ def main():
                         default=None, 
                         help='File or prefix to compare against')
 
+    # Optional third archive to compare against
+    parser.add_argument('-c2', '--compare2', 
+                        default=None, 
+                        help='Third file or prefix to compare against')
+
     # Optional output file specification
     parser.add_argument('-o', '--output', 
                         default='custom_heatmap.pdf', 
@@ -458,21 +479,71 @@ def main():
     # Load archives based on input type
     if args.file:
         archive = load_grid_archive_from_csv(args.file, config)
-        if args.compare:
-            other = load_grid_archive_from_csv(args.compare, config)
-            archive = compare_archives(archive, other)
     else:
         archive = load_multiple_archives(prefix=args.prefix,
                                          start_index=args.range[0], 
                                          end_index=args.range[1], 
                                          config=config)
 
-        if args.compare:
+    if args.compare:
+        me_archive = None
+        cmame_archive = None
+        cmamae_archive = None
+
+        if args.file:  # One file
+            other = load_grid_archive_from_csv(args.compare, config)
+            if args.compare2:
+                third = load_grid_archive_from_csv(args.compare2, config)
+        else:          # Range of files
             other = load_multiple_archives(prefix=args.compare,
                                          start_index=args.range[0], 
                                          end_index=args.range[1], 
                                          config=config)
-            archive = compare_archives(archive, other)
+            if args.compare2:
+                third = load_multiple_archives(prefix=args.compare2,
+                                               start_index=args.range[0], 
+                                               end_index=args.range[1], 
+                                               config=config)
+
+        if args.file:
+            if "map_elites" in args.file:
+                me_archive = archive
+            elif "cma_me_imp" in args.file:
+                cmame_archive = archive
+            elif "cma_mae" in args.file:
+                cmamae_archive = archive
+            else:
+                parser.error("--file name does not correspond to any known algorithm: map_elites, cma_me_imp, cma_mae")
+        else:
+            if "map_elites" in args.prefix:
+                me_archive = archive
+            elif "cma_me_imp" in args.prefix:
+                cmame_archive = archive
+            elif "cma_mae" in args.prefix:
+                cmamae_archive = archive
+            else:
+                parser.error("--prefix name does not correspond to any known algorithm: map_elites, cma_me_imp, cma_mae")
+
+        if "map_elites" in args.compare:
+            me_archive = other
+        elif "cma_me_imp" in args.compare:
+            cmame_archive = other
+        elif "cma_mae" in args.compare:
+            cmamae_archive = other
+        else:
+            parser.error("--compare name does not correspond to any known algorithm: map_elites, cma_me_imp, cma_mae")
+
+        if args.compare2:
+            if "map_elites" in args.compare2:
+                me_archive = third
+            elif "cma_me_imp" in args.compare2:
+                cmame_archive = third
+            elif "cma_mae" in args.compare2:
+                cmamae_archive2 = third
+            else:
+                parser.error("--compare name does not correspond to any known algorithm: map_elites, cma_me_imp, cma_mae")
+
+        archive = compare_archives(map_elites_archive = me_archive, cma_me_imp_archive = cmame_archive, cma_mae_archive = cmamae_archive)
     
     # Verify the loaded archive
     print(f"Number of elite solutions: {len(archive)}")

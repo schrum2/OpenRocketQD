@@ -174,8 +174,15 @@ This command creates a file `custom_heatmap.pdf` that displays the heatmap conte
 ```
 python process_saved_archives.py -f evolve_rockets_output/cma_mae_stabilitynose_altitude_0_archive.csv -o cma_mae_stabilitynose_altitude_0_archive.pdf
 ```
-The script also provides a way to aggregate all results from a given type of experiment into a mega-archive, meaning an archive containing the best results across several individual archives. For example, results from 30 `cma_mae` runs can be aggregated with the following command:
+The script also provides a way to aggregate all results from a given type of experiment into a mega-archive, meaning an archive containing only the best results across several individual archives. For example, results from 30 `cma_mae` runs can be aggregated with the following command:
 ```
 python process_saved_archives.py -r 0 29 -p evolve_rockets_output/cma_mae_stabilitynose_altitude -o cma_mae_stabilitynose_altitude_0to29_megaarchive.pdf
 ```
-Note that there is an assumption here that the archives being aggregated used sequential experiment numbers 0 through 29.
+Note that there is an assumption here that the archives being aggregated used sequential experiment numbers 0 through 29. The `process_saved_archives.py` script can also compare archives. Here is a comparison of individual archives produces by MAP-Elites and CMA-ME:
+```
+python process_saved_archives.py -f evolve_rockets_output/map_elites_stabilitynose_altitude_0_archive.csv -c evolve_rockets_output/cma_me_imp_stabilitynose_altitude_0_archive.csv -o compare_map_elites_vs_cma_me_imp_0_archives.pdf
+```
+You can even compare three archives from different algorithms:
+```
+python process_saved_archives.py -f evolve_rockets_output/map_elites_stabilitynose_altitude_0_archive.csv -c evolve_rockets_output/cma_me_imp_stabilitynose_altitude_0_archive.csv -c2 evolve_rockets_output/cma_mae_stabilitynose_altitude_0_archive.csv -o compare_map_elites_vs_cma_me_imp_vs_cma_mae_0_archives.pdf
+```
