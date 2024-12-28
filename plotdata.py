@@ -10,15 +10,18 @@ data_dir = "evolve_rockets_output"
 # File patterns for both algorithms
 cma_pattern = "cma_me_imp_stabilitynose_altitude_{}_metrics.json"
 map_elites_pattern = "map_elites_stabilitynose_altitude_{}_metrics.json"
+cma_mae_pattern = "cma_mae_stabilitynose_altitude_{}_metrics.json"
 
 # Number of files to process for each algorithm
 num_files = 30
 
-# Lists to store data for both algorithms
+# Lists to store data for each algorithm
 cma_coverage_data = []
 map_elites_coverage_data = []
+cma_mae_coverage_data = []
 cma_qd_score_data = []
 map_elites_qd_score_data = []
+cma_mae_qd_score_data = []
 
 # Load data from CMA-ME files
 for i in range(num_files):
@@ -27,6 +30,14 @@ for i in range(num_files):
         cma_data = json.load(f)
         cma_coverage_data.append(cma_data["Archive Coverage"]["y"])
         cma_qd_score_data.append(cma_data["QD Score"]["y"])
+
+# Load data from CMA-MAE files
+for i in range(num_files):
+    cma_mae_file_path = os.path.join(data_dir, cma_mae_pattern.format(i))
+    with open(cma_mae_file_path, 'r') as f:
+        cma_mae_data = json.load(f)
+        cma_mae_coverage_data.append(cma_mae_data["Archive Coverage"]["y"])
+        cma_mae_qd_score_data.append(cma_mae_data["QD Score"]["y"])
 
 # Load data from MAP-Elites files
 for i in range(num_files):
@@ -39,8 +50,10 @@ for i in range(num_files):
 # Convert lists to numpy arrays for easier manipulation
 cma_coverage_data = np.array(cma_coverage_data)
 map_elites_coverage_data = np.array(map_elites_coverage_data)
+cma_mae_coverage_data = np.array(cma_mae_coverage_data)
 cma_qd_score_data = np.array(cma_qd_score_data)
 map_elites_qd_score_data = np.array(map_elites_qd_score_data)
+cma_mae_qd_score_data = np.array(cma_mae_qd_score_data)
 
 # Function to calculate means and 95% confidence intervals
 def calculate_mean_and_ci(data):
@@ -51,8 +64,10 @@ def calculate_mean_and_ci(data):
 # Calculate means and confidence intervals for both algorithms
 cma_coverage_mean, cma_coverage_ci = calculate_mean_and_ci(cma_coverage_data)
 map_elites_coverage_mean, map_elites_coverage_ci = calculate_mean_and_ci(map_elites_coverage_data)
+cma_mae_coverage_mean, cma_mae_coverage_ci = calculate_mean_and_ci(cma_mae_coverage_data)
 cma_qd_score_mean, cma_qd_score_ci = calculate_mean_and_ci(cma_qd_score_data)
 map_elites_qd_score_mean, map_elites_qd_score_ci = calculate_mean_and_ci(map_elites_qd_score_data)
+cma_mae_qd_score_mean, cma_mae_qd_score_ci = calculate_mean_and_ci(cma_mae_qd_score_data)
 
 # X values (assumed to be the same across all files)
 x_values = cma_data["Archive Coverage"]["x"]
@@ -69,6 +84,8 @@ left_margin = 0.15  # Adjust this value if necessary
 plt.figure(figsize=(10, 6))
 plt.plot(x_values, cma_coverage_mean, label="CMA-ME", color="blue")
 plt.fill_between(x_values, cma_coverage_mean - cma_coverage_ci, cma_coverage_mean + cma_coverage_ci, color="blue", alpha=0.2)
+plt.plot(x_values, cma_mae_coverage_mean, label="CMA-MAE", color="red")
+plt.fill_between(x_values, cma_mae_coverage_mean - cma_mae_coverage_ci, cma_mae_coverage_mean + cma_mae_coverage_ci, color="red", alpha=0.2)
 plt.plot(x_values, map_elites_coverage_mean, label="MAP-Elites", color="green")
 plt.fill_between(x_values, map_elites_coverage_mean - map_elites_coverage_ci, map_elites_coverage_mean + map_elites_coverage_ci, color="green", alpha=0.2)
 plt.xlabel("Generations", fontsize=20)
@@ -83,6 +100,8 @@ plt.close()
 plt.figure(figsize=(10, 6))
 plt.plot(x_values, cma_qd_score_mean, label="CMA-ME", color="blue")
 plt.fill_between(x_values, cma_qd_score_mean - cma_qd_score_ci, cma_qd_score_mean + cma_qd_score_ci, color="blue", alpha=0.2)
+plt.plot(x_values, cma_mae_qd_score_mean, label="CMA-MAE", color="red")
+plt.fill_between(x_values, cma_mae_qd_score_mean - cma_mae_qd_score_ci, cma_mae_qd_score_mean + cma_mae_qd_score_ci, color="red", alpha=0.2)
 plt.plot(x_values, map_elites_qd_score_mean, label="MAP-Elites", color="green")
 plt.fill_between(x_values, map_elites_qd_score_mean - map_elites_qd_score_ci, map_elites_qd_score_mean + map_elites_qd_score_ci, color="green", alpha=0.2)
 plt.xlabel("Generations", fontsize=20)
@@ -97,6 +116,7 @@ average_scaling_factor = 10000.0
 
 # Convert CMA-ME and MAP-Elites Archive Coverage to counts (Occupied Cells)
 cma_occupied_cells = cma_coverage_mean * average_scaling_factor
+cma_mae_occupied_cells = cma_mae_coverage_mean * average_scaling_factor
 map_elites_occupied_cells = map_elites_coverage_mean * average_scaling_factor
 
 # Plot Number of Individuals in Archive (Occupied Cells) comparison
@@ -104,6 +124,9 @@ plt.figure(figsize=(10, 6))
 plt.plot(x_values, cma_occupied_cells, label="CMA-ME", color="blue")
 plt.fill_between(x_values, (cma_occupied_cells - cma_coverage_ci * average_scaling_factor),
                  (cma_occupied_cells + cma_coverage_ci * average_scaling_factor), color="blue", alpha=0.2)
+plt.plot(x_values, cma_mae_occupied_cells, label="CMA-MAE", color="red")
+plt.fill_between(x_values, (cma_mae_occupied_cells - cma_mae_coverage_ci * average_scaling_factor),
+                 (cma_mae_occupied_cells + cma_mae_coverage_ci * average_scaling_factor), color="red", alpha=0.2)
 plt.plot(x_values, map_elites_occupied_cells, label="MAP-Elites", color="green")
 plt.fill_between(x_values, (map_elites_occupied_cells - map_elites_coverage_ci * average_scaling_factor),
                  (map_elites_occupied_cells + map_elites_coverage_ci * average_scaling_factor), color="green", alpha=0.2)
