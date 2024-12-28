@@ -186,3 +186,7 @@ You can even compare three archives from different algorithms:
 ```
 python process_saved_archives.py -f evolve_rockets_output/map_elites_stabilitynose_altitude_0_archive.csv -c evolve_rockets_output/cma_me_imp_stabilitynose_altitude_0_archive.csv -c2 evolve_rockets_output/cma_mae_stabilitynose_altitude_0_archive.csv -o compare_map_elites_vs_cma_me_imp_vs_cma_mae_0_archives.pdf
 ```
+And if you replace the `-f` with `-p` and provide a range with `-r`, you can compare mega-archives from three different experiment batches:
+```
+python process_saved_archives.py -r 0 29 -p evolve_rockets_output/map_elites_stabilitynose_altitude -c evolve_rockets_output/cma_me_imp_stabilitynose_altitude -c2 evolve_rockets_output/cma_mae_stabilitynose_altitude -o compare_map_elites_vs_cma_me_imp_vs_cma_mae_0to29_megaarchives.pdf
+```
