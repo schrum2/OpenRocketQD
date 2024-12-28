@@ -22,6 +22,14 @@ MAX_NOSE_TYPE_INDEX = 5
 NOSE_TYPE_LABELS = ["OGIVE", "CONICAL", "ELLIPSOID", "POWER", "PARABOLIC", "HAACK"]
 NUM_NOSE_TYPES = len(NOSE_TYPE_LABELS)
 
+MAP_NUM_ALL = 40
+MAP_NUM_ME_CMAME = 35
+MAP_NUM_CMAME_CMAMAE = 30
+MAP_NUM_ME_CMAMAE = 25
+MAP_NUM_CMAMAE = 17
+MAP_NUM_CMAME = 10
+MAP_NUM_ME = 5
+
 def load_grid_archive_from_csv(filepath, config=None):
     """
     Load a previously saved GridArchive from a CSV file.
@@ -181,8 +189,10 @@ def plot_custom_heatmap(archive, save_path="custom_heatmap.pdf", compare=False):
 
     # Plot the heatmap
     fig, ax = plt.subplots(figsize=(10, 6))
-    #cmap = plt.cm.inferno  # Color map for consistency
-    cmap = plt.cm.viridis  # Color map for consistency
+    if compare:
+        cmap = plt.cm.Paired  
+    else:
+        cmap = plt.cm.viridis
     norm = Normalize(vmin=0, vmax=MAX_FITNESS)  # Normalize color scale
     
     c = ax.imshow(
@@ -258,23 +268,23 @@ def plot_custom_heatmap(archive, save_path="custom_heatmap.pdf", compare=False):
 
     if compare:
         # Get colors for each value
-        color_ALL = cmap(norm(40))
-        color_ME_CMAME = cmap(norm(35))
-        color_CMAME_CMAMAE = cmap(norm(30))
-        color_ME_CMAMAE = cmap(norm(25))
-        color_CMAMAE = cmap(norm(20))
-        color_CMAME = cmap(norm(15))
-        color_ME = cmap(norm(10))
+        color_ALL = cmap(norm(MAP_NUM_ALL))
+        color_ME_CMAME = cmap(norm(MAP_NUM_ME_CMAME))
+        color_CMAME_CMAMAE = cmap(norm(MAP_NUM_CMAME_CMAMAE))
+        color_ME_CMAMAE = cmap(norm(MAP_NUM_ME_CMAMAE))
+        color_CMAMAE = cmap(norm(MAP_NUM_CMAMAE))
+        color_CMAME = cmap(norm(MAP_NUM_CMAME))
+        color_ME = cmap(norm(MAP_NUM_ME))
     
         # Create patch objects for the legend
         legend_elements = [
             mpatches.Patch(facecolor=color_ALL, label='ALL'),
-            mpatches.Patch(facecolor=color_ME_CMAME, label='MAP-Elites+CMA-ME'),
+            mpatches.Patch(facecolor=color_ME_CMAME, label='ME+CMA-ME'),
             mpatches.Patch(facecolor=color_CMAME_CMAMAE, label='CMA-ME+CMA-MAE'),
-            mpatches.Patch(facecolor=color_ME_CMAMAE, label='MAP-Elites+CMA-MAE'),
-            mpatches.Patch(facecolor=color_CMAMAE, label='Only CMA-MAE'),
-            mpatches.Patch(facecolor=color_CMAME, label='Only CMA-ME'),
-            mpatches.Patch(facecolor=color_ME, label='Only MAP-Elites')
+            mpatches.Patch(facecolor=color_ME_CMAMAE, label='ME+CMA-MAE'),
+            mpatches.Patch(facecolor=color_CMAMAE, label='CMA-MAE'),
+            mpatches.Patch(facecolor=color_CMAME, label='CMA-ME'),
+            mpatches.Patch(facecolor=color_ME, label='ME')
         ]
     
         # Add the legend to the plot
@@ -305,13 +315,13 @@ def compare_archives(map_elites_archive, cma_me_imp_archive, cma_mae_archive):
         
     Returns:
         GridArchive: A new archive where:
-        - Cells with solutions in all archives have score 40
-        - Cells with solutions only in map_elites and cma_me_imp have score 35
-        - Cells with solutions only in cma_me_imp and cma_mae have score 30
-        - Cells with solutions only in cma_mae and map_elites have score 25
-        - Cells with solutions only in cma_mae_archive have score 20
-        - Cells with solutions only in cma_me_imp_archive have score 15
-        - Cells with solutions only in map_elites_archive have score 10
+        - Cells with solutions in all archives have score MAP_NUM_ALL
+        - Cells with solutions only in map_elites and cma_me_imp have score MAP_NUM_ME_CMAME
+        - Cells with solutions only in cma_me_imp and cma_mae have score MAP_NUM_CMAME_CMAMAE
+        - Cells with solutions only in cma_mae and map_elites have score MAP_NUM_ME_CMAMAE
+        - Cells with solutions only in cma_mae_archive have score MAP_NUM_CMAMAE
+        - Cells with solutions only in cma_me_imp_archive have score MAP_NUM_CMAME
+        - Cells with solutions only in map_elites_archive have score MAP_NUM_ME
         - Empty cells in all archives remain empty
     
     """
@@ -369,43 +379,43 @@ def compare_archives(map_elites_archive, cma_me_imp_archive, cma_mae_archive):
         if map_elites_has_solution and cma_me_imp_has_solution and cma_mae_has_solution:
             result_archive.add_single(
                 solution=map_elites_dict[index]['solution'],
-                objective=40.0,
+                objective=MAP_NUM_ALL,
                 measures=map_elites_dict[index]['measures']
             )
         elif map_elites_has_solution and cma_me_imp_has_solution:
             result_archive.add_single(
                 solution=map_elites_dict[index]['solution'],
-                objective=35.0,
+                objective=MAP_NUM_ME_CMAME,
                 measures=map_elites_dict[index]['measures']
             )
         elif cma_me_imp_has_solution and cma_mae_has_solution:
             result_archive.add_single(
                 solution=cma_me_imp_dict[index]['solution'],
-                objective=30.0,
+                objective=MAP_NUM_CMAME_CMAMAE,
                 measures=cma_me_imp_dict[index]['measures']
             )
         elif cma_mae_has_solution and map_elites_has_solution:
             result_archive.add_single(
                 solution=map_elites_dict[index]['solution'],
-                objective=25.0,
+                objective=MAP_NUM_ME_CMAMAE,
                 measures=map_elites_dict[index]['measures']
             )
         elif cma_mae_has_solution:
             result_archive.add_single(
                 solution=cma_mae_dict[index]['solution'],
-                objective=20.0,
+                objective=MAP_NUM_CMAMAE,
                 measures=cma_mae_dict[index]['measures']
             )
         elif cma_me_imp_has_solution:
             result_archive.add_single(
                 solution=cma_me_imp_dict[index]['solution'],
-                objective=15.0,
+                objective=MAP_NUM_CMAME,
                 measures=cma_me_imp_dict[index]['measures']
             )
         elif map_elites_has_solution:
             result_archive.add_single(
                 solution=map_elites_dict[index]['solution'],
-                objective=10.0,
+                objective=MAP_NUM_ME,
                 measures=map_elites_dict[index]['measures']
             )
         else:
@@ -478,8 +488,10 @@ def main():
     
     # Load archives based on input type
     if args.file:
+        print(f"First file: {args.file}") 
         archive = load_grid_archive_from_csv(args.file, config)
     else:
+        print(f"First file range for archive: {args.prefix} {args.range[0]} to {args.range[1]}") 
         archive = load_multiple_archives(prefix=args.prefix,
                                          start_index=args.range[0], 
                                          end_index=args.range[1], 
@@ -491,15 +503,19 @@ def main():
         cmamae_archive = None
 
         if args.file:  # One file
+            print(f"Second file: {args.compare}") 
             other = load_grid_archive_from_csv(args.compare, config)
             if args.compare2:
+                print(f"Third file: {args.compare2}") 
                 third = load_grid_archive_from_csv(args.compare2, config)
         else:          # Range of files
+            print(f"Second file range for archive: {args.compare} {args.range[0]} to {args.range[1]}") 
             other = load_multiple_archives(prefix=args.compare,
                                          start_index=args.range[0], 
                                          end_index=args.range[1], 
                                          config=config)
             if args.compare2:
+                print(f"Third file range for archive: {args.compare2} {args.range[0]} to {args.range[1]}") 
                 third = load_multiple_archives(prefix=args.compare2,
                                                start_index=args.range[0], 
                                                end_index=args.range[1], 
@@ -539,7 +555,7 @@ def main():
             elif "cma_me_imp" in args.compare2:
                 cmame_archive = third
             elif "cma_mae" in args.compare2:
-                cmamae_archive2 = third
+                cmamae_archive = third
             else:
                 parser.error("--compare name does not correspond to any known algorithm: map_elites, cma_me_imp, cma_mae")
 
