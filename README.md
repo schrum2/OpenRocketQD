@@ -190,3 +190,4 @@ And if you replace the `-f` with `-p` and provide a range with `-r`, you can com
 ```
 python process_saved_archives.py -r 0 29 -p evolve_rockets_output/map_elites_stabilitynose_altitude -c evolve_rockets_output/cma_me_imp_stabilitynose_altitude -c2 evolve_rockets_output/cma_mae_stabilitynose_altitude -o compare_map_elites_vs_cma_me_imp_vs_cma_mae_0to29_megaarchives.pdf
 ```
+In addition to comparing the final archives, it is also possible to aggregate results of coverage and QD score across runs. The `plotdata.py` script is configured to do this, but it specifically expects 30 experimental runs of each algorithm from 0 to 29.
