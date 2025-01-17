@@ -70,7 +70,7 @@ def load_grid_archive_from_csv(filepath, config=None):
     return add_data_frame_to_archive(df, archive)
 
     
-def add_data_frame_to_archive(df, archive):
+def add_data_frame_to_archive(df, archive, count=False):
     """
     Takes all the solutions in a pandas dataframe and puts them into a pyribs GridArchive.
 
@@ -90,13 +90,22 @@ def add_data_frame_to_archive(df, archive):
         solution = row[solution_cols].values.reshape(1, -1)  # Shape: (1, solution_dim)
         objective = np.array([row['objective']])  # Shape: (1,)
         measures = row[[f'measures_{i}' for i in range(2)]].values.reshape(1, -1)  # Shape: (1, 2)
-        
-        # Add the solution to the archive
-        archive.add(solution, objective, measures)
+
+        if count:
+            (occupied, elite) = archive.retrieve_single(measures[0])
+            newcount = 0
+            if occupied:
+                newcount = elite["objective"] + 1
+            
+            objective[0] = newcount
+            archive.add(solution, objective, measures)
+        else:
+            # Add the solution to the archive
+            archive.add(solution, objective, measures)
     
     return archive
 
-def load_multiple_archives(prefix=None, start_index=None, end_index=None, config=None):
+def load_multiple_archives(prefix=None, start_index=None, end_index=None, config=None, count=False):
     """
     Load multiple archives from CSV files based on provided file prefix and index range
     
@@ -135,18 +144,18 @@ def load_multiple_archives(prefix=None, start_index=None, end_index=None, config
         **archive_kwargs
     )
 
-    archive = add_data_frame_to_archive(df, archive)
+    archive = add_data_frame_to_archive(df, archive, count)
  
     # Start at +1 since first was read and added above
     for i in range(start_index+1, end_index + 1):
         # Load the CSV data
         df = pd.read_csv(f"{prefix}_{i}_archive.csv")
-        archive = add_data_frame_to_archive(df, archive)
+        archive = add_data_frame_to_archive(df, archive, count)
 
     return archive
 
 # Custom plotting function
-def plot_custom_heatmap(archive, save_path="custom_heatmap.pdf", compare=False):
+def plot_custom_heatmap(archive, save_path="custom_heatmap.pdf", compare=False, count=False):
     """
     Custom implementation of a heatmap plot for a GridArchive with labeled intervals on the x-axis.
 
@@ -154,6 +163,7 @@ def plot_custom_heatmap(archive, save_path="custom_heatmap.pdf", compare=False):
         archive: A GridArchive instance containing the archive data.
         save_path: Path to save the generated heatmap image.
         compare: whether there is a comparison with other archives
+        count: showing a count rather than a fitness of comparison
     """
     # Extract the archive data (fitness and measures) into a 2D grid
     data = archive.data(return_type='pandas')
@@ -193,7 +203,11 @@ def plot_custom_heatmap(archive, save_path="custom_heatmap.pdf", compare=False):
         cmap = plt.cm.Paired  
     else:
         cmap = plt.cm.viridis
-    norm = Normalize(vmin=0, vmax=MAX_FITNESS)  # Normalize color scale
+
+    top = MAX_FITNESS
+    if not compare and not isinstance(count, bool):
+        top = count
+    norm = Normalize(vmin=0, vmax=top)  # Normalize color scale
     
     c = ax.imshow(
         heatmap_grid,
@@ -293,7 +307,7 @@ def plot_custom_heatmap(archive, save_path="custom_heatmap.pdf", compare=False):
     else:
         # Add a colorbar
         cbar = fig.colorbar(c, ax=ax)
-        cbar.set_label("Consistency Score", fontsize=20)
+        cbar.set_label("Archive Count" if not isinstance(count, bool) else "Consistency Score", fontsize=20)
 
     # Configure matplotlib to embed fonts in the PDF
     plt.rcParams['pdf.fonttype'] = 42
@@ -469,6 +483,10 @@ def main():
     parser.add_argument('-o', '--output', 
                         default='custom_heatmap.pdf', 
                         help='Output file path for the heatmap')
+
+    parser.add_argument('-co', '--count', 
+                        default=False, 
+                        help='Whether output should show count across archive range')
     
     # Parse initial arguments
     args = parser.parse_args()
@@ -488,6 +506,9 @@ def main():
     
     # Load archives based on input type
     if args.file:
+        if args.count:
+            parser.error("Plotting a --count requires a file range, not a single file")
+            
         print(f"First file: {args.file}") 
         archive = load_grid_archive_from_csv(args.file, config)
     else:
@@ -495,7 +516,8 @@ def main():
         archive = load_multiple_archives(prefix=args.prefix,
                                          start_index=args.range[0], 
                                          end_index=args.range[1], 
-                                         config=config)
+                                         config=config,
+                                         count=args.count)
 
     if args.compare:
         me_archive = None
@@ -513,13 +535,15 @@ def main():
             other = load_multiple_archives(prefix=args.compare,
                                          start_index=args.range[0], 
                                          end_index=args.range[1], 
-                                         config=config)
+                                         config=config,
+                                         count=args.count)
             if args.compare2:
                 print(f"Third file range for archive: {args.compare2} {args.range[0]} to {args.range[1]}") 
                 third = load_multiple_archives(prefix=args.compare2,
                                                start_index=args.range[0], 
                                                end_index=args.range[1], 
-                                               config=config)
+                                               config=config,
+                                               count=args.count)
 
         if args.file:
             if "map_elites" in args.file:
@@ -567,7 +591,7 @@ def main():
     print(f"Measure ranges: {list(zip(archive.lower_bounds, archive.upper_bounds))}")
     
     # Plot the custom heatmap
-    plot_custom_heatmap(archive, args.output, args.compare is not None)
+    plot_custom_heatmap(archive, args.output, args.compare is not None, (args.range[1] - args.range[0] + 1) if args.count else False)
 
 
 # Load a single specific file

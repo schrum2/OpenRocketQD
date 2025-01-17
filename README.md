@@ -178,7 +178,11 @@ The script also provides a way to aggregate all results from a given type of exp
 ```
 python process_saved_archives.py -r 0 29 -p evolve_rockets_output/cma_mae_stabilitynose_altitude -o cma_mae_stabilitynose_altitude_0to29_megaarchive.pdf
 ```
-Note that there is an assumption here that the archives being aggregated used sequential experiment numbers 0 through 29. The `process_saved_archives.py` script can also compare archives. Here is a comparison of individual archives produces by MAP-Elites and CMA-ME:
+Note that there is an assumption here that the archives being aggregated used sequential experiment numbers 0 through 29. Instead of collecting the best results across all archives, you can also count how many archives have an occupant in a given bin with commands like this:
+```
+python process_saved_archives.py -r 0 29 -p evolve_rockets_output/cma_mae_stabilitynose_altitude --count True -o cma_mae_stabilitynose_altitude_count.pdf
+```
+The `process_saved_archives.py` script can also compare archives. Here is a comparison of individual archives produces by MAP-Elites and CMA-ME:
 ```
 python process_saved_archives.py -f evolve_rockets_output/map_elites_stabilitynose_altitude_0_archive.csv -c evolve_rockets_output/cma_me_imp_stabilitynose_altitude_0_archive.csv -o compare_map_elites_vs_cma_me_imp_0_archives.pdf
 ```
