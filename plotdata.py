@@ -96,14 +96,19 @@ plt.subplots_adjust(left=left_margin)
 plt.savefig("Archive_Coverage_Comparison.pdf", bbox_inches='tight')
 plt.close()
 
+average_scaling_factor = 10000.0
+
 # Plot QD Score comparison
 plt.figure(figsize=(10, 6))
 plt.plot(x_values, cma_qd_score_mean, label="CMA-ME", color="blue")
 plt.fill_between(x_values, cma_qd_score_mean - cma_qd_score_ci, cma_qd_score_mean + cma_qd_score_ci, color="blue", alpha=0.2)
+#plt.plot(x_values, cma_coverage_mean*40*average_scaling_factor, label="CMA-ME", color="blue", ls="--")
 plt.plot(x_values, cma_mae_qd_score_mean, label="CMA-MAE", color="red")
 plt.fill_between(x_values, cma_mae_qd_score_mean - cma_mae_qd_score_ci, cma_mae_qd_score_mean + cma_mae_qd_score_ci, color="red", alpha=0.2)
+#plt.plot(x_values, cma_mae_coverage_mean*40*average_scaling_factor, label="CMA-MAE", color="red", ls="--")
 plt.plot(x_values, map_elites_qd_score_mean, label="MAP-Elites", color="green")
 plt.fill_between(x_values, map_elites_qd_score_mean - map_elites_qd_score_ci, map_elites_qd_score_mean + map_elites_qd_score_ci, color="green", alpha=0.2)
+#plt.plot(x_values, map_elites_coverage_mean*40*average_scaling_factor, label="MAP-Elites", color="green", ls="--")
 plt.xlabel("Generations", fontsize=20)
 plt.ylabel("Average QD Score", fontsize=20)
 plt.title("Average QD Score", fontsize=20)
@@ -111,8 +116,6 @@ plt.legend(loc="lower right", fontsize=20)
 plt.subplots_adjust(left=left_margin)
 plt.savefig("QD_Score_Comparison.pdf", bbox_inches='tight')
 plt.close()
-
-average_scaling_factor = 10000.0
 
 # Convert CMA-ME and MAP-Elites Archive Coverage to counts (Occupied Cells)
 cma_occupied_cells = cma_coverage_mean * average_scaling_factor
