@@ -89,6 +89,16 @@ python evolve_rockets.py map_elites 5 stabilitynose_altitude
 The `stabilitynose_altitude` bin model is actually the one used in experiments
 submitted for publication.
 
+## Run Experiments
+
+The batch files `evolve_stabilitynose_altitude_map_elites.bat`, `evolve_stabilitynose_altitude_cma_me_imp.bat`, and `evolve_stabilitynose_altitude_cma_mae.bat` allow several experimental runs to be performed sequentially, each with a different random seed and experiment number that appears in the names of output files. Here is an example of running experiments with MAP-Elites for seeds from 0 to 9:
+
+```
+evolve_stabilitynose_altitude_map_elites.bat 0 9
+```
+
+## Evaluating Results
+
 Once evolution completes, results are stored in the subdirectory `evolve_rockets_output`.
 In particular, there will be a `csv` file associated with the algorithm used 
 for evolution and the run number. Basically, all relevant files will 
@@ -123,6 +133,8 @@ python rocket_spread.py .\evolve_rockets_output\cma_me_imp_stabilitynose_altitud
 This command finds rocket line numbers that achieve different altitudes. In this example specifically, 
 the user is shown the 6 stable rockets whose altitude is closest to 10 meters without exceeding it, and 
 the output continues in increments of 10 meters: 20, 30, 40, and so on up to 90.
+
+## Creating ORK Files for OpenRocket
 
 Back to `rocket_evaluate.py`: If you want to create an `ork` file representing the rocket so that you can analyze it
 further in OpenRocket, then add the name of the file to the end of the command line:
@@ -160,6 +172,8 @@ This outputs three files: one `ork` file corresponding to each line number in th
 
 The ability to create individual `ork` files allows specific designs to be analyzed in detail and potentially modified based on a designer's preferences. However, to analyze the aggregate output from one or multiple experiments in more detail, different scripts must be used.
 
+## Data Visualization
+
 By default, Pyribs outputs some basic results to the `evolve_rockets_output` directory associated with each run. For example, running `cma_mae` with the `stabilitynose_altitude` bin model and an experiment number of 0 produces these files:
 
 * `cma_mae_stabilitynose_altitude_0_archive_coverage.png`: Archive coverage over time as a ratio of the total number of bins.
@@ -174,6 +188,9 @@ This command creates a file `custom_heatmap.pdf` that displays the heatmap conte
 ```
 python process_saved_archives.py -f evolve_rockets_output/cma_mae_stabilitynose_altitude_0_archive.csv -o cma_mae_stabilitynose_altitude_0_archive.pdf
 ```
+
+### Mega-Archives
+
 The script also provides a way to aggregate all results from a given type of experiment into a mega-archive, meaning an archive containing only the best results across several individual archives. For example, results from 30 `cma_mae` runs can be aggregated with the following command:
 ```
 python process_saved_archives.py -r 0 29 -p evolve_rockets_output/cma_mae_stabilitynose_altitude -o cma_mae_stabilitynose_altitude_0to29_megaarchive.pdf
@@ -182,6 +199,9 @@ Note that there is an assumption here that the archives being aggregated used se
 ```
 python process_saved_archives.py -r 0 29 -p evolve_rockets_output/cma_mae_stabilitynose_altitude --count True -o cma_mae_stabilitynose_altitude_count.pdf
 ```
+
+### Comparing Archives
+
 The `process_saved_archives.py` script can also compare archives. Here is a comparison of individual archives produces by MAP-Elites and CMA-ME:
 ```
 python process_saved_archives.py -f evolve_rockets_output/map_elites_stabilitynose_altitude_0_archive.csv -c evolve_rockets_output/cma_me_imp_stabilitynose_altitude_0_archive.csv -o compare_map_elites_vs_cma_me_imp_0_archives.pdf
@@ -194,4 +214,7 @@ And if you replace the `-f` with `-p` and provide a range with `-r`, you can com
 ```
 python process_saved_archives.py -r 0 29 -p evolve_rockets_output/map_elites_stabilitynose_altitude -c evolve_rockets_output/cma_me_imp_stabilitynose_altitude -c2 evolve_rockets_output/cma_mae_stabilitynose_altitude -o compare_map_elites_vs_cma_me_imp_vs_cma_mae_0to29_megaarchives.pdf
 ```
+
+### Coverage and QD Score
+
 In addition to comparing the final archives, it is also possible to aggregate results of coverage and QD score across runs. The `plotdata.py` script is configured to do this, but it specifically expects 30 experimental runs of each algorithm from 0 to 29.
