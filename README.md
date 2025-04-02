@@ -218,3 +218,18 @@ python process_saved_archives.py -r 0 29 -p evolve_rockets_output/map_elites_sta
 ### Coverage and QD Score
 
 In addition to comparing the final archives, it is also possible to aggregate results of coverage and QD score across runs. The `plotdata.py` script is configured to do this, but it specifically expects 30 experimental runs of each algorithm from 0 to 29.
+
+### Citation
+
+Is using or referring to this code in any way, please cite the following publication
+
+```
+@inproceedings{schrum:gecco2025,
+title={A Quality Diversity Approach to Evolving Model Rockets},
+author={Jacob Schrum and Cody Crosby},
+year={2025},
+booktitle={Genetic and Evolutionary Computation Conference},
+doi = {10.1145/3712256.3726338},
+publisher={ACM}
+}
+```
